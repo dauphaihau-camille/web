@@ -4,3 +4,4 @@ export * from './api/auth.requests';
 export * from './api/auth.schemas';
 export * from './api/auth.types';
 export * from './hooks/use-current-user-query';
+export * from './lib/post-login-redirect';

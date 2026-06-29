@@ -1,8 +1,9 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -14,13 +15,42 @@ import {
   FieldLabel,
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { authKeys, login } from '@/domains/auth';
+import {
+  authKeys,
+  currentUserQueryOptions,
+  getPostLoginRedirectTarget,
+  login,
+  useCurrentUserQuery,
+} from '@/domains/auth';
+import { myWorkspaceListQueryOptions, workspaceKeys } from '@/domains/workspace';
 
 import { loginFormSchema, type LoginFormValues } from '../_forms/login.scheme';
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const currentUserQuery = useCurrentUserQuery();
+
+  const redirectTarget = getPostLoginRedirectTarget(
+    searchParams.get('redirectTo') ?? searchParams.get('from'),
+  );
+
+  async function resolvePostLoginPath() {
+    const currentUser = await queryClient.fetchQuery(currentUserQueryOptions());
+
+    if (!currentUser) {
+      return '/login';
+    }
+
+    if (redirectTarget !== '/workspace') {
+      return redirectTarget;
+    }
+
+    const workspaces = await queryClient.fetchQuery(myWorkspaceListQueryOptions());
+
+    return workspaces[0] ? `/${workspaces[0].slug}` : '/workspace';
+  }
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -36,7 +66,11 @@ export function LoginForm() {
       await queryClient.invalidateQueries({
         queryKey: authKeys.all,
       });
-      router.push('/dashboard');
+      await queryClient.invalidateQueries({
+        queryKey: workspaceKeys.all,
+      });
+      const postLoginPath = await resolvePostLoginPath();
+      router.push(postLoginPath);
       router.refresh();
     },
     onError: (error) => {
@@ -45,6 +79,17 @@ export function LoginForm() {
       });
     },
   });
+
+  useEffect(() => {
+    if (!currentUserQuery.data) {
+      return;
+    }
+
+    void resolvePostLoginPath().then((postLoginPath) => {
+      router.replace(postLoginPath);
+      router.refresh();
+    });
+  }, [currentUserQuery.data, router]);
 
   function handleSubmit(values: LoginFormValues) {
     form.clearErrors('root');

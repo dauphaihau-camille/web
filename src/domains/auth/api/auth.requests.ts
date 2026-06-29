@@ -31,3 +31,7 @@ export async function login(body: LoginInput): Promise<LoginResponse> {
 
   return loginResponseApiSchema.parse(response);
 }
+
+export async function logout(): Promise<void> {
+  await apiPost('auth/logout');
+}
