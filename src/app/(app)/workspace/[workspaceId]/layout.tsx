@@ -4,8 +4,11 @@ import { WorkspaceShell } from './_components/workspace-shell';
 export default async function WorkspaceLayout({
   children,
   params,
-}: LayoutProps<'/workspace/[workspaceId]'>) {
-  const { workspaceId } = await params;
+}: {
+  children: React.ReactNode;
+  params: Promise<unknown>;
+}) {
+  const { workspaceId } = (await params) as { workspaceId: string };
 
   return (
     <WorkspaceProvider workspaceId={workspaceId}>

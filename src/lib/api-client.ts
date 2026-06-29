@@ -3,13 +3,13 @@ import ky, { type Input, type Options } from 'ky';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
 
-type ApiRequestOptions = Omit<Options, 'prefixUrl'>;
+type ApiRequestOptions = Omit<Options, 'prefix'>;
 
 type ApiQueryOptions<
   TQueryFnData,
   TError = Error,
   TData = TQueryFnData,
-  TQueryKey extends QueryKey = QueryKey
+  TQueryKey extends QueryKey = QueryKey,
 > = Omit<UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>, 'queryKey' | 'queryFn'>;
 
 function normalizePath(path: string) {
@@ -17,7 +17,7 @@ function normalizePath(path: string) {
 }
 
 export const apiClient = ky.create({
-  ...(apiBaseUrl ? { prefixUrl: apiBaseUrl } : {}),
+  ...(apiBaseUrl ? { prefix: apiBaseUrl } : {}),
   credentials: 'include',
   headers: {
     accept: 'application/json',
@@ -43,7 +43,7 @@ export async function apiGet<TResponse>(path: Input, options?: ApiRequestOptions
 export async function apiPost<TResponse, TBody = unknown>(
   path: Input,
   body?: TBody,
-  options?: ApiRequestOptions
+  options?: ApiRequestOptions,
 ) {
   return apiRequest(path, {
     ...options,
@@ -55,7 +55,7 @@ export async function apiPost<TResponse, TBody = unknown>(
 export async function apiPut<TResponse, TBody = unknown>(
   path: Input,
   body?: TBody,
-  options?: ApiRequestOptions
+  options?: ApiRequestOptions,
 ) {
   return apiRequest(path, {
     ...options,
@@ -67,7 +67,7 @@ export async function apiPut<TResponse, TBody = unknown>(
 export async function apiPatch<TResponse, TBody = unknown>(
   path: Input,
   body?: TBody,
-  options?: ApiRequestOptions
+  options?: ApiRequestOptions,
 ) {
   return apiRequest(path, {
     ...options,
@@ -87,7 +87,7 @@ export function createApiQueryOptions<
   TQueryFnData,
   TError = Error,
   TData = TQueryFnData,
-  TQueryKey extends QueryKey = QueryKey
+  TQueryKey extends QueryKey = QueryKey,
 >({
   path,
   queryKey,

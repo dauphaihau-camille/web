@@ -1,8 +1,17 @@
 import { queryOptions } from '@tanstack/react-query';
 
-import { getWorkspace } from './workspace.requests';
+import { getWorkspace, listMyWorkspaces } from './workspace.requests';
 import { workspaceKeys } from './workspace.keys';
 import type { WorkspaceId } from './workspace.types';
+
+export function myWorkspaceListQueryOptions() {
+  return queryOptions({
+    queryKey: workspaceKeys.list({
+      scope: 'me',
+    }),
+    queryFn: listMyWorkspaces,
+  });
+}
 
 export function workspaceDetailQueryOptions(workspaceId: WorkspaceId) {
   return queryOptions({

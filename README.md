@@ -1,21 +1,19 @@
-# Next.js template
+# Camille Web
 
-This is a Next.js template with shadcn/ui.
+Next.js frontend for `camille-v2`.
 
-## Adding components
+## Phase 0 decisions
 
-To add components to your app, run the following command:
+- Keep the existing `src/app` structure and domain folders as scaffolding.
+- Treat Camille v1 as the UX reference surface.
+- Use `document` and `teamspace` as fixed product terms.
+- Authenticate against the API over http-only cookies and load app state through REST queries.
 
-```bash
-npx shadcn@latest add button
-```
+## Local setup
 
-This will place the ui components in the `components` directory.
+1. Copy `.env.example` to `.env.local`.
+2. Set `NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/v1`.
+3. Start the API first so auth and workspace requests resolve.
+4. Run `npm run dev`.
 
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
-```
+The current login page is [src/app/login/page.tsx](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/src/app/login/page.tsx). It posts directly to `POST /auth/login` and relies on the backend cookie session.

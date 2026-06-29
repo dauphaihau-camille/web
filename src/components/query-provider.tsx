@@ -7,7 +7,7 @@ type QueryProviderProps = {
   children: React.ReactNode;
 };
 
-export function QueryProvider({ children }: QueryProviderProps) {
+export default function QueryProvider({ children }: QueryProviderProps) {
   const [queryClient] = React.useState(
     () => new QueryClient({
       defaultOptions: {
@@ -17,7 +17,7 @@ export function QueryProvider({ children }: QueryProviderProps) {
           staleTime: 30_000,
         },
       },
-    })
+    }),
   );
 
   return (
