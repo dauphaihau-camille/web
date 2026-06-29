@@ -22,19 +22,15 @@ export function WorkspaceOverview() {
     );
   }
 
+  const workspace = workspaceQuery.data;
+
   return (
-    <section className="space-y-4">
+    <section className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold">{workspaceQuery.data.name}</h2>
+        <h2 className="text-2xl font-semibold">{workspace.name}</h2>
         <p className="text-sm text-muted-foreground">
-          This route is now backed by <span className="font-mono">GET /workspaces/:workspaceId</span>.
-        </p>
-      </div>
-      <div className="rounded-2xl border bg-muted/20 p-5">
-        <p className="text-sm font-medium">Phase 0 status</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The folder structure and shell stay in place. Later phases replace these placeholder
-          panels with Camille v1-inspired sidebar, document tree, and editor flows.
+          This workspace route is now backed by the v2 API for detail, updates, and membership
+          management.
         </p>
       </div>
     </section>

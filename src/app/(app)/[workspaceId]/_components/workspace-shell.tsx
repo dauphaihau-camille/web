@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+
 import { WorkspaceSidebar } from './workspace-sidebar';
 
 export function WorkspaceShell({
@@ -10,11 +12,11 @@ export function WorkspaceShell({
   workspaceId: string;
 }) {
   return (
-    <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+    <SidebarProvider className="h-svh min-h-svh items-stretch">
       <WorkspaceSidebar workspaceId={workspaceId} />
-      <section className="min-w-0 rounded-xl border bg-background p-5">
+      <SidebarInset className="min-h-svh min-w-0 bg-background p-5 shadow-sm">
         {children}
-      </section>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

@@ -1,5 +1,4 @@
 import { WorkspaceProvider } from './_components/workspace-provider';
-import { WorkspaceShell } from './_components/workspace-shell';
 
 export default async function WorkspaceLayout({
   children,
@@ -12,7 +11,7 @@ export default async function WorkspaceLayout({
 
   return (
     <WorkspaceProvider workspaceId={workspaceId}>
-      <WorkspaceShell workspaceId={workspaceId}>{children}</WorkspaceShell>
+      {children}
     </WorkspaceProvider>
   );
 }
