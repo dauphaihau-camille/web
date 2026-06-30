@@ -1,5 +1,10 @@
 @import "tailwindcss";
+@import "shadcn/tailwind.css";
 @import "tw-animate-css";
+@import "@blocknote/core/fonts/inter.css";
+@import "@blocknote/shadcn/style.css";
+
+@source "../../node_modules/@blocknote/shadcn/dist/*.js";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -126,4 +131,21 @@
   html {
     @apply font-sans;
     }
+}
+
+@layer components {
+  .bn-container .bn-block-content[data-content-type="subpage"].ProseMirror-selectednode {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
+
+  .bn-container .bn-block-content[data-content-type="subpage"].ProseMirror-selectednode > *,
+  .bn-container .ProseMirror-selectednode > .bn-block-content[data-content-type="subpage"] > *,
+  .bn-container .bn-react-node-view-renderer.ProseMirror-selectednode .bn-block-content[data-content-type="subpage"] > *,
+  .bn-container .ProseMirror-selectednode .bn-block-content[data-content-type="subpage"] > * {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+  }
 }
