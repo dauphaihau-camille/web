@@ -1,10 +1,9 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
 import { buttonVariants } from '@/components/ui/button';
+import { authRoutes } from '@/domains/auth';
 import { cn } from '@/lib/utils';
 
 export default function HomePage() {
@@ -17,7 +16,7 @@ export default function HomePage() {
           one place.
         </h5>
         <Link
-          href="/login"
+          href={authRoutes.login()}
           prefetch
           className={cn(buttonVariants({ size: 'lg' }), 'mt-6 inline-flex')}
         >

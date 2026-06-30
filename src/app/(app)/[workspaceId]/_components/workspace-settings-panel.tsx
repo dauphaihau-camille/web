@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
@@ -10,18 +10,21 @@ import { Label } from '@/components/ui/label';
 import {
   updateWorkspace,
   updateWorkspaceSchema,
-  useWorkspaceQuery,
+  type Workspace,
   workspaceKeys,
+  workspaceRoutes,
 } from '@/domains/workspace';
 
-import { useWorkspace } from './workspace-provider';
-
-export function WorkspaceSettingsPanel() {
-  const { workspaceId } = useWorkspace();
+export function WorkspaceSettingsPanel({
+  workspace,
+}: {
+  workspace: Workspace;
+}) {
+  const workspaceId = workspace.id;
   const router = useRouter();
   const queryClient = useQueryClient();
-  const workspaceQuery = useWorkspaceQuery(workspaceId);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const updateWorkspaceMutation = useMutation({
     mutationFn: ({
       version,
@@ -40,7 +43,7 @@ export function WorkspaceSettingsPanel() {
         ...(slug ? { slug } : {}),
         ...(description !== undefined ? { description } : {}),
       }),
-    onSuccess: async (workspace) => {
+    onSuccess: async (updatedWorkspace) => {
       setErrorMessage(null);
       await Promise.all([
         queryClient.invalidateQueries({
@@ -50,32 +53,16 @@ export function WorkspaceSettingsPanel() {
           queryKey: workspaceKeys.lists(),
         }),
       ]);
-      router.replace(`/${workspace.slug}/settings`);
+      router.replace(workspaceRoutes.settings(updatedWorkspace.slug));
     },
     onError: (error) => {
       setErrorMessage(error instanceof Error ? error.message : 'Could not update workspace.');
     },
   });
 
-  if (workspaceQuery.isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading workspace settings...</p>;
-  }
-
-  if (workspaceQuery.isError || !workspaceQuery.data) {
-    return (
-      <section className="space-y-3">
-        <h3 className="text-lg font-semibold">Workspace unavailable</h3>
-        <p className="text-sm text-muted-foreground">
-          The workspace settings panel could not load workspace data for this session.
-        </p>
-      </section>
-    );
-  }
-
-  const workspace = workspaceQuery.data;
   const canEditWorkspace = workspace.current_user_role === 'owner' || workspace.current_user_role === 'admin';
 
-  function handleUpdateWorkspace(event: FormEvent<HTMLFormElement>) {
+  function handleUpdateWorkspace(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const nextName = String(formData.get('name') ?? '').trim();

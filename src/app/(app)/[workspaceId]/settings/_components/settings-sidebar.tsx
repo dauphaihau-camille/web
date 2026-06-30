@@ -16,17 +16,18 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
+import { workspaceRoutes } from '@/domains/workspace';
 
 import { WorkspaceUserDropdown } from '../../_components/workspace-user-dropdown';
 
 const workspaceSettingsItems = [
-  { href: '', icon: Settings2Icon, label: 'General' },
-  { href: '/members', icon: UsersIcon, label: 'Members' },
+  { getHref: workspaceRoutes.settings, icon: Settings2Icon, label: 'General' },
+  { getHref: workspaceRoutes.settingsMembers, icon: UsersIcon, label: 'Members' },
 ];
 
 export function SettingsSidebar({ workspaceId }: { workspaceId: string }) {
   const pathname = usePathname();
-  const settingsBaseHref = `/${workspaceId}/settings`;
+  const workspaceHref = workspaceRoutes.detail(workspaceId);
 
   return (
     <Sidebar
@@ -43,7 +44,7 @@ export function SettingsSidebar({ workspaceId }: { workspaceId: string }) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  render={<Link href={`/${workspaceId}`} />}
+                  render={<Link href={workspaceHref} />}
                   tooltip="Back to workspace"
                 >
                   <ArrowLeftIcon />
@@ -58,7 +59,7 @@ export function SettingsSidebar({ workspaceId }: { workspaceId: string }) {
           <SidebarGroupContent>
             <SidebarMenu>
               {workspaceSettingsItems.map((item) => {
-                const href = `${settingsBaseHref}${item.href}`;
+                const href = item.getHref(workspaceId);
 
                 return (
                   <SidebarMenuItem key={item.label}>

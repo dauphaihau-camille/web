@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import {
   createWorkspace,
   workspaceKeys,
+  workspaceRoutes,
 } from '@/domains/workspace';
 import { suggestWorkspaceDomain } from '@/domains/workspace/api/workspace-domain';
 
@@ -49,7 +50,7 @@ export function CreateWorkspaceForm() {
       await queryClient.invalidateQueries({
         queryKey: workspaceKeys.lists(),
       });
-      router.push(`/${workspace.slug}`);
+      router.push(workspaceRoutes.detail(workspace.slug));
     },
     onError: (error) => {
       form.setError('root', {

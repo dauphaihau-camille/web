@@ -1,4 +1,6 @@
-const DEFAULT_POST_LOGIN_PATH = '/workspace';
+import { workspaceRoutes } from '@/domains/workspace/workspace-routes';
+
+const DEFAULT_POST_LOGIN_PATH = workspaceRoutes.entry();
 
 export function getSafeRedirectTarget(redirectTarget: string | null | undefined) {
   if (!redirectTarget) {

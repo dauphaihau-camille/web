@@ -15,8 +15,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { authKeys, logout, useCurrentUserQuery } from '@/domains/auth';
-import { workspaceKeys, useWorkspaceQuery } from '@/domains/workspace';
+import {
+  authKeys, authRoutes, logout, useCurrentUserQuery, 
+} from '@/domains/auth';
+import { workspaceKeys, useWorkspaceQuery, workspaceRoutes } from '@/domains/workspace';
 import { cn } from '@/lib/utils';
 
 export function WorkspaceUserDropdown({ workspaceId }: { workspaceId: string }) {
@@ -30,12 +32,9 @@ export function WorkspaceUserDropdown({ workspaceId }: { workspaceId: string }) 
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: authKeys.all }),
-        queryClient.invalidateQueries({ queryKey: workspaceKeys.all }),
-      ]);
-      router.push('/login');
-      router.refresh();
+      queryClient.setQueryData(authKeys.currentUser(), null);
+      queryClient.removeQueries({ queryKey: workspaceKeys.all });
+      window.location.assign(authRoutes.login());
     },
   });
 
@@ -80,7 +79,7 @@ export function WorkspaceUserDropdown({ workspaceId }: { workspaceId: string }) 
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => router.push(`/${workspaceId}/settings`)}>
+          <DropdownMenuItem onClick={() => router.push(workspaceRoutes.settings(workspaceId))}>
             <Settings2Icon />
             <span>Settings</span>
           </DropdownMenuItem>

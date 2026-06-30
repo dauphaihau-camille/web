@@ -1,75 +1,18 @@
-'use client';
+import { redirect } from 'next/navigation';
 
-import Link from 'next/link';
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-
-import { buttonVariants } from '@/components/ui/button';
-import { useCurrentUserQuery } from '@/domains/auth';
-import { cn } from '@/lib/utils';
+import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
+import { listMyWorkspacesServer } from '@/domains/workspace/api/workspace.server.requests';
+import { workspaceRoutes } from '@/domains/workspace';
 import { CreateWorkspaceForm } from './_components/create-workspace-form';
-import { useMyWorkspacesQuery } from '@/domains/workspace';
 
-export default function WorkspaceEntryPage() {
-  const router = useRouter();
-  const currentUserQuery = useCurrentUserQuery();
-  const myWorkspacesQuery = useMyWorkspacesQuery();
-  const firstWorkspace = myWorkspacesQuery.data?.[0];
-  const isResolvingSession = currentUserQuery.isLoading || currentUserQuery.isFetching;
-  const isResolvingWorkspaces = myWorkspacesQuery.isLoading || myWorkspacesQuery.isFetching;
+export default async function WorkspaceEntryPage() {
+  await requireCurrentUserServer(workspaceRoutes.entry());
 
-  useEffect(() => {
-    if (isResolvingSession || isResolvingWorkspaces) {
-      return;
-    }
-
-    if (!currentUserQuery.data) {
-      router.replace('/login?redirectTo=%2Fworkspace');
-      return;
-    }
-
-    if (firstWorkspace) {
-      router.replace(`/${firstWorkspace.slug}`);
-    }
-  }, [
-    currentUserQuery.data,
-    isResolvingSession,
-    firstWorkspace,
-    isResolvingWorkspaces,
-    router,
-  ]);
-
-  if (isResolvingSession || (currentUserQuery.data && isResolvingWorkspaces)) {
-    return (
-      <section className="rounded-2xl border p-6">
-        <p className="text-sm text-muted-foreground">Opening your workspace...</p>
-      </section>
-    );
-  }
-
-  if (!currentUserQuery.data) {
-    return (
-      <section className="rounded-2xl border p-6">
-        <p className="text-sm font-medium">Sign in required</p>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Camille opens workspaces from your authenticated API session.
-        </p>
-        <Link
-          href="/login?redirectTo=%2Fworkspace"
-          className={cn(buttonVariants(), 'mt-4')}
-        >
-          Go to login
-        </Link>
-      </section>
-    );
-  }
+  const workspaces = await listMyWorkspacesServer();
+  const firstWorkspace = workspaces[0];
 
   if (firstWorkspace) {
-    return (
-      <section className="rounded-2xl border p-6">
-        <p className="text-sm text-muted-foreground">Redirecting to {firstWorkspace.name}...</p>
-      </section>
-    );
+    redirect(workspaceRoutes.detail(firstWorkspace.slug));
   }
 
   return (

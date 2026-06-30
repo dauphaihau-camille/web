@@ -12,9 +12,9 @@ export function SettingsShell({
   workspaceId: string;
 }) {
   return (
-    <SidebarProvider className="h-svh min-h-svh items-stretch">
+    <SidebarProvider className="h-svh min-h-svh items-stretch overflow-hidden">
       <SettingsSidebar workspaceId={workspaceId} />
-      <SidebarInset className="min-h-svh min-w-0 bg-background p-5 max-w-xl mx-auto">
+      <SidebarInset className="min-h-0 min-w-0 overflow-y-auto bg-background p-5 max-w-xl mx-auto">
         {children}
       </SidebarInset>
     </SidebarProvider>

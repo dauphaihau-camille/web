@@ -5,3 +5,4 @@ export * from './api/workspace.schemas';
 export * from './api/workspace.types';
 export * from './hooks/use-my-workspaces-query';
 export * from './hooks/use-workspace-query';
+export * from './workspace-routes';

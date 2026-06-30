@@ -1,6 +1,19 @@
+import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
+import { getWorkspaceServer } from '@/domains/workspace/api/workspace.server.requests';
+import { workspaceRoutes } from '@/domains/workspace';
+
 import { WorkspaceSettingsPanel } from '../_components/workspace-settings-panel';
 
-export default function WorkspaceSettingsPage() {
+export default async function WorkspaceSettingsPage({
+  params,
+}: {
+  params: Promise<unknown>;
+}) {
+  const { workspaceId } = (await params) as { workspaceId: string };
+  await requireCurrentUserServer(workspaceRoutes.settings(workspaceId));
+
+  const workspace = await getWorkspaceServer(workspaceId);
+
   return (
     <section className="space-y-6">
       <div>
@@ -9,7 +22,7 @@ export default function WorkspaceSettingsPage() {
           Update the workspace name, slug, and description for this space.
         </p>
       </div>
-      <WorkspaceSettingsPanel />
+      <WorkspaceSettingsPanel workspace={workspace} />
     </section>
   );
 }

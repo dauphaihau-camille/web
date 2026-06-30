@@ -33,5 +33,7 @@ export async function login(body: LoginInput): Promise<LoginResponse> {
 }
 
 export async function logout(): Promise<void> {
-  await apiPost('auth/logout');
+  await apiRequest('auth/logout', {
+    method: 'post',
+  });
 }

@@ -14,6 +14,7 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from '@/components/ui/navigation-menu';
+import { authRoutes } from '@/domains/auth';
 import { cn } from '@/lib/utils';
 
 const solutions = [
@@ -129,7 +130,7 @@ export function Navigate() {
         </NavigationMenuList>
       </NavigationMenu>
 
-      <Link href="/login" className={cn(buttonVariants({ size: 'xs' }), 'px-2.5 text-[13px]')}>
+      <Link href={authRoutes.login()} className={cn(buttonVariants({ size: 'sm' }), 'px-2.5 text-[13px]')}>
         Login
       </Link>
     </div>

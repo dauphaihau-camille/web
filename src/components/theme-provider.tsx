@@ -1,7 +1,17 @@
 'use client';
 
 import * as React from 'react';
+import { usePathname } from 'next/navigation';
 import { ThemeProvider as NextThemesProvider, useTheme } from 'next-themes';
+import { authRoutes } from '@/domains/auth';
+
+function shouldForceLightTheme(pathname: string | null) {
+  if (!pathname) {
+    return false;
+  }
+
+  return pathname === '/' || authRoutes.isLoginPath(pathname);
+}
 
 function isTypingTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) {
@@ -54,6 +64,9 @@ export default function ThemeProvider({
   children,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
+  const pathname = usePathname();
+  const forcedTheme = shouldForceLightTheme(pathname) ? 'light' : props.forcedTheme;
+
   return (
     <NextThemesProvider
       attribute="class"
@@ -61,6 +74,7 @@ export default function ThemeProvider({
       enableSystem
       disableTransitionOnChange
       {...props}
+      forcedTheme={forcedTheme}
     >
       <ThemeHotkey />
       {children}
