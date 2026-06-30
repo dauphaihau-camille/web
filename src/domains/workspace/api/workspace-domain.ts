@@ -11,6 +11,7 @@ const RESERVED_WORKSPACE_DOMAINS = new Set([
   'settings',
   'solutions',
   'workspace',
+  'web-push-sw.js',
 ]);
 
 export const workspaceDomainPattern = /^(?!-+$)[a-z0-9-]+$/;
