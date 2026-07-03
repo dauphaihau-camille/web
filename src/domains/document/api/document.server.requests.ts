@@ -1,6 +1,7 @@
 import 'server-only';
 
-import { apiServerGet, apiServerPost, apiServerRequest } from '@/lib/api-server';
+import { apiServerPost, apiServerRequest } from '@/lib/api-server';
+import { logger } from '@/lib/server-logger';
 
 import {
   createDocumentSchema,
@@ -29,15 +30,43 @@ async function buildWorkspaceDefaultDocumentRequestError(response: Response) {
 }
 
 export async function getDocumentServer(documentId: DocumentId): Promise<Document> {
-  const response = await apiServerRequest(`documents/${documentId}`);
+  logger.debug({ documentId }, 'Fetching document on the server');
+
+  let response: Response;
+
+  try {
+    response = await apiServerRequest(`documents/${documentId}`);
+  }
+  catch (error) {
+    logger.error({ documentId, error }, 'Document request failed before receiving a response');
+    throw error;
+  }
 
   if (!response.ok) {
+    logger.error({ documentId, status: response.status }, 'Document request returned a non-ok response');
     throw await buildServerRequestError('the document', response);
   }
 
   const payload = await response.json();
+  const document = documentSchema.parse(payload);
 
-  return documentSchema.parse(payload);
+  logger.debug({
+    documentId,
+    response: {
+      id: document.id,
+      publicId: document.public_id,
+      workspaceId: document.workspace_id,
+      teamspaceId: document.teamspace_id,
+      version: document.version,
+      contentBlockCount: document.content.length,
+      updatedAt: document.updated_at,
+      archivedAt: document.archived_at,
+    },
+  }, 'Fetched document response summary on the server');
+
+  logger.info({ documentId }, 'Fetched document on the server');
+
+  return document;
 }
 
 export async function getWorkspaceDefaultDocumentServer(

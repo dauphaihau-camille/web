@@ -19,6 +19,7 @@ export default defineConfig([
   {
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/naming-convention': 'off',
       'react-refresh/only-export-components': 'off',
     },
   },

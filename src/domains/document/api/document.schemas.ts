@@ -5,6 +5,7 @@ export const documentContentFormatSchema = z.literal('blocknote_v1');
 
 export const documentSchema = z.object({
   id: documentIdSchema,
+  public_id: z.string().min(1),
   version: z.number().int().positive(),
   workspace_id: z.string().min(1),
   teamspace_id: z.string().nullable().optional().transform((value) => value ?? undefined),
@@ -20,11 +21,13 @@ export const documentSchema = z.object({
 
 export const documentNavigationNodeSchema = z.object({
   id: documentIdSchema,
+  public_id: z.string().min(1),
   title: z.string(),
   teamspace_id: z.string().nullable().optional().transform((value) => value ?? undefined),
   parent_document_id: z.string().nullable().optional().transform((value) => value ?? undefined),
   sort_key: z.number().int(),
   has_children: z.boolean(),
+  has_content: z.boolean(),
 });
 
 export const documentNavigationPageSchema = z.object({

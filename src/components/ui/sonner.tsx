@@ -34,7 +34,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          toast: 'cn-toast !w-fit !max-w-fit mx-auto',
+          toast: 'cn-toast !w-fit !max-w-fit !overflow-normal !gap-2 !px-3 !py-2 sm:data-[x-position=center]:!left-1/2 sm:data-[x-position=center]:![translate:-50%_0]',
+          content: '!w-auto !gap-0.5',
+          title: 'whitespace-nowrap',
+          description: 'whitespace-nowrap',
         },
       }}
       {...props}

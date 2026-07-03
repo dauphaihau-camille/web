@@ -71,6 +71,12 @@ export async function createDocument(input: CreateDocumentInput): Promise<Docume
   return documentSchema.parse(response);
 }
 
+export async function duplicateDocument(documentId: DocumentId): Promise<Document> {
+  const response = await apiPost<unknown>(`documents/${documentId}/duplicate`);
+
+  return documentSchema.parse(response);
+}
+
 export async function updateDocument(
   documentId: DocumentId,
   input: UpdateDocumentInput,
