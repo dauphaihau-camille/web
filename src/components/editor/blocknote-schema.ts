@@ -2,10 +2,10 @@
 
 import { BlockNoteSchema } from '@blocknote/core';
 
-import { subpageBlock } from './subpage-block';
+import { subdocBlock } from './subdoc-block';
 
 export const blockNoteSchema = BlockNoteSchema.create().extend({
   blockSpecs: {
-    subpage: subpageBlock(),
+    subpage: subdocBlock(),
   },
 });
