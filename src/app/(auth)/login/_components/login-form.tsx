@@ -2,13 +2,12 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -30,7 +29,6 @@ import {
 import { loginFormSchema, type LoginFormValues } from '../_forms/login.scheme';
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
 
@@ -107,7 +105,6 @@ export function LoginForm() {
                   className="h-11 px-3"
                   placeholder="Enter your email address..."
                 />
-                <FieldDescription>Use the seeded demo account or your local test user.</FieldDescription>
                 {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
               </Field>
             )}
@@ -126,7 +123,6 @@ export function LoginForm() {
                   aria-invalid={fieldState.invalid}
                   className="h-11 px-3"
                 />
-                <FieldDescription>Passwords shorter than 8 characters are blocked client-side.</FieldDescription>
                 {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
               </Field>
             )}
