@@ -1,0 +1,54 @@
+'use client';
+
+import { type DocumentNavigationNode } from '@/domains/document';
+import { useWorkspaceFavoritesQuery } from '@/domains/favorite';
+
+import { DocumentTreeLoading } from '../document-tree/document-tree-loading';
+import { DocumentTreeList } from '../document-tree/document-tree-list';
+import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
+
+function toFavoriteDocumentNode(favorite: {
+  document_id: string;
+  public_id: string;
+  title: string;
+  teamspace_id?: string;
+  parent_document_id?: string;
+  sort_key: number;
+}): DocumentNavigationNode {
+  return {
+    id: favorite.document_id,
+    public_id: favorite.public_id,
+    title: favorite.title,
+    teamspace_id: favorite.teamspace_id,
+    parent_document_id: favorite.parent_document_id,
+    sort_key: favorite.sort_key,
+    has_children: false,
+    has_content: false,
+  };
+}
+
+export function FavoritesDocumentsGroup({
+  workspaceId,
+}: {
+  workspaceId: string;
+}) {
+  const favoritesQuery = useWorkspaceFavoritesQuery(workspaceId);
+
+  return (
+    <CollapsibleSidebarGroup label="Favorites">
+      {favoritesQuery.isLoading ? <DocumentTreeLoading /> : null}
+      {favoritesQuery.isError
+        ? <p className="px-2 py-1 text-xs text-muted-foreground">Favorites unavailable.</p>
+        : null}
+      {!favoritesQuery.isLoading && !favoritesQuery.isError
+        ? (
+          <DocumentTreeList
+            workspaceSlug={workspaceId}
+            items={(favoritesQuery.data ?? []).map(toFavoriteDocumentNode)}
+            emptyMessage="No favorites yet."
+          />
+        )
+        : null}
+    </CollapsibleSidebarGroup>
+  );
+}

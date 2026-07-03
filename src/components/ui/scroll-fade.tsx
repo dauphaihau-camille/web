@@ -10,6 +10,7 @@ export type ScrollFadeProps = React.HTMLAttributes<HTMLDivElement> & {
   direction?: ScrollFadeDirection;
   fadeColor?: string;
   fadeSize?: string;
+  topOffset?: string;
 };
 
 function callHandler(
@@ -27,6 +28,7 @@ export const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(func
     direction = 'y',
     fadeColor = 'var(--background)',
     fadeSize = '1.75rem',
+    topOffset = '0px',
     onScroll,
     children,
     style,
@@ -115,6 +117,7 @@ export const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(func
   const fadeStyle = {
     '--scroll-fade-overlay-color': fadeColor,
     '--scroll-fade-overlay-size': fadeSize,
+    '--scroll-fade-top-offset': topOffset,
     ...style,
   } as React.CSSProperties;
 
@@ -123,7 +126,7 @@ export const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(func
   const showEnd = direction === 'top' ? false : hasEndFade;
   const startOverlayClassName = isHorizontal
     ? 'sticky left-0 top-0 bottom-0 z-10 -mr-[var(--scroll-fade-overlay-size)] inline-block h-full w-[var(--scroll-fade-overlay-size)] shrink-0 align-top bg-[linear-gradient(to_right,var(--scroll-fade-overlay-color),transparent)]'
-    : 'sticky top-0 z-10 -mb-[var(--scroll-fade-overlay-size)] block h-[var(--scroll-fade-overlay-size)] w-full bg-[linear-gradient(to_bottom,var(--scroll-fade-overlay-color),transparent)]';
+    : 'sticky top-[var(--scroll-fade-top-offset)] z-10 -mb-[var(--scroll-fade-overlay-size)] block h-[var(--scroll-fade-overlay-size)] w-full bg-[linear-gradient(to_bottom,var(--scroll-fade-overlay-color),transparent)]';
   const endOverlayClassName = isHorizontal
     ? 'sticky right-0 top-0 bottom-0 z-10 -ml-[var(--scroll-fade-overlay-size)] inline-block h-full w-[var(--scroll-fade-overlay-size)] shrink-0 align-top bg-[linear-gradient(to_left,var(--scroll-fade-overlay-color),transparent)]'
     : 'sticky bottom-0 z-10 -mt-[var(--scroll-fade-overlay-size)] block h-[var(--scroll-fade-overlay-size)] w-full bg-[linear-gradient(to_top,var(--scroll-fade-overlay-color),transparent)]';
