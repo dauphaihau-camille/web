@@ -9,10 +9,10 @@ export default async function WorkspaceSettingsPage({
 }: {
   params: Promise<unknown>;
 }) {
-  const { workspaceId } = (await params) as { workspaceId: string };
-  await requireCurrentUserServer(workspaceRoutes.settings(workspaceId));
+  const { workspaceSlug } = (await params) as { workspaceSlug: string };
+  await requireCurrentUserServer(workspaceRoutes.settings(workspaceSlug));
 
-  const workspace = await getWorkspaceServer(workspaceId);
+  const workspace = await getWorkspaceServer(workspaceSlug);
 
   return (
     <section className="space-y-6">

@@ -8,10 +8,10 @@ export default async function WorkspaceSettingsMembersPage({
 }: {
   params: Promise<unknown>;
 }) {
-  const { workspaceId } = (await params) as { workspaceId: string };
-  await requireCurrentUserServer(workspaceRoutes.settingsMembers(workspaceId));
+  const { workspaceSlug } = (await params) as { workspaceSlug: string };
+  await requireCurrentUserServer(workspaceRoutes.settingsMembers(workspaceSlug));
 
-  const workspace = await getWorkspaceServer(workspaceId);
+  const workspace = await getWorkspaceServer(workspaceSlug);
 
   return (
     <section className="space-y-6">

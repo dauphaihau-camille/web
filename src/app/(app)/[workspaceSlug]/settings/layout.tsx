@@ -7,9 +7,9 @@ export default async function SettingsLayout({
   children: React.ReactNode;
   params: Promise<unknown>;
 }) {
-  const { workspaceId } = (await params) as { workspaceId: string };
+  const { workspaceSlug } = (await params) as { workspaceSlug: string };
 
   return (
-    <SettingsShell workspaceId={workspaceId}>{children}</SettingsShell>
+    <SettingsShell workspaceSlug={workspaceSlug}>{children}</SettingsShell>
   );
 }

@@ -7,9 +7,9 @@ export default async function WorkspaceRoutesLayout({
   children: React.ReactNode;
   params: Promise<unknown>;
 }) {
-  const { workspaceId } = (await params) as { workspaceId: string };
+  const { workspaceSlug } = (await params) as { workspaceSlug: string };
 
   return (
-    <WorkspaceShell workspaceId={workspaceId}>{children}</WorkspaceShell>
+    <WorkspaceShell workspaceSlug={workspaceSlug}>{children}</WorkspaceShell>
   );
 }

@@ -14,7 +14,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { workspaceRoutes } from '@/domains/workspace';
 
@@ -25,9 +24,9 @@ const workspaceSettingsItems = [
   { getHref: workspaceRoutes.settingsMembers, icon: UsersIcon, label: 'Members' },
 ];
 
-export function SettingsSidebar({ workspaceId }: { workspaceId: string }) {
+export function SettingsSidebar({ workspaceSlug }: { workspaceSlug: string }) {
   const pathname = usePathname();
-  const workspaceHref = workspaceRoutes.detail(workspaceId);
+  const workspaceHref = workspaceRoutes.detail(workspaceSlug);
 
   return (
     <Sidebar
@@ -35,9 +34,8 @@ export function SettingsSidebar({ workspaceId }: { workspaceId: string }) {
       className="h-auto min-h-svh self-stretch border-r border-sidebar-border bg-sidebar"
     >
       <SidebarHeader className="gap-3 p-3">
-        <WorkspaceUserDropdown workspaceId={workspaceId} />
+        <WorkspaceUserDropdown workspaceSlug={workspaceSlug} />
       </SidebarHeader>
-      <SidebarSeparator />
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -59,7 +57,7 @@ export function SettingsSidebar({ workspaceId }: { workspaceId: string }) {
           <SidebarGroupContent>
             <SidebarMenu>
               {workspaceSettingsItems.map((item) => {
-                const href = item.getHref(workspaceId);
+                const href = item.getHref(workspaceSlug);
 
                 return (
                   <SidebarMenuItem key={item.label}>

@@ -4,20 +4,20 @@ import type { ReactNode } from 'react';
 import { createContext, useContext } from 'react';
 
 type WorkspaceContextValue = {
-  workspaceId: string;
+  workspaceSlug: string;
 };
 
 const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
 
 export function WorkspaceProvider({
   children,
-  workspaceId,
+  workspaceSlug,
 }: {
   children: ReactNode;
-  workspaceId: string;
+  workspaceSlug: string;
 }) {
   return (
-    <WorkspaceContext.Provider value={{ workspaceId }}>
+    <WorkspaceContext.Provider value={{ workspaceSlug }}>
       {children}
     </WorkspaceContext.Provider>
   );
@@ -31,4 +31,8 @@ export function useWorkspace() {
   }
 
   return value;
+}
+
+export function useOptionalWorkspace() {
+  return useContext(WorkspaceContext);
 }
