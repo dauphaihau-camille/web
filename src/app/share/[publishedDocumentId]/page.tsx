@@ -1,4 +1,4 @@
-import { BlockNoteEditor } from '@/components/editor/blocknote-editor';
+import { BlockNoteEditorLoader } from '@/components/editor/blocknote-editor-loader';
 import { getPublicDocumentServer } from '@/domains/publish/api/publish.server.requests';
 
 export default async function SharedDocumentPage({
@@ -16,7 +16,7 @@ export default async function SharedDocumentPage({
           <h1 className="text-4xl font-semibold tracking-tight">{document.title}</h1>
         </div>
         <div className="pt-6">
-          <BlockNoteEditor
+          <BlockNoteEditorLoader
             documentTitle={document.title}
             content={document.content}
             workspaceSlug=""

@@ -41,6 +41,7 @@ function SubdocBlock(
     (typeof params.workspaceSlug === 'string' ? params.workspaceSlug : undefined)
     || workspaceId;
   const documentQuery = useDocumentQuery(documentId);
+  const resolvedTitle = documentQuery.data?.title || title || 'Untitled';
   const hasContent = hasMeaningfulContent(documentQuery.data?.content);
   const DocumentIcon = hasContent ? FileTextIcon : FileIcon;
 
@@ -54,12 +55,12 @@ function SubdocBlock(
           return;
         }
 
-        router.push(workspaceRoutes.document(workspaceSlug, publicId || documentId, title));
+        router.push(workspaceRoutes.document(workspaceSlug, publicId || documentId, resolvedTitle));
       }}
     >
       <DocumentIcon className="size-5 shrink-0 text-muted-foreground" />
       <span className="min-w-0 truncate border-b border-border/40 text-sm font-semibold text-foreground mt-0.5">
-        {title || 'Untitled'}
+        {resolvedTitle}
       </span>
     </button>
   );

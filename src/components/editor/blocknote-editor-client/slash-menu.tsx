@@ -9,7 +9,7 @@ import type {
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-type NotionLikeSlashMenuProps = Pick<
+type SlashMenuProps = Pick<
   SuggestionMenuProps<DefaultReactSuggestionItem>,
   'items' | 'loadingState' | 'selectedIndex' | 'onItemClick'
 > & {
@@ -49,13 +49,13 @@ function getSlashMenuHint(item: DefaultReactSuggestionItem) {
   return SLASH_MENU_HINTS[titleKey];
 }
 
-export function NotionLikeSlashMenu({
+export function SlashMenu({
   items,
   loadingState,
   selectedIndex,
   onItemClick,
   query,
-}: NotionLikeSlashMenuProps) {
+}: SlashMenuProps) {
   if (loadingState === 'loaded' && items.length === 0) {
     return null;
   }
@@ -73,7 +73,7 @@ export function NotionLikeSlashMenu({
         renderedItems.push(
           <div
             key={`separator-${currentGroup}-${item.group}`}
-            className="-mx-1 my-1 h-px bg-border"
+            className="mx-1 my-1 h-px bg-border"
           />,
         );
       }
@@ -94,7 +94,7 @@ export function NotionLikeSlashMenu({
         key={`${item.group}-${item.title}`}
         type="button"
         className={cn(
-          'group relative flex w-full cursor-default items-center gap-3 rounded-md px-1.5 py-1 text-left text-sm text-foreground outline-hidden transition-colors select-none',
+          'group relative flex w-full cursor-default items-center gap-2 rounded-md px-1.5 py-1 text-left text-sm text-foreground outline-hidden transition-colors select-none',
           index === selectedIndex && (hasSearchQuery || selectedIndex !== 0)
             ? 'bg-accent text-accent-foreground'
             : 'hover:bg-accent hover:text-accent-foreground',
@@ -124,7 +124,7 @@ export function NotionLikeSlashMenu({
       <div className="min-w-32 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10">
         {shouldScroll
           ? (
-            <ScrollArea className="h-[28rem]">
+            <ScrollArea className="h-112">
               <div className="p-1 pr-3">
                 {renderedItems}
 
