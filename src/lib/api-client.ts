@@ -20,7 +20,15 @@ function normalizePath(path: string) {
 }
 
 function getApiUrl(path: string) {
-  return apiBaseUrl ? `${apiBaseUrl}/${normalizePath(path)}` : path;
+  if (apiBaseUrl) {
+    return `${apiBaseUrl}/${normalizePath(path)}`;
+  }
+
+  if (typeof window !== 'undefined') {
+    return new URL(path, window.location.origin).toString();
+  }
+
+  return path;
 }
 
 async function refreshAccessToken() {
@@ -91,8 +99,12 @@ export function createQueryKey(...parts: QueryKey) {
 }
 
 export function apiRequest(path: Input, options?: ApiRequestOptions) {
-  if (typeof path === 'string' && apiBaseUrl) {
-    return apiClient(normalizePath(path), options);
+  if (typeof path === 'string') {
+    if (apiBaseUrl) {
+      return apiClient(normalizePath(path), options);
+    }
+
+    return apiClient(getApiUrl(path), options);
   }
 
   return apiClient(path, options);

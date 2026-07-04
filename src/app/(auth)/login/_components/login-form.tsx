@@ -27,6 +27,7 @@ import {
 } from '@/domains/workspace';
 
 import { loginFormSchema, type LoginFormValues } from '../_forms/login.scheme';
+import { navigateAfterLogin } from './login-navigation';
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -72,7 +73,7 @@ export function LoginForm() {
         queryKey: workspaceKeys.all,
       });
       const postLoginPath = await resolvePostLoginPath();
-      window.location.assign(postLoginPath);
+      navigateAfterLogin(postLoginPath);
     },
     onError: (error) => {
       form.setError('root', {
