@@ -2,7 +2,7 @@ import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.request
 import { getWorkspaceServer } from '@/domains/workspace/api/workspace.server.requests';
 import { workspaceRoutes } from '@/domains/workspace';
 
-import { WorkspaceSettingsPanel } from '../_components/workspace-settings-panel';
+import { WorkspaceSettingsPanel } from './_components/workspace-settings-panel';
 
 export default async function WorkspaceSettingsPage({
   params,

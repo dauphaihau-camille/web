@@ -1,7 +1,7 @@
 import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
 import { getWorkspaceServer } from '@/domains/workspace/api/workspace.server.requests';
 import { workspaceRoutes } from '@/domains/workspace';
-import { WorkspaceMembersPanel } from '../../_components/workspace-members-panel';
+import { MembersPanel } from './_components/members-panel';
 
 export default async function WorkspaceSettingsMembersPage({
   params,
@@ -21,7 +21,7 @@ export default async function WorkspaceSettingsMembersPage({
           Manage access and roles for the people who can work inside this space.
         </p>
       </div>
-      <WorkspaceMembersPanel workspace={workspace} />
+      <MembersPanel workspace={workspace} />
     </section>
   );
 }
