@@ -1,7 +1,10 @@
 import { queryOptions, type QueryKey, type UseQueryOptions } from '@tanstack/react-query';
 import ky, { type Input, type Options } from 'ky';
 
+import { authRoutes } from '@/domains/auth/auth-routes';
+
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
+const AUTH_RETRY_HEADER = 'x-auth-refresh-retry';
 
 type ApiRequestOptions = Omit<Options, 'prefix'>;
 
@@ -16,11 +19,70 @@ function normalizePath(path: string) {
   return path.replace(/^\/+/, '');
 }
 
+function getApiUrl(path: string) {
+  return apiBaseUrl ? `${apiBaseUrl}/${normalizePath(path)}` : path;
+}
+
+async function refreshAccessToken() {
+  return fetch(getApiUrl('auth/refresh'), {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      accept: 'application/json',
+    },
+  });
+}
+
+function redirectToLogin() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const redirectTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  const loginUrl = authRoutes.isLoginPath(window.location.pathname)
+    ? window.location.pathname
+    : authRoutes.login(redirectTo);
+
+  if (window.location.pathname === loginUrl && !window.location.search && !window.location.hash) {
+    return;
+  }
+
+  window.location.replace(loginUrl);
+}
+
 export const apiClient = ky.create({
   ...(apiBaseUrl ? { prefix: apiBaseUrl } : {}),
   credentials: 'include',
   headers: {
     accept: 'application/json',
+  },
+  hooks: {
+    afterResponse: [
+      async ({ request, options, response }) => {
+        if (response.status !== 401 || request.headers.get(AUTH_RETRY_HEADER) === '1') {
+          return response;
+        }
+
+        if (request.url.endsWith('/auth/login') || request.url.endsWith('/auth/refresh')) {
+          return response;
+        }
+
+        const refreshResponse = await refreshAccessToken();
+
+        if (!refreshResponse.ok) {
+          redirectToLogin();
+          return response;
+        }
+
+        const retryHeaders = new Headers(options.headers ?? request.headers);
+        retryHeaders.set(AUTH_RETRY_HEADER, '1');
+
+        return apiClient(request, {
+          ...options,
+          headers: retryHeaders,
+        });
+      },
+    ],
   },
 });
 
