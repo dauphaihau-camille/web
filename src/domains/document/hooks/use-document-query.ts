@@ -1,13 +1,18 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 
 import { documentDetailQueryOptions } from '../api/document.queries';
 import type { Document, DocumentId } from '../api/document.types';
 
-export function useDocumentQuery(documentId: DocumentId, initialData?: Document) {
+type UseDocumentQueryOptions = Pick<
+  UseQueryOptions<Document>,
+  'initialData' | 'initialDataUpdatedAt' | 'refetchOnMount'
+>;
+
+export function useDocumentQuery(documentId: DocumentId, options?: UseDocumentQueryOptions) {
   return useQuery({
     ...documentDetailQueryOptions(documentId),
-    ...(initialData ? { initialData } : {}),
+    ...options,
   });
 }

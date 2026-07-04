@@ -14,42 +14,52 @@ import {
 import type { Document } from '@/domains/document';
 import { cn } from '@/lib/utils';
 
-import { formatRelativeTime } from './header-actions.utils';
-import { PageOperations } from './page-operations';
+import { DocOperations } from './doc-operations';
+import { RelativeTimeText } from './relative-time-text';
 import { ShareButton } from './share-button';
-import { useHeaderActions } from './use-header-actions';
 
 type HeaderActionsProps = {
-  workspaceSlug: string;
-  document: Document;
+  archiveCurrentDocument: () => void;
+  copyLink: () => void | Promise<void>;
+  copyPublishedLink: () => Promise<void>;
+  duplicateDocument: () => void;
+  favoriteStatus?: {
+    is_favorite: boolean;
+  };
+  isArchiving: boolean;
+  isDuplicating: boolean;
+  isFavoriting: boolean;
   isVisible?: boolean;
+  isPublishing: boolean;
+  isUnpublishing: boolean;
+  publishCurrentDocument: () => void;
+  publishStatus?: {
+    public_path?: string;
+    published_document_id?: string;
+  };
+  toggleFavorite: () => void;
+  unpublishCurrentDocument: () => void;
+  updatedAt: Document['updated_at'];
 };
 
 export function HeaderActions({
-  workspaceSlug,
-  document,
+  archiveCurrentDocument,
+  copyLink,
+  copyPublishedLink,
+  duplicateDocument,
+  favoriteStatus,
+  isArchiving,
+  isDuplicating,
+  isFavoriting,
   isVisible = true,
+  isPublishing,
+  isUnpublishing,
+  publishCurrentDocument,
+  publishStatus,
+  toggleFavorite,
+  unpublishCurrentDocument,
+  updatedAt,
 }: HeaderActionsProps) {
-  const {
-    archiveCurrentDocument,
-    copyLink,
-    copyPublishedLink,
-    duplicateDocument,
-    favoriteStatus,
-    isFavoriting,
-    isArchiving,
-    isDuplicating,
-    isPublishing,
-    isUnpublishing,
-    publishCurrentDocument,
-    publishStatus,
-    toggleFavorite,
-    unpublishCurrentDocument,
-  } = useHeaderActions({
-    workspaceSlug,
-    document,
-  });
-
   return (
     <div
       className={cn(
@@ -58,7 +68,11 @@ export function HeaderActions({
       )}
     >
       <div className="hidden items-center gap-1 text-sm font-medium text-muted-foreground md:flex mr-2">
-        <span>Edited {formatRelativeTime(document.updated_at)}</span>
+        <RelativeTimeText
+          fallback="recently"
+          prefix="Edited"
+          value={updatedAt}
+        />
       </div>
       <ShareButton
         isPublished={Boolean(publishStatus?.published_document_id)}
@@ -93,10 +107,10 @@ export function HeaderActions({
             : 'Add to favorites'
         }
       />
-      <PageOperations
+      <DocOperations
         isArchiving={isArchiving}
         isDuplicating={isDuplicating}
-        updatedAt={document.updated_at}
+        updatedAt={updatedAt}
         onArchive={archiveCurrentDocument}
         onCopyLink={copyLink}
         onDuplicate={duplicateDocument}

@@ -116,13 +116,15 @@ export function ShareButton({
               Publish
             </TabsTrigger>
             <Tooltip>
-              <TooltipTrigger>
-                <span className="inline-flex">
-                  <TabsTrigger value="share" className="flex-none px-3 py-1" disabled>
-                    Share
-                  </TabsTrigger>
-                </span>
-              </TooltipTrigger>
+              <TooltipTrigger
+                render={(
+                  <span className="inline-flex">
+                    <TabsTrigger value="share" className="flex-none px-3 py-1" disabled>
+                      Share
+                    </TabsTrigger>
+                  </span>
+                )}
+              />
               <TooltipContent>Feature not available</TooltipContent>
             </Tooltip>
           </TabsList>

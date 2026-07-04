@@ -13,7 +13,11 @@ export function DocumentRouteScreen({
   initialDocument: Document;
   workspaceSlug: string;
 }) {
-  const documentQuery = useDocumentQuery(documentId, initialDocument);
+  const documentQuery = useDocumentQuery(documentId, {
+    initialData: initialDocument,
+    initialDataUpdatedAt: 0,
+    refetchOnMount: 'always',
+  });
   const document = documentQuery.data ?? initialDocument;
 
   return (

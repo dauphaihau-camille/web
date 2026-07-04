@@ -18,6 +18,8 @@ import { parseDocumentRouteSegment, workspaceRoutes } from '@/domains/workspace'
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
 
+import { DocumentTreeNodeActions } from './document-tree-node-actions';
+
 export function DocumentTreeNode({
   document,
   workspaceSlug,
@@ -66,6 +68,7 @@ export function DocumentTreeNode({
           <SidebarMenuSubButton
             render={<Link href={href} />}
             isActive={isActive}
+            className="pr-14 group-hover/menu-sub-item:bg-sidebar-accent group-hover/menu-sub-item:text-sidebar-accent-foreground group-focus-within/menu-sub-item:bg-sidebar-accent group-focus-within/menu-sub-item:text-sidebar-accent-foreground"
           >
             {hasChildren
               ? (
@@ -91,6 +94,11 @@ export function DocumentTreeNode({
               : <DocumentIcon />}
             <span className="font-semibold">{displayTitle}</span>
           </SidebarMenuSubButton>
+          <DocumentTreeNodeActions
+            document={document}
+            isActive={isActive}
+            workspaceSlug={workspaceSlug}
+          />
         </SidebarMenuSubItem>
 
         {hasChildren && isExpanded && (

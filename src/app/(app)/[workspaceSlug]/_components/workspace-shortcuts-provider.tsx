@@ -5,6 +5,7 @@ import {
   createContext, useEffect, useRef, useState,
 } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useTheme } from 'next-themes';
 
 export const OPEN_SHARE_EVENT = 'workspace:open-share';
 export const COPY_LINK_EVENT = 'workspace:copy-link';
@@ -19,6 +20,19 @@ type WorkspaceShortcutsContextValue = {
 
 export const WorkspaceShortcutsContext = createContext<WorkspaceShortcutsContextValue | null>(null);
 
+function isTypingTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  return (
+    target.isContentEditable
+    || target.tagName === 'INPUT'
+    || target.tagName === 'TEXTAREA'
+    || target.tagName === 'SELECT'
+  );
+}
+
 export function WorkspaceShortcutsProvider({
   children,
 }: {
@@ -27,6 +41,7 @@ export function WorkspaceShortcutsProvider({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { resolvedTheme, setTheme } = useTheme();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const historyEntriesRef = useRef<string[]>([]);
   const historyIndexRef = useRef(-1);
@@ -59,6 +74,10 @@ export function WorkspaceShortcutsProvider({
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.repeat) {
+        return;
+      }
+
       const hasPrimaryModifier = event.metaKey || event.ctrlKey;
       const hasOnlyPrimaryModifier = hasPrimaryModifier && !event.altKey && !event.shiftKey;
       const hasPrimaryAndShiftModifier = hasPrimaryModifier && event.shiftKey && !event.altKey;
@@ -77,6 +96,16 @@ export function WorkspaceShortcutsProvider({
         if (event.key.toLowerCase() === 'l') {
           event.preventDefault();
           window.dispatchEvent(new CustomEvent(COPY_LINK_EVENT));
+          return;
+        }
+
+        if (event.key.toLowerCase() === 'm') {
+          if (isTypingTarget(event.target)) {
+            return;
+          }
+
+          event.preventDefault();
+          setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
         }
 
         return;
@@ -121,7 +150,7 @@ export function WorkspaceShortcutsProvider({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [router]);
+  }, [resolvedTheme, router, setTheme]);
 
   return (
     <WorkspaceShortcutsContext.Provider

@@ -1,8 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useDebounceFn } from 'ahooks';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 import {
   createDocument,
@@ -11,11 +10,8 @@ import {
   type Document,
   updateDocument,
 } from '@/domains/document';
-import { EditableBlockNoteEditor } from '@/components/editor/editable-blocknote-editor';
+import { BlockNoteEditorLoader } from '@/components/editor/blocknote-editor-loader';
 import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
-import { workspaceRoutes } from '@/domains/workspace';
-import { usePublishStatusQuery } from '@/domains/publish';
-import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +24,9 @@ import {
   updateCachedReferencedSubdocTitles,
 } from './document-screen-cache';
 import { HeaderActions } from './header-actions/header-actions';
+import { useHeaderActions } from './header-actions/use-header-actions';
 import { PublishedDocumentBar } from './published-document-bar';
+import { useDocumentTitle } from './_hooks/use-document-title';
 import { useDocumentChromeVisibility } from './use-document-chrome-visibility';
 
 export function DocumentScreen({
@@ -39,50 +37,34 @@ export function DocumentScreen({
   workspaceSlug: string;
 }) {
   const queryClient = useQueryClient();
-  const [draftTitle, setDraftTitle] = useState<string | null>(null);
-  const activeDraftDocumentId = useDocumentTitleDraftStore((state) => state.activeDocumentId);
-  const activeDraftTitle = useDocumentTitleDraftStore((state) => state.draftTitle);
-  const clearDraftTitle = useDocumentTitleDraftStore((state) => state.clearDraftTitle);
-  const setDocumentTitleDraft = useDocumentTitleDraftStore((state) => state.setDraftTitle);
   const {
     hideChrome,
     isChromeVisible,
     revealChrome,
   } = useDocumentChromeVisibility();
   const documentId = document.id;
-  const publishStatusQuery = usePublishStatusQuery(documentId);
-  const isPublished = Boolean(publishStatusQuery.data?.published_document_id);
 
-  const updateDocumentRoute = (nextTitle: string) => {
-    if (typeof window === 'undefined') {
-      return;
-    }
+  const headerActions = useHeaderActions({
+    workspaceSlug,
+    document,
+  });
+  const {
+    displayTitle,
+    handleTitleBlur,
+    handleTitleChange,
+    savedTitle,
+    title,
+  } = useDocumentTitle({
+    document,
+    workspaceSlug,
+  });
 
-    const nextPath = workspaceRoutes.document(
-      workspaceSlug,
-      document.public_id,
-      nextTitle,
-    );
+  const isPublished = Boolean(headerActions.publishStatus?.published_document_id);
 
-    if (window.location.pathname !== nextPath) {
-      const nextUrl = `${nextPath}${window.location.search}${window.location.hash}`;
-      window.history.replaceState(null, '', nextUrl);
-    }
-  };
-
-  const { run: scheduleRouteUpdate, cancel: cancelScheduledRouteUpdate } = useDebounceFn(
-    updateDocumentRoute,
-    { wait: 300 },
-  );
-
-  const updateDocumentMutation = useMutation({
+  const updateContentMutation = useMutation({
     mutationFn: (input: Parameters<typeof updateDocument>[1]) =>
       updateDocument(documentId, input),
     onSuccess: async (documentUpdated, variables) => {
-      if (variables.title !== undefined) {
-        updateCachedNavigationTitle(queryClient, workspaceSlug, documentId, variables.title);
-        updateCachedReferencedSubdocTitles(queryClient, documentId, variables.title);
-      }
       if (variables.content !== undefined) {
         updateCachedNavigationContentStatus(
           queryClient,
@@ -96,7 +78,6 @@ export function DocumentScreen({
         (currentDocument) => ({
           ...(currentDocument ?? documentUpdated),
           ...documentUpdated,
-          ...(variables.title !== undefined ? { title: variables.title } : {}),
           ...(variables.content !== undefined ? { content: variables.content } : {}),
         }),
       );
@@ -132,23 +113,9 @@ export function DocumentScreen({
     setRecentWorkspaceDocumentId(workspaceSlug, documentId);
   }, [documentId, workspaceSlug]);
 
-  useEffect(() => () => {
-    clearDraftTitle(documentId);
-  }, [clearDraftTitle, documentId]);
-
-  useEffect(() => () => {
-    cancelScheduledRouteUpdate();
-  }, [cancelScheduledRouteUpdate]);
-
-  const title = draftTitle ?? document.title;
-  const displayTitle =
-    activeDraftDocumentId === documentId && activeDraftTitle !== null
-      ? activeDraftTitle
-      : title;
-
   return (
     <section className="space-y-6" onPointerMove={revealChrome}>
-      <PublishedDocumentBar publishedPath={publishStatusQuery.data?.public_path} />
+      <PublishedDocumentBar publishedPath={headerActions.publishStatus?.public_path} />
 
       <div
         className={cn(
@@ -165,9 +132,9 @@ export function DocumentScreen({
           />
 
           <HeaderActions
-            workspaceSlug={workspaceSlug}
-            document={document}
             isVisible={isChromeVisible}
+            updatedAt={document.updated_at}
+            {...headerActions}
           />
         </div>
       </div>
@@ -179,72 +146,42 @@ export function DocumentScreen({
               value={title}
               onChange={(event) => {
                 hideChrome();
-                const nextTitle = event.target.value;
-
-                setDraftTitle(nextTitle);
-                setDocumentTitleDraft(documentId, nextTitle);
-                scheduleRouteUpdate(nextTitle.trim() || 'Untitled');
+                handleTitleChange(event.target.value);
               }}
-              onBlur={(event) => {
-                const latestDocument =
-                  queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
-                const nextTitle = event.currentTarget.value.trim() || 'Untitled';
-
-                if (nextTitle === latestDocument.title) {
-                  setDraftTitle(null);
-                  clearDraftTitle(documentId);
-                  return;
-                }
-                setDraftTitle(nextTitle);
-                setDocumentTitleDraft(documentId, nextTitle);
-                cancelScheduledRouteUpdate();
-                updateDocumentRoute(nextTitle);
-
-                queryClient.setQueryData<Document>(
-                  documentKeys.detail(documentId),
-                  {
-                    ...latestDocument,
-                    title: nextTitle,
-                  },
-                );
-                updateCachedNavigationTitle(queryClient, workspaceSlug, documentId, nextTitle);
-
-                void updateDocumentMutation
-                  .mutateAsync({
-                    version: latestDocument.version,
-                    title: nextTitle,
-                  })
-                  .then(() => {
-                    setDraftTitle(null);
-                    clearDraftTitle(documentId);
-                  });
-              }}
+              onBlur={(event) => handleTitleBlur(event.currentTarget.value)}
               className="h-auto border-0 bg-transparent px-0 text-4xl font-semibold tracking-tight shadow-none focus-visible:ring-0 dark:bg-transparent md:text-5xl"
             />
           </div>
         </div>
-  
-        <EditableBlockNoteEditor
+
+        <BlockNoteEditorLoader
           key={documentId}
           documentId={documentId}
-          documentTitle={document.title}
+          documentTitle={savedTitle}
           workspaceSlug={workspaceSlug}
           content={document.content}
-          onStartContentChange={hideChrome}
-          onContentChange={async (content) => {
+          documentOperations={{
+            isArchiving: headerActions.isArchiving,
+            isDuplicating: headerActions.isDuplicating,
+            onArchive: headerActions.archiveCurrentDocument,
+            onCopyLink: headerActions.copyLink,
+            onDuplicate: headerActions.duplicateDocument,
+          }}
+          onStartContentChangeAction={hideChrome}
+          onContentChangeAction={async (content) => {
             const latest =
               queryClient.getQueryData<typeof document>(
                 documentKeys.detail(documentId),
               ) ?? document;
 
-            const updated = await updateDocumentMutation.mutateAsync({
+            const updated = await updateContentMutation.mutateAsync({
               version: latest.version,
               content,
             });
-  
+
             queryClient.setQueryData(documentKeys.detail(documentId), updated);
           }}
-          onCreateSubdoc={() => createSubDocMutation.mutateAsync()}
+          onCreateSubdocAction={() => createSubDocMutation.mutateAsync()}
         />
       </div>
     </section>

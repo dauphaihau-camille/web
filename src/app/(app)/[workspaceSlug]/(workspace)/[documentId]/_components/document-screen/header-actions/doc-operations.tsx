@@ -21,9 +21,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 
-import { formatRelativeTime } from './header-actions.utils';
+import { RelativeTimeText } from './relative-time-text';
 
-type PageOperationsProps = {
+type DocOperationsProps = {
   isArchiving: boolean;
   isDuplicating: boolean;
   updatedAt: string;
@@ -32,20 +32,19 @@ type PageOperationsProps = {
   onDuplicate: () => void;
 };
 
-export function PageOperations({
+export function DocOperations({
   isArchiving,
   isDuplicating,
   updatedAt,
   onArchive,
   onCopyLink,
   onDuplicate,
-}: PageOperationsProps) {
+}: DocOperationsProps) {
   useEffect(() => {
     const handleDuplicateDocument = () => {
       if (isDuplicating) {
         return;
       }
-
       onDuplicate();
     };
 
@@ -109,7 +108,11 @@ export function PageOperations({
         <DropdownMenuSeparator />
         <div className="px-2 py-1.5">
           <p className="text-xs text-muted-foreground">
-            Last edited {formatRelativeTime(updatedAt)}
+            <RelativeTimeText
+              fallback="recently"
+              prefix="Last edited"
+              value={updatedAt}
+            />
           </p>
         </div>
       </DropdownMenuContent>
