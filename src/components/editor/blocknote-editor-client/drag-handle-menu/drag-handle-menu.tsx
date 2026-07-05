@@ -1,18 +1,18 @@
 'use client';
 
+import type { Block, BlockNoteEditor } from '@blocknote/core';
+import { SideMenuExtension } from '@blocknote/core/extensions';
 import {
   BlockColorsItem,
   useBlockNoteEditor,
   useComponentsContext,
   useDictionary,
+  useExtension,
+  useExtensionState,
   useEditorState,
 } from '@blocknote/react';
-import {
-  CopyIcon,
-  LinkIcon,
-  PaletteIcon,
-  Trash2Icon,
-} from 'lucide-react';
+import { PaletteIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 import type { BlockNoteDocumentOperations } from '../../blocknote-editor.types';
 import {
@@ -20,7 +20,8 @@ import {
   type EditorBlock,
 } from './editor-block';
 import { MenuRow } from './menu-row';
-import { TurnToItem } from './turn-to-item';
+import { NormalBlockMenu } from './normal-block-menu';
+import { SubdocBlockMenu } from './subdoc-block-menu';
 
 type DragHandleMenuProps = {
   documentOperations?: BlockNoteDocumentOperations;
@@ -32,74 +33,141 @@ export function DragHandleMenu({
   const Components = useComponentsContext();
   const editor = useBlockNoteEditor();
   const dictionary = useDictionary();
+  const sideMenu = useExtension(SideMenuExtension);
+  const hoveredBlock = useExtensionState(SideMenuExtension, {
+    editor,
+    selector: (state) => state?.block,
+  });
   const selectedBlocks = useEditorState({
     editor,
     selector: ({ editor: currentEditor }) =>
       currentEditor.getSelection()?.blocks ?? [currentEditor.getTextCursorPosition().block],
   });
 
-  if (!Components || !documentOperations || selectedBlocks.length === 0) {
+  if (!Components || !documentOperations || !hoveredBlock || selectedBlocks.length === 0) {
     return null;
   }
 
-  const currentBlockLabel = getCurrentBlockLabel(selectedBlocks[0] as EditorBlock, dictionary);
+  const currentBlock = hoveredBlock as EditorBlock;
+  const currentBlockLabel = getCurrentBlockLabel(currentBlock, dictionary);
+  const isDocumentBlock = currentBlock.type === 'subpage';
+  const subdocumentId =
+    typeof currentBlock.props.documentId === 'string'
+      ? currentBlock.props.documentId
+      : null;
+  const blocksToRemove = selectedBlocks.some((block) => block.id === hoveredBlock.id)
+    ? selectedBlocks
+    : [hoveredBlock];
+  const isArchivingSubdocument =
+    isDocumentBlock
+    && subdocumentId !== null
+    && documentOperations.archivingSubdocumentId === subdocumentId;
+  const handleDelete = () => {
+    sideMenu.unfreezeMenu();
+    editor.removeBlocks(blocksToRemove);
+  };
+  const handleArchiveSubdocument = () => {
+    if (
+      isArchivingSubdocument
+      || !subdocumentId
+      || !documentOperations.onArchiveSubdocument
+    ) {
+      return;
+    }
+
+    const blockSnapshots = blocksToRemove.map((block) => cloneBlock(block as Block));
+    const insertionPoint = findInsertionPoint(editor.document as Block[], blocksToRemove as Block[]);
+
+    sideMenu.unfreezeMenu();
+    editor.removeBlocks(blocksToRemove);
+
+    void documentOperations.onArchiveSubdocument(subdocumentId).catch(() => {
+      restoreBlocks(editor, blockSnapshots, insertionPoint);
+      toast('Failed to move doc to trash');
+    });
+  };
 
   return (
     <Components.Generic.Menu.Dropdown className="bn-menu-dropdown bn-drag-handle-menu drag-handle-menu">
       <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground">
         {currentBlockLabel}
       </div>
-      <TurnToItem />
       <BlockColorsItem>
         <MenuRow
           icon={<PaletteIcon className="size-4" />}
           label="Color"
         />
       </BlockColorsItem>
-      <div className="mx-1 my-1 h-px bg-border" />
-      <Components.Generic.Menu.Item
-        className="bn-menu-item drag-handle-menu__item"
-        onClick={() => {
-          if (documentOperations.isDuplicating) {
-            return;
-          }
-
-          documentOperations.onDuplicate();
-        }}
-      >
-        <MenuRow
-          icon={<CopyIcon className="size-4" />}
-          label={documentOperations.isDuplicating ? 'Duplicating...' : 'Duplicate'}
-          shortcut={'\u2318D'}
-        />
-      </Components.Generic.Menu.Item>
-      <Components.Generic.Menu.Item
-        className="bn-menu-item drag-handle-menu__item"
-        onClick={() => {
-          void documentOperations.onCopyLink();
-        }}
-      >
-        <MenuRow
-          icon={<LinkIcon className="size-4" />}
-          label="Copy link"
-          shortcut={'\u21e7\u2318L'}
-        />
-      </Components.Generic.Menu.Item>
-      <Components.Generic.Menu.Item
-        className="bn-menu-item drag-handle-menu__item drag-handle-menu__item--destructive"
-        onClick={() => {
-          if (documentOperations.isArchiving) {
-            return;
-          }
-
-          documentOperations.onArchive();
-        }}
-      >
-        <MenuRow
-          icon={<Trash2Icon className="size-4" />}
-          label={documentOperations.isArchiving ? 'Moving to Trash...' : 'Move to Trash'}
-        />
-      </Components.Generic.Menu.Item>
+      {isDocumentBlock
+        ? (
+          <SubdocBlockMenu
+            documentOperations={documentOperations}
+            isArchivingSubdocument={isArchivingSubdocument}
+            onArchive={handleArchiveSubdocument}
+          />
+        )
+        : null}
+      {isDocumentBlock
+        ? (
+          null
+        )
+        : (
+          <NormalBlockMenu onDelete={handleDelete} />
+        )}
     </Components.Generic.Menu.Dropdown>
   );
+}
+
+function cloneBlock(block: Block): Block {
+  return {
+    ...block,
+    props: { ...block.props },
+    content: Array.isArray(block.content) ? JSON.parse(JSON.stringify(block.content)) : block.content,
+    children: block.children.map((child) => cloneBlock(child as Block)),
+  } as Block;
+}
+
+function flattenBlocks(blocks: Block[]): Block[] {
+  return blocks.flatMap((block) => [
+    block,
+    ...flattenBlocks((block.children ?? []) as Block[]),
+  ]);
+}
+
+function findInsertionPoint(documentBlocks: Block[], blocksToRemove: Block[]) {
+  const flattenedBlocks = flattenBlocks(documentBlocks);
+  const removedIds = new Set(blocksToRemove.map((block) => block.id));
+  const firstRemovedIndex = flattenedBlocks.findIndex((block) => removedIds.has(block.id));
+  const previousBlock =
+    firstRemovedIndex <= 0
+      ? null
+      : [...flattenedBlocks.slice(0, firstRemovedIndex)]
+        .reverse()
+        .find((block) => !removedIds.has(block.id)) ?? null;
+  const nextBlock =
+    firstRemovedIndex === -1
+      ? null
+      : flattenedBlocks
+        .slice(firstRemovedIndex + 1)
+        .find((block) => !removedIds.has(block.id)) ?? null;
+
+  return {
+    nextBlock,
+    previousBlock,
+  };
+}
+
+function restoreBlocks(
+  editor: BlockNoteEditor,
+  blocks: Block[],
+  insertionPoint: ReturnType<typeof findInsertionPoint>,
+) {
+  if (insertionPoint.previousBlock) {
+    editor.insertBlocks(blocks as never[], insertionPoint.previousBlock, 'after');
+    return;
+  }
+
+  if (insertionPoint.nextBlock) {
+    editor.insertBlocks(blocks as never[], insertionPoint.nextBlock, 'before');
+  }
 }

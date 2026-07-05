@@ -2,8 +2,10 @@ import type { Document } from '@/domains/document';
 
 export type BlockNoteDocumentOperations = {
   isArchiving: boolean;
+  archivingSubdocumentId?: string | null;
   isDuplicating: boolean;
   onArchive: () => void;
+  onArchiveSubdocument?: (documentId: string) => Promise<void>;
   onCopyLink: () => void | Promise<void>;
   onDuplicate: () => void;
 };

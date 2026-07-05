@@ -4,9 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { FileIcon, FileTextIcon } from 'lucide-react';
 import { createReactBlockSpec, type ReactCustomBlockRenderProps } from '@blocknote/react';
 
-import { useDocumentQuery } from '@/domains/document';
 import { workspaceRoutes } from '@/domains/workspace';
-import { hasMeaningfulContent } from './has-meaningful-content';
 
 const subdocBlockConfig = {
   type: 'subpage' as const,
@@ -20,8 +18,14 @@ const subdocBlockConfig = {
     workspaceId: {
       default: '',
     },
+    publishedDocumentId: {
+      default: '',
+    },
     title: {
       default: 'Untitled',
+    },
+    hasContent: {
+      default: true,
     },
   },
   content: 'none' as const,
@@ -34,28 +38,39 @@ function SubdocBlock(
   const params = useParams<{ workspaceSlug?: string }>();
 
   const {
-    documentId, publicId, workspaceId, title,
+    documentId,
+    publicId,
+    workspaceId,
+    title,
+    publishedDocumentId,
+    hasContent: hasContentProp,
   } = props.block.props;
 
   const workspaceSlug =
     (typeof params.workspaceSlug === 'string' ? params.workspaceSlug : undefined)
     || workspaceId;
-  const documentQuery = useDocumentQuery(documentId);
-  const resolvedTitle = documentQuery.data?.title || title || 'Untitled';
-  const hasContent = hasMeaningfulContent(documentQuery.data?.content);
+  const resolvedTitle = title || 'Untitled';
+  const publicTarget = typeof publishedDocumentId === 'string' && publishedDocumentId.length > 0
+    ? `/share/${publishedDocumentId}`
+    : null;
+  const privateTarget = workspaceSlug
+    ? workspaceRoutes.document(workspaceSlug, publicId || documentId, resolvedTitle)
+    : null;
+  const targetHref = publicTarget ?? privateTarget;
+  const hasContent = hasContentProp;
   const DocumentIcon = hasContent ? FileTextIcon : FileIcon;
 
   return (
     <button
       type="button"
       contentEditable={false}
-      className="inline-flex w-full max-w-full cursor-pointer items-center gap-1 rounded-[inherit] px-2 py-0.5 text-left align-top outline-none transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-0"
+      aria-disabled={!targetHref}
+      className="inline-flex w-full max-w-full items-center gap-1 rounded-[inherit] px-2 py-0.5 text-left align-top outline-none transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-0 aria-disabled:cursor-default aria-disabled:opacity-60"
       onClick={() => {
-        if (!workspaceSlug) {
+        if (!targetHref) {
           return;
         }
-
-        router.push(workspaceRoutes.document(workspaceSlug, publicId || documentId, resolvedTitle));
+        router.push(targetHref);
       }}
     >
       <DocumentIcon className="size-5 shrink-0 text-muted-foreground" />
@@ -69,7 +84,17 @@ function SubdocBlock(
 export const subdocBlock = createReactBlockSpec(subdocBlockConfig, {
   render: SubdocBlock,
   toExternalHTML: ({ block }) => (
-    <a href={workspaceRoutes.document(block.props.workspaceId, block.props.publicId || block.props.documentId, block.props.title)}>
+    <a
+      href={
+        block.props.publishedDocumentId
+          ? `/share/${block.props.publishedDocumentId}`
+          : workspaceRoutes.document(
+            block.props.workspaceId,
+            block.props.publicId || block.props.documentId,
+            block.props.title,
+          )
+      }
+    >
       {block.props.title || 'Untitled'}
     </a>
   ),

@@ -2,8 +2,11 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 import {
+  archiveDocument,
+  documentDetailQueryOptions,
   createDocument,
   documentKeys,
   setRecentWorkspaceDocumentId,
@@ -19,9 +22,8 @@ import { DocumentBreadcrumb } from './document-breadcrumb';
 import {
   insertCreatedSubdocIntoCachedChildren,
   markCachedNavigationNodeHasChildren,
+  removeCachedNavigationDocument,
   updateCachedNavigationContentStatus,
-  updateCachedNavigationTitle,
-  updateCachedReferencedSubdocTitles,
 } from './document-screen-cache';
 import { HeaderActions } from './header-actions/header-actions';
 import { useHeaderActions } from './header-actions/use-header-actions';
@@ -109,6 +111,31 @@ export function DocumentScreen({
     },
   });
 
+  const archiveSubdocMutation = useMutation({
+    mutationFn: async (subdocumentId: string) => {
+      const subdocument = await queryClient.ensureQueryData(
+        documentDetailQueryOptions(subdocumentId),
+      );
+
+      return archiveDocument(subdocumentId, subdocument.version);
+    },
+    onSuccess: async (archivedSubdocument) => {
+      queryClient.setQueryData(
+        documentKeys.detail(archivedSubdocument.id),
+        archivedSubdocument,
+      );
+      removeCachedNavigationDocument(
+        queryClient,
+        workspaceSlug,
+        archivedSubdocument.id,
+      );
+      await queryClient.invalidateQueries({
+        queryKey: documentKeys.lists(workspaceSlug),
+      });
+      toast('Moved to trash');
+    },
+  });
+
   useEffect(() => {
     setRecentWorkspaceDocumentId(workspaceSlug, documentId);
   }, [documentId, workspaceSlug]);
@@ -162,8 +189,12 @@ export function DocumentScreen({
           content={document.content}
           documentOperations={{
             isArchiving: headerActions.isArchiving,
+            archivingSubdocumentId: archiveSubdocMutation.variables ?? null,
             isDuplicating: headerActions.isDuplicating,
             onArchive: headerActions.archiveCurrentDocument,
+            onArchiveSubdocument: async (subdocumentId) => {
+              await archiveSubdocMutation.mutateAsync(subdocumentId);
+            },
             onCopyLink: headerActions.copyLink,
             onDuplicate: headerActions.duplicateDocument,
           }}
