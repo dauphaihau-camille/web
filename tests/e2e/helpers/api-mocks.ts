@@ -14,8 +14,10 @@ export type WorkspaceApiFixture = {
 };
 
 export type LoginApiScenario = {
-  loginStatus?: number;
-  loginBody?: Record<string, unknown>;
+  startStatus?: number;
+  startBody?: Record<string, unknown>;
+  verifyStatus?: number;
+  verifyBody?: Record<string, unknown>;
   currentUserStatus?: number;
   workspaces?: WorkspaceApiFixture[];
 };
@@ -40,8 +42,13 @@ async function fulfillJson(route: Route, status: number, body: unknown) {
 
 export async function mockLoginApi(page: Page, scenario: LoginApiScenario = {}) {
   const {
-    loginStatus = 200,
-    loginBody = {
+    startStatus = 200,
+    startBody = {
+      challenge_id: 'challenge-1',
+      expires_in_seconds: 600,
+    },
+    verifyStatus = 200,
+    verifyBody = {
       access_token: 'access-token',
       refresh_token: 'refresh-token',
       user: {
@@ -80,8 +87,13 @@ export async function mockLoginApi(page: Page, scenario: LoginApiScenario = {}) 
       return;
     }
 
-    if (url.pathname.endsWith('/auth/login') && request.method() === 'POST') {
-      await fulfillJson(route, loginStatus, loginBody);
+    if (url.pathname.endsWith('/auth/email/start') && request.method() === 'POST') {
+      await fulfillJson(route, startStatus, startBody);
+      return;
+    }
+
+    if (url.pathname.endsWith('/auth/email/verify') && request.method() === 'POST') {
+      await fulfillJson(route, verifyStatus, verifyBody);
       return;
     }
 

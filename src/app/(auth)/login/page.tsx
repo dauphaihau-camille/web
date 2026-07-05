@@ -6,7 +6,7 @@ export default function LoginPage() {
       <div className="flex flex-col space-y-2 text-center">
         <h1 className="text-5xl font-medium tracking-tight">Log in</h1>
         <p className="text-sm text-muted-foreground">
-          Sign in with your email and continue in Camille.
+          Enter your email and we&apos;ll send you a code to continue in Camille.
         </p>
       </div>
       <LoginForm />

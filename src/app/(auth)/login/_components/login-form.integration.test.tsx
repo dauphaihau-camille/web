@@ -11,7 +11,8 @@ import { mswServer } from '@/test/msw/server';
 
 import { LoginForm } from './login-form';
 
-const authLoginUrlPattern = /\/auth\/login\/?$/;
+const authEmailStartUrlPattern = /\/auth\/email\/start\/?$/;
+const authEmailVerifyUrlPattern = /\/auth\/email\/verify\/?$/;
 const myWorkspacesUrlPattern = /\/me\/workspaces\/?$/;
 
 const {
@@ -87,29 +88,36 @@ describe('LoginForm integration', () => {
     mswServer.use(http.get(myWorkspacesUrlPattern, () => HttpResponse.json(workspaceListResult)));
   });
 
-  it('blocks submit when the password is shorter than the route schema allows', async () => {
+  it('validates the email before requesting a code', async () => {
     const user = userEvent.setup();
 
     renderWithProviders(<LoginForm />);
 
-    await user.clear(screen.getByLabelText('Password'));
-    await user.type(screen.getByLabelText('Password'), 'short');
-    await user.click(screen.getByRole('button', { name: 'Continue with email' }));
+    await user.clear(screen.getByLabelText('Email'));
+    await user.type(screen.getByLabelText('Email'), 'invalid-email');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
 
-    expect(
-      await screen.findByText('Password must be at least 8 characters.'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('Invalid email address')).toBeInTheDocument();
   });
 
-  it('redirects to the requested route after a successful login', async () => {
+  it('redirects to the requested route after a successful code verification', async () => {
     const user = userEvent.setup();
-    let loginRequestBody: unknown = null;
+    let startRequestBody: unknown = null;
+    let verifyRequestBody: unknown = null;
 
     searchParams = new URLSearchParams('redirectTo=/shared/doc-1');
 
     mswServer.use(
-      http.post(authLoginUrlPattern, async ({ request }) => {
-        loginRequestBody = await request.json();
+      http.post(authEmailStartUrlPattern, async ({ request }) => {
+        startRequestBody = await request.json();
+
+        return HttpResponse.json({
+          challenge_id: 'challenge-1',
+          expires_in_seconds: 600,
+        });
+      }),
+      http.post(authEmailVerifyUrlPattern, async ({ request }) => {
+        verifyRequestBody = await request.json();
 
         return HttpResponse.json({
           access_token: 'access-token',
@@ -129,26 +137,100 @@ describe('LoginForm integration', () => {
 
     renderWithProviders(<LoginForm />);
 
-    await user.click(screen.getByRole('button', { name: 'Continue with email' }));
+    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.type(screen.getByPlaceholderText('123456'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Verify code' }));
 
     await waitFor(() => {
       expect(navigateAfterLoginMock).toHaveBeenCalledWith('/shared/doc-1');
     });
 
-    expect(loginRequestBody).toEqual({
+    expect(startRequestBody).toEqual({
       email: 'member@example.com',
-      password: 'password123',
+    });
+    expect(verifyRequestBody).toEqual({
+      challenge_id: 'challenge-1',
+      code: '123456',
     });
   });
 
-  it('shows the API error when login fails', async () => {
+  it('accepts a null display name after verification and still redirects', async () => {
     const user = userEvent.setup();
 
     mswServer.use(
-      http.post(authLoginUrlPattern, () =>
+      http.post(authEmailStartUrlPattern, () =>
+        HttpResponse.json({
+          challenge_id: 'challenge-1',
+          expires_in_seconds: 600,
+        })),
+      http.post(authEmailVerifyUrlPattern, () =>
+        HttpResponse.json({
+          access_token: 'access-token',
+          refresh_token: 'refresh-token',
+          user: {
+            id: currentUserFixture.id,
+            email: currentUserFixture.email,
+            display_name: null,
+            status: currentUserFixture.status,
+            session_id: currentUserFixture.sessionId,
+            roles: currentUserFixture.roles,
+            permissions: currentUserFixture.permissions,
+          },
+        })),
+    );
+
+    renderWithProviders(<LoginForm />);
+
+    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.type(screen.getByPlaceholderText('123456'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Verify code' }));
+
+    await waitFor(() => {
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/acme');
+    });
+  });
+
+  it('shows the API error when sending the code fails', async () => {
+    const user = userEvent.setup();
+
+    mswServer.use(
+      http.post(authEmailStartUrlPattern, () =>
         HttpResponse.json(
           {
-            message: 'Invalid email or password.',
+            message: 'Too many attempts.',
+          },
+          {
+            status: 429,
+          },
+        )),
+    );
+
+    renderWithProviders(<LoginForm />);
+
+    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    const errorAlert = await screen.findByRole('alert');
+
+    expect(errorAlert.textContent).toMatch(/429|Too many|Request failed/i);
+    expect(navigateAfterLoginMock).not.toHaveBeenCalled();
+  });
+
+  it('shows the API error when code verification fails', async () => {
+    const user = userEvent.setup();
+
+    mswServer.use(
+      http.post(authEmailStartUrlPattern, () =>
+        HttpResponse.json({
+          challenge_id: 'challenge-1',
+          expires_in_seconds: 600,
+        })),
+      http.post(authEmailVerifyUrlPattern, () =>
+        HttpResponse.json(
+          {
+            message: 'Invalid login code.',
           },
           {
             status: 401,
@@ -158,11 +240,33 @@ describe('LoginForm integration', () => {
 
     renderWithProviders(<LoginForm />);
 
-    await user.click(screen.getByRole('button', { name: 'Continue with email' }));
+    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.type(screen.getByPlaceholderText('123456'), '123456');
+    await user.click(screen.getByRole('button', { name: 'Verify code' }));
 
     const errorAlert = await screen.findByRole('alert');
 
-    expect(errorAlert.textContent).toMatch(/401|Unauthorized|Request failed/i);
+    expect(errorAlert.textContent).toMatch(/401|Invalid login code|Request failed/i);
     expect(navigateAfterLoginMock).not.toHaveBeenCalled();
+  });
+
+  it('disables resend behind a countdown after sending the code', async () => {
+    const user = userEvent.setup();
+
+    mswServer.use(
+      http.post(authEmailStartUrlPattern, () =>
+        HttpResponse.json({
+          challenge_id: 'challenge-1',
+          expires_in_seconds: 600,
+        })),
+    );
+
+    renderWithProviders(<LoginForm />);
+
+    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    expect(await screen.findByRole('button', { name: 'Resend in 15s' })).toBeDisabled();
   });
 });

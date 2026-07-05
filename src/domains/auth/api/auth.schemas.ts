@@ -13,7 +13,7 @@ export const currentUserSchema = z.object({
 export const currentUserApiSchema = z.object({
   id: z.coerce.string(),
   email: z.email(),
-  display_name: z.string().optional(),
+  display_name: z.string().nullable().optional(),
   status: z.coerce.string(),
   session_id: z.coerce.string(),
   roles: z.array(z.coerce.string()).catch([]),
@@ -21,7 +21,7 @@ export const currentUserApiSchema = z.object({
 }).transform((user) => ({
   id: user.id,
   email: user.email,
-  displayName: user.display_name,
+  displayName: user.display_name ?? undefined,
   status: user.status,
   sessionId: user.session_id,
   roles: user.roles,
@@ -32,6 +32,28 @@ export const loginInputSchema = z.object({
   email: z.email(),
   password: z.string().min(1),
 });
+
+export const emailAuthStartInputSchema = z.object({
+  email: z.email(),
+});
+
+export const emailAuthVerifyInputSchema = z.object({
+  challengeId: z.string().min(1),
+  code: z.string().regex(/^\d{6}$/, 'Code must be 6 digits.'),
+});
+
+export const emailAuthStartResponseSchema = z.object({
+  challengeId: z.string(),
+  expiresInSeconds: z.number().int().positive(),
+});
+
+export const emailAuthStartResponseApiSchema = z.object({
+  challenge_id: z.coerce.string(),
+  expires_in_seconds: z.coerce.number().int().positive(),
+}).transform((response) => ({
+  challengeId: response.challenge_id,
+  expiresInSeconds: response.expires_in_seconds,
+}));
 
 export const loginResponseSchema = z.object({
   accessToken: z.string(),

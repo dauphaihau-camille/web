@@ -1,12 +1,21 @@
 import type { z } from 'zod';
 
-import { loginInputSchema } from '@/domains/auth';
+import {
+  emailAuthStartInputSchema,
+  emailAuthVerifyInputSchema,
+} from '@/domains/auth';
 
-export const loginFormSchema = loginInputSchema.extend({
-  email: loginInputSchema.shape.email.meta({
+export const requestEmailCodeFormSchema = emailAuthStartInputSchema.extend({
+  email: emailAuthStartInputSchema.shape.email.meta({
     title: 'Email',
   }),
-  password: loginInputSchema.shape.password.min(8, 'Password must be at least 8 characters.'),
 });
 
-export type LoginFormValues = z.output<typeof loginFormSchema>;
+export const verifyEmailCodeFormSchema = emailAuthVerifyInputSchema.extend({
+  code: emailAuthVerifyInputSchema.shape.code.meta({
+    title: 'Verification code',
+  }),
+});
+
+export type RequestEmailCodeFormValues = z.output<typeof requestEmailCodeFormSchema>;
+export type VerifyEmailCodeFormValues = z.output<typeof verifyEmailCodeFormSchema>;

@@ -71,7 +71,11 @@ export const apiClient = ky.create({
           return response;
         }
 
-        if (request.url.endsWith('/auth/login') || request.url.endsWith('/auth/refresh')) {
+        if (
+          request.url.endsWith('/auth/login')
+          || request.url.endsWith('/auth/refresh')
+          || request.url.endsWith('/auth/email/verify')
+        ) {
           return response;
         }
 

@@ -16,4 +16,4 @@ Next.js frontend for `camille-v2`.
 3. Start the API first so auth and workspace requests resolve.
 4. Run `npm run dev`.
 
-The current login page is [src/app/login/page.tsx](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/src/app/login/page.tsx). It posts directly to `POST /auth/login` and relies on the backend cookie session.
+The current login page is [src/app/login/page.tsx](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/src/app/login/page.tsx). It uses the backend-owned passwordless flow via `POST /auth/email/start` and `POST /auth/email/verify`, then relies on the backend cookie session.
