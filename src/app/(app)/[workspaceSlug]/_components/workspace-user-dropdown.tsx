@@ -8,8 +8,8 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 import {
-  DropdownMenuCheckboxItem,
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -20,7 +20,6 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   authKeys, authRoutes, logout, useCurrentUserQuery, 
 } from '@/domains/auth';
@@ -32,12 +31,15 @@ import {
 } from '@/domains/workspace';
 import { cn } from '@/lib/utils';
 import { CreateWorkspaceDialog } from './create-workspace-dialog';
+import { LogoutConfirmDialog } from './logout-confirm-dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function WorkspaceUserDropdown({ workspaceSlug }: { workspaceSlug: string }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const currentUserQuery = useCurrentUserQuery();
   const workspaceQuery = useWorkspaceQuery(workspaceSlug);
   const myWorkspacesQuery = useQuery({
@@ -54,6 +56,7 @@ export function WorkspaceUserDropdown({ workspaceSlug }: { workspaceSlug: string
   const logoutMutation = useMutation({
     mutationFn: logout,
     onSuccess: async () => {
+      setIsLogoutDialogOpen(false);
       queryClient.setQueryData(authKeys.currentUser(), null);
       queryClient.removeQueries({ queryKey: workspaceKeys.all });
       window.location.assign(authRoutes.login());
@@ -216,17 +219,27 @@ export function WorkspaceUserDropdown({ workspaceSlug }: { workspaceSlug: string
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
+            variant="destructive"
             disabled={logoutMutation.isPending}
-            onClick={() => logoutMutation.mutate()}
+            onClick={() => {
+              setIsOpen(false);
+              setIsLogoutDialogOpen(true);
+            }}
           >
             <LogOutIcon />
-            <span>{logoutMutation.isPending ? 'Logging out...' : 'Log out'}</span>
+            <span>Log out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <CreateWorkspaceDialog
         open={isCreateWorkspaceOpen}
         onOpenChange={setIsCreateWorkspaceOpen}
+      />
+      <LogoutConfirmDialog
+        isPending={logoutMutation.isPending}
+        onConfirm={() => logoutMutation.mutate()}
+        onOpenChange={setIsLogoutDialogOpen}
+        open={isLogoutDialogOpen}
       />
     </>
   );
