@@ -9,9 +9,16 @@ export const publishStatusSchema = z.object({
 
 export const publicDocumentSchema = z.object({
   id: z.string().min(1),
+  published_document_id: z.string().min(1),
   title: z.string(),
   content_format: z.literal('blocknote_v1'),
   content: z.array(z.unknown()),
+  breadcrumb: z.array(z.object({
+    id: z.string().min(1),
+    title: z.string(),
+    published_document_id: z.string().min(1),
+    public_path: z.string().min(1),
+  })),
   published_at: z.string(),
   updated_at: z.string(),
 });

@@ -9,8 +9,14 @@ function shouldForceLightTheme(pathname: string | null) {
   if (!pathname) {
     return false;
   }
-
   return pathname === '/' || authRoutes.isLoginPath(pathname);
+}
+
+function shouldBypassThemeProvider(pathname: string | null) {
+  if (!pathname) {
+    return false;
+  }
+  return pathname === '/share' || pathname.startsWith('/share/');
 }
 
 export default function ThemeProvider({
@@ -18,6 +24,11 @@ export default function ThemeProvider({
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
   const pathname = usePathname();
+
+  if (shouldBypassThemeProvider(pathname)) {
+    return children;
+  }
+
   const forcedTheme = shouldForceLightTheme(pathname) ? 'light' : props.forcedTheme;
 
   return (
