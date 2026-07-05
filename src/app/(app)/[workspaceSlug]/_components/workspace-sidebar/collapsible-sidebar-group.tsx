@@ -25,7 +25,7 @@ export function CollapsibleSidebarGroup({
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
-    <SidebarGroup className='space-y-0.5'>
+    <SidebarGroup className='space-y-0.5 py-0.5'>
       <div className="group/sidebar-group-header flex items-center gap-2 rounded-md pl-2 pr-1 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
         <SidebarGroupLabel
           render={<button type="button" />}

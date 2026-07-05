@@ -18,6 +18,8 @@ import {
 import {
   favoriteDocument as addFavoriteDocument,
   favoriteKeys,
+  type FavoriteDocument,
+  type FavoriteStatus,
   unfavoriteDocument,
   useFavoriteStatusQuery,
 } from '@/domains/favorite';
@@ -34,6 +36,11 @@ import { removeCachedNavigationDocument } from '../document-screen-cache';
 type UseHeaderActionsOptions = {
   workspaceSlug: string;
   document: Document;
+};
+
+type FavoriteMutationContext = {
+  previousFavoriteStatus?: FavoriteStatus;
+  previousWorkspaceFavorites?: FavoriteDocument[];
 };
 
 export function useHeaderActions({
@@ -74,19 +81,81 @@ export function useHeaderActions({
   });
 
   const favoriteMutation = useMutation({
-    mutationFn: async () => {
-      if (favoriteStatusQuery.data?.is_favorite) {
+    mutationFn: async ({ nextIsFavorite }: { nextIsFavorite: boolean }) => {
+      if (!nextIsFavorite) {
         return unfavoriteDocument(document.id);
       }
 
       return addFavoriteDocument(document.id);
     },
-    onSuccess: async (status) => {
+    onMutate: async ({ nextIsFavorite }) => {
+      await queryClient.cancelQueries({
+        queryKey: favoriteKeys.status(document.id),
+      });
+      await queryClient.cancelQueries({
+        queryKey: favoriteKeys.workspaceList(workspaceSlug),
+      });
+
+      const previousFavoriteStatus = queryClient.getQueryData<FavoriteStatus>(
+        favoriteKeys.status(document.id),
+      );
+      const previousWorkspaceFavorites = queryClient.getQueryData<FavoriteDocument[]>(
+        favoriteKeys.workspaceList(workspaceSlug),
+      );
+
+      queryClient.setQueryData<FavoriteStatus>(
+        favoriteKeys.status(document.id),
+        {
+          document_id: document.id,
+          is_favorite: nextIsFavorite,
+        },
+      );
+      updateWorkspaceFavoritesCache({
+        document,
+        isFavorite: nextIsFavorite,
+        queryClient,
+        workspaceSlug,
+      });
+
+      return {
+        previousFavoriteStatus,
+        previousWorkspaceFavorites,
+      } satisfies FavoriteMutationContext;
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousFavoriteStatus) {
+        queryClient.setQueryData(
+          favoriteKeys.status(document.id),
+          context.previousFavoriteStatus,
+        );
+      }
+
+      if (context?.previousWorkspaceFavorites) {
+        queryClient.setQueryData(
+          favoriteKeys.workspaceList(workspaceSlug),
+          context.previousWorkspaceFavorites,
+        );
+      }
+
+      toast('Could not update favorites');
+    },
+    onSuccess: (status) => {
       queryClient.setQueryData(favoriteKeys.status(document.id), status);
+      updateWorkspaceFavoritesCache({
+        document,
+        isFavorite: status.is_favorite,
+        queryClient,
+        workspaceSlug,
+      });
+      toast(status.is_favorite ? 'Added to favorites' : 'Removed from favorites');
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: favoriteKeys.status(document.id),
+      });
       await queryClient.invalidateQueries({
         queryKey: favoriteKeys.workspaceList(workspaceSlug),
       });
-      toast(status.is_favorite ? 'Added to favorites' : 'Removed from favorites');
     },
   });
 
@@ -142,8 +211,21 @@ export function useHeaderActions({
   };
 
   const toggleFavorite = () => {
-    void favoriteMutation.mutateAsync();
+    const currentStatus =
+      queryClient.getQueryData<FavoriteStatus>(favoriteKeys.status(document.id)) ??
+      favoriteStatusQuery.data;
+
+    void favoriteMutation.mutateAsync({
+      nextIsFavorite: !currentStatus?.is_favorite,
+    });
   };
+
+  const favoriteStatus = favoriteMutation.isPending
+    ? {
+      document_id: document.id,
+      is_favorite: favoriteMutation.variables.nextIsFavorite,
+    }
+    : favoriteStatusQuery.data;
 
   const copyPublishedLink = async () => {
     if (typeof window === 'undefined') {
@@ -173,7 +255,7 @@ export function useHeaderActions({
     copyLink,
     copyPublishedLink,
     duplicateDocument,
-    favoriteStatus: favoriteStatusQuery.data,
+    favoriteStatus,
     isFavoriting: favoriteMutation.isPending || favoriteStatusQuery.isLoading,
     isArchiving: archiveDocumentMutation.isPending,
     isDuplicating: duplicateDocumentMutation.isPending,
@@ -201,9 +283,9 @@ function getNearestDocument(
     return orderedItems[0] ?? null;
   }
 
-  return orderedItems[currentIndex - 1]
-    ?? orderedItems[currentIndex + 1]
-    ?? null;
+  return orderedItems[currentIndex - 1] ??
+    orderedItems[currentIndex + 1] ??
+    null;
 }
 
 async function resolveArchiveDestination({
@@ -245,4 +327,47 @@ function getRootNavigationItems(
   }
 
   return navigation.teamspaces.find((teamspace) => teamspace.id === teamspaceId)?.documents.items ?? [];
+}
+
+function updateWorkspaceFavoritesCache({
+  document,
+  isFavorite,
+  queryClient,
+  workspaceSlug,
+}: {
+  document: Document;
+  isFavorite: boolean;
+  queryClient: QueryClient;
+  workspaceSlug: string;
+}) {
+  queryClient.setQueryData<FavoriteDocument[] | undefined>(
+    favoriteKeys.workspaceList(workspaceSlug),
+    (currentFavorites) => {
+      if (!currentFavorites) {
+        return currentFavorites;
+      }
+
+      if (!isFavorite) {
+        return currentFavorites.filter((favorite) => favorite.document_id !== document.id);
+      }
+
+      return [
+        createOptimisticFavoriteDocument(document),
+        ...currentFavorites.filter((favorite) => favorite.document_id !== document.id),
+      ];
+    },
+  );
+}
+
+function createOptimisticFavoriteDocument(document: Document): FavoriteDocument {
+  return {
+    document_id: document.id,
+    favorited_at: new Date().toISOString(),
+    parent_document_id: document.parent_document_id,
+    public_id: document.public_id,
+    sort_key: document.sort_key,
+    teamspace_id: document.teamspace_id,
+    title: document.title,
+    workspace_id: document.workspace_id,
+  };
 }

@@ -1,6 +1,8 @@
 'use client';
 
-import { type DocumentNavigationNode } from '@/domains/document';
+import { HTTPError } from 'ky';
+
+import type { DocumentNavigationNode } from '@/domains/document';
 import { useWorkspaceFavoritesQuery } from '@/domains/favorite';
 
 import { DocumentTreeLoading } from '../document-tree/document-tree-loading';
@@ -33,6 +35,17 @@ export function FavoritesDocumentsGroup({
   workspaceId: string;
 }) {
   const favoritesQuery = useWorkspaceFavoritesQuery(workspaceId);
+  const favorites = favoritesQuery.data ?? [];
+  const isEmptyFavoritesResponse =
+    !favoritesQuery.isLoading
+    && (
+      (!favoritesQuery.isError && favorites.length === 0)
+      || (favoritesQuery.error instanceof HTTPError && favoritesQuery.error.response.status === 404)
+    );
+
+  if (isEmptyFavoritesResponse) {
+    return null;
+  }
 
   return (
     <CollapsibleSidebarGroup label="Favorites">
@@ -44,7 +57,7 @@ export function FavoritesDocumentsGroup({
         ? (
           <DocumentTreeList
             workspaceSlug={workspaceId}
-            items={(favoritesQuery.data ?? []).map(toFavoriteDocumentNode)}
+            items={favorites.map(toFavoriteDocumentNode)}
             emptyMessage="No favorites yet."
           />
         )
