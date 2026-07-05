@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -52,7 +52,9 @@ export function WorkspaceSettingsPanel({
   });
 
   const updateWorkspaceMutation = useMutation({
-    mutationFn: ({ version, name, description, slug }: UpdateWorkspaceInput) =>
+    mutationFn: ({
+      version, name, description, slug, 
+    }: UpdateWorkspaceInput) =>
       updateWorkspace(workspaceId, {
         version,
         ...(name ? { name } : {}),
@@ -96,7 +98,10 @@ export function WorkspaceSettingsPanel({
     });
   }
 
-  const description = form.watch('description');
+  const description = useWatch({
+    control: form.control,
+    name: 'description',
+  });
 
   return (
     <section className="rounded-2xl border bg-muted/20 p-5">
@@ -183,10 +188,6 @@ export function WorkspaceSettingsPanel({
               </Field>
             )}
           />
-          <div className="space-y-1 text-sm text-muted-foreground">
-            <p>Workspace id: <span className="font-mono">{workspace.id}</span></p>
-            <p>Updated: {new Date(workspace.updated_at).toLocaleString()}</p>
-          </div>
           {form.formState.errors.root?.message
             ? (
               <Field data-invalid>
