@@ -1,4 +1,14 @@
 export const blockNoteEditorClientStyles = `
+  .editor-blocknote-client .bn-editor,
+  .editor-blocknote-client .tiptap {
+    background-color: transparent !important;
+  }
+
+  .editor-blocknote-client .bn-block-group,
+  .editor-blocknote-client .bn-block-outer {
+    background-color: transparent !important;
+  }
+
   .editor-blocknote-client
     .bn-block-content:not([data-content-type="subpage"])
     > .bn-inline-content {
