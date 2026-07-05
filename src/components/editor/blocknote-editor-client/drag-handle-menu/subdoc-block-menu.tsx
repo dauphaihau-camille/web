@@ -13,12 +13,14 @@ import { MenuRow } from './menu-row';
 type SubdocBlockMenuProps = {
   documentOperations: BlockNoteDocumentOperations;
   isArchivingSubdocument: boolean;
+  subdocumentId: string | null;
   onArchive: () => void;
 };
 
 export function SubdocBlockMenu({
   documentOperations,
   isArchivingSubdocument,
+  subdocumentId,
   onArchive,
 }: SubdocBlockMenuProps) {
   const Components = useComponentsContext();
@@ -32,11 +34,11 @@ export function SubdocBlockMenu({
       <Components.Generic.Menu.Item
         className="bn-menu-item drag-handle-menu__item"
         onClick={() => {
-          if (documentOperations.isDuplicating) {
+          if (documentOperations.isDuplicating || !subdocumentId) {
             return;
           }
 
-          documentOperations.onDuplicate();
+          documentOperations.onDuplicate(subdocumentId);
         }}
       >
         <MenuRow

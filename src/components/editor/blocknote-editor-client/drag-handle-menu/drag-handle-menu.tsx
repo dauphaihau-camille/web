@@ -103,6 +103,7 @@ export function DragHandleMenu({
           <SubdocBlockMenu
             documentOperations={documentOperations}
             isArchivingSubdocument={isArchivingSubdocument}
+            subdocumentId={subdocumentId}
             onArchive={handleArchiveSubdocument}
           />
         )

@@ -7,7 +7,7 @@ export type BlockNoteDocumentOperations = {
   onArchive: () => void;
   onArchiveSubdocument?: (documentId: string) => Promise<void>;
   onCopyLink: () => void | Promise<void>;
-  onDuplicate: () => void;
+  onDuplicate: (documentId?: string) => void;
 };
 
 export type BlockNoteEditorProps = {

@@ -53,12 +53,22 @@ export function useHeaderActions({
   const publishStatusQuery = usePublishStatusQuery(document.id);
 
   const duplicateDocumentMutation = useMutation({
-    mutationFn: async () => duplicateDocumentRequest(document.id),
-    onSuccess: async (duplicatedDocument) => {
+    mutationFn: async (targetDocumentId: string) => duplicateDocumentRequest(targetDocumentId),
+    onSuccess: async (duplicatedDocument, targetDocumentId) => {
       queryClient.setQueryData(
         documentKeys.detail(duplicatedDocument.id),
         duplicatedDocument,
       );
+      if (duplicatedDocument.parent_document_id) {
+        await queryClient.invalidateQueries({
+          queryKey: documentKeys.detail(duplicatedDocument.parent_document_id),
+        });
+      }
+      if (targetDocumentId !== document.id) {
+        await queryClient.invalidateQueries({
+          queryKey: documentKeys.detail(targetDocumentId),
+        });
+      }
       await queryClient.invalidateQueries({
         queryKey: documentKeys.lists(workspaceSlug),
       });
@@ -184,8 +194,8 @@ export function useHeaderActions({
     toast('Copied page link to clipboard');
   };
 
-  const duplicateDocument = () => {
-    void duplicateDocumentMutation.mutateAsync();
+  const duplicateDocument = (targetDocumentId?: string) => {
+    void duplicateDocumentMutation.mutateAsync(targetDocumentId ?? document.id);
   };
 
   const archiveCurrentDocument = () => {

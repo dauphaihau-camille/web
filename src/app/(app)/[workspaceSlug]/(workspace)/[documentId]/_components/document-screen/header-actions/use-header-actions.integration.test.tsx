@@ -3,7 +3,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import type { ReactNode } from 'react';
 
-import type { Document } from '@/domains/document';
+import { documentKeys, type Document, useDocumentQuery } from '@/domains/document';
 import { mswServer } from '@/test/msw/server';
 
 import { useHeaderActions } from './use-header-actions';
@@ -44,8 +44,11 @@ function createWrapper() {
     },
   });
 
-  return function Wrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return {
+    queryClient,
+    Wrapper({ children }: { children: ReactNode }) {
+      return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+    },
   };
 }
 
@@ -78,9 +81,10 @@ describe('useHeaderActions integration', () => {
       http.get(publishStatusUrlPattern, () => HttpResponse.json({})),
     );
 
+    const { Wrapper } = createWrapper();
     const { result } = renderHook(
       () => useHeaderActions({ document: documentFixture, workspaceSlug: 'acme' }),
-      { wrapper: createWrapper() },
+      { wrapper: Wrapper },
     );
 
     await waitFor(() => {
@@ -105,6 +109,86 @@ describe('useHeaderActions integration', () => {
     await waitFor(() => {
       expect(result.current.favoriteStatus?.is_favorite).toBe(true);
       expect(result.current.isFavoriting).toBe(false);
+    });
+  });
+
+  it('duplicates the selected subdocument and invalidates the parent detail cache', async () => {
+    const parentDocument: Document = {
+      ...documentFixture,
+      content: [
+        {
+          id: 'block-1',
+          type: 'subpage',
+          props: {
+            documentId: 'doc-2',
+          },
+          children: [],
+        },
+      ],
+    };
+    const duplicatedSubdocument: Document = {
+      ...documentFixture,
+      id: 'doc-3',
+      public_id: 'public-doc-3',
+      parent_document_id: parentDocument.id,
+      title: 'Quarterly plan copy',
+    };
+
+    mswServer.use(
+      http.get(favoriteStatusUrlPattern, () =>
+        HttpResponse.json({
+          document_id: parentDocument.id,
+          is_favorite: false,
+        })),
+      http.get(publishStatusUrlPattern, () => HttpResponse.json({})),
+      http.post(/\/documents\/doc-2\/duplicate\/?$/, () => HttpResponse.json(duplicatedSubdocument)),
+      http.get(/\/documents\/doc-1\/?$/, () =>
+        HttpResponse.json({
+          ...parentDocument,
+          content: [
+            ...parentDocument.content,
+            {
+              id: 'block-2',
+              type: 'subpage',
+              props: {
+                documentId: duplicatedSubdocument.id,
+              },
+              children: [],
+            },
+          ],
+        })),
+    );
+
+    const { Wrapper, queryClient } = createWrapper();
+    queryClient.setQueryData(documentKeys.detail(parentDocument.id), parentDocument);
+
+    const { result } = renderHook(
+      () => ({
+        documentQuery: useDocumentQuery(parentDocument.id, {
+          initialData: parentDocument,
+          refetchOnMount: false,
+        }),
+        headerActions: useHeaderActions({ document: parentDocument, workspaceSlug: 'acme' }),
+      }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.headerActions.duplicateDocument('doc-2');
+    });
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData(documentKeys.detail(duplicatedSubdocument.id)),
+      ).toMatchObject({
+        id: duplicatedSubdocument.id,
+      });
+    });
+
+    await waitFor(() => {
+      expect(
+        result.current.documentQuery.data?.content,
+      ).toHaveLength(2);
     });
   });
 });

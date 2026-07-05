@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 'use client';
 
 import { useState } from 'react';
@@ -123,6 +124,14 @@ export function DocumentTreeNodeActions({
         documentKeys.detail(duplicatedDocument.id),
         duplicatedDocument,
       );
+      if (duplicatedDocument.parent_document_id) {
+        await queryClient.invalidateQueries({
+          queryKey: documentKeys.detail(duplicatedDocument.parent_document_id),
+        });
+      }
+      await queryClient.invalidateQueries({
+        queryKey: documentKeys.detail(document.id),
+      });
       await queryClient.invalidateQueries({
         queryKey: documentKeys.lists(workspaceSlug),
       });
@@ -269,7 +278,7 @@ export function DocumentTreeNodeActions({
           <TooltipContent side="bottom">Delete, duplicate, and more...</TooltipContent>
         </Tooltip>
 
-        <DropdownMenuContent  side="right" sideOffset={8} className="w-auto min-w-48">
+        <DropdownMenuContent side="right" sideOffset={8} className="w-auto min-w-48">
           <DropdownMenuItem
             disabled={duplicateDocumentMutation.isPending}
             onClick={handleDuplicate}
@@ -319,9 +328,9 @@ function getNearestDocument(
     return orderedItems[0] ?? null;
   }
 
-  return orderedItems[currentIndex - 1]
-    ?? orderedItems[currentIndex + 1]
-    ?? null;
+  return orderedItems[currentIndex - 1] ??
+    orderedItems[currentIndex + 1] ??
+    null;
 }
 
 async function resolveArchiveDestination({
