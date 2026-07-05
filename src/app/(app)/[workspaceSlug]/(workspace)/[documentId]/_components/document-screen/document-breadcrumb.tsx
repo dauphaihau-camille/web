@@ -13,7 +13,6 @@ import {
 import { workspaceRoutes } from '@/domains/workspace';
 import {
   Breadcrumb,
-  BreadcrumbEllipsis,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
@@ -85,6 +84,7 @@ export function DocumentBreadcrumb({
         resolvedBreadcrumbDocuments[resolvedBreadcrumbDocuments.length - 1],
       ]
       : resolvedBreadcrumbDocuments;
+  const breadcrumbLabelClassName = 'block max-w-[7rem] truncate rounded px-1.5 sm:max-w-[9rem] lg:max-w-[11rem]';
 
   return (
     <Breadcrumb
@@ -118,7 +118,7 @@ export function DocumentBreadcrumb({
               <BreadcrumbItem className="min-w-0">
                 {isCurrentDocument
                   ? (
-                    <BreadcrumbPage className="truncate rounded px-1.5 py-1">
+                    <BreadcrumbPage className={`${breadcrumbLabelClassName} max-w-[8rem] py-1 sm:max-w-[10rem] lg:max-w-[12rem]`}>
                       {displayTitle}
                     </BreadcrumbPage>
                   )
@@ -134,7 +134,7 @@ export function DocumentBreadcrumb({
                           prefetch={false}
                         />
                       )}
-                      className="truncate rounded px-1.5 hover:bg-accent hover:text-foreground"
+                      className={`${breadcrumbLabelClassName} hover:bg-accent hover:text-foreground`}
                     >
                       {breadcrumbDocument.title}
                     </BreadcrumbLink>
