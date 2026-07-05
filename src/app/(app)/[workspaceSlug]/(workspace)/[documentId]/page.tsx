@@ -1,7 +1,11 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 
+import { authRoutes } from '@/domains/auth/auth-routes';
 import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
-import { getDocumentServer } from '@/domains/document/api/document.server.requests';
+import {
+  getDocumentServer,
+  isServerRequestError,
+} from '@/domains/document/api/document.server.requests';
 import {
   isDocumentRouteId,
   parseDocumentRouteSegment,
@@ -30,7 +34,11 @@ export default async function WorkspaceDetailPage({
     document = await getDocumentServer(documentId);
   }
   catch (error) {
-    if (error instanceof Error && error.message.includes('Status: 404.')) {
+    if (isServerRequestError(error, 401)) {
+      redirect(authRoutes.login(workspaceRoutes.document(workspaceSlug, documentSegment)));
+    }
+
+    if (isServerRequestError(error, 403) || isServerRequestError(error, 404)) {
       notFound();
     }
 

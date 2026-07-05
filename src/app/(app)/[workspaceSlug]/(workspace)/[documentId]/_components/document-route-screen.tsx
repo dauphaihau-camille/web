@@ -5,7 +5,6 @@ import { type Document, useDocumentQuery } from '@/domains/document';
 import { DocumentScreen } from './document-screen/document-screen';
 
 export function DocumentRouteScreen({
-  documentId,
   initialDocument,
   workspaceSlug,
 }: {
@@ -13,7 +12,8 @@ export function DocumentRouteScreen({
   initialDocument: Document;
   workspaceSlug: string;
 }) {
-  const documentQuery = useDocumentQuery(documentId, {
+  const canonicalDocumentId = initialDocument.id;
+  const documentQuery = useDocumentQuery(canonicalDocumentId, {
     initialData: initialDocument,
     initialDataUpdatedAt: 0,
     refetchOnMount: 'always',

@@ -14,6 +14,27 @@ import type {
   WorkspaceId,
 } from './document.types';
 
+export class ServerRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = 'ServerRequestError';
+  }
+}
+
+export function isServerRequestError(
+  error: unknown,
+  status?: number,
+): error is ServerRequestError {
+  if (!(error instanceof ServerRequestError)) {
+    return false;
+  }
+
+  return status === undefined || error.status === status;
+}
+
 async function buildServerRequestError(
   label: string,
   response: Response,
@@ -22,7 +43,10 @@ async function buildServerRequestError(
   const trimmedBody = responseBody.trim();
   const details = trimmedBody ? ` Body: ${trimmedBody}` : '';
 
-  return new Error(`Failed to load ${label}. Status: ${response.status}.${details}`);
+  return new ServerRequestError(
+    `Failed to load ${label}. Status: ${response.status}.${details}`,
+    response.status,
+  );
 }
 
 async function buildWorkspaceDefaultDocumentRequestError(response: Response) {
