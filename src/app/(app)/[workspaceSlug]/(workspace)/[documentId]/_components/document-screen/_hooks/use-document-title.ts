@@ -78,8 +78,32 @@ export function useDocumentTitle({
   const syncTitleCaches = (nextDocument: Document) => {
     queryClient.setQueryData<Document>(documentKeys.detail(documentId), nextDocument);
     updateCachedNavigationTitle(queryClient, workspaceSlug, documentId, nextDocument.title);
-    updateCachedReferencedSubdocTitles(queryClient, documentId, nextDocument.title);
     updateDocumentRoute(nextDocument.title);
+  };
+
+  const persistReferencedSubdocTitles = async (nextTitle: string) => {
+    const updatedReferencedDocuments = updateCachedReferencedSubdocTitles(
+      queryClient,
+      documentId,
+      nextTitle,
+    );
+
+    await Promise.allSettled(
+      updatedReferencedDocuments.map(async (referencingDocument) => {
+        const savedReferencingDocument = await updateDocument(
+          referencingDocument.documentId,
+          {
+            version: referencingDocument.version,
+            content: referencingDocument.content,
+          },
+        );
+
+        queryClient.setQueryData<Document>(
+          documentKeys.detail(referencingDocument.documentId),
+          savedReferencingDocument,
+        );
+      }),
+    );
   };
 
   const flushQueuedTitleSave = async () => {
@@ -125,12 +149,14 @@ export function useDocumentTitle({
 
         setSavedTitle(updatedDocument.title);
         syncTitleCaches(updatedDocument);
+        await persistReferencedSubdocTitles(updatedDocument.title);
 
         if (shouldFinalize) {
           finalizeTitleDraft(updatedDocument.title);
         }
       }
-    } finally {
+    }
+    finally {
       state.inFlight = false;
     }
   };

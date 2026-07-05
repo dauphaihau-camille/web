@@ -11,6 +11,12 @@ import {
   type WorkspaceDocumentNavigation,
 } from '@/domains/document';
 
+export type UpdatedReferencedSubdocDocument = {
+  content: unknown[];
+  documentId: string;
+  version: number;
+};
+
 function isWorkspaceNavigation(
   value: WorkspaceDocumentNavigation | DocumentNavigationPage | undefined,
 ): value is WorkspaceDocumentNavigation {
@@ -175,7 +181,7 @@ export function updateCachedReferencedSubdocTitles(
   queryClient: QueryClient,
   documentId: string,
   nextTitle: string,
-) {
+): UpdatedReferencedSubdocDocument[] {
   const replaceSubdocTitleInContent = (content: unknown[]): unknown[] => {
     let changed = false;
 
@@ -230,25 +236,35 @@ export function updateCachedReferencedSubdocTitles(
     return changed ? nextContent : content;
   };
 
-  queryClient.setQueriesData<Document>(
-    { queryKey: [...documentKeys.all, 'detail'] },
-    (currentDocument) => {
-      if (!currentDocument || currentDocument.id === documentId) {
-        return currentDocument;
-      }
+  const updatedDocuments: UpdatedReferencedSubdocDocument[] = [];
+  const cachedDocuments = queryClient.getQueriesData<Document>({
+    queryKey: [...documentKeys.all, 'detail'],
+  });
 
-      const nextContent = replaceSubdocTitleInContent(currentDocument.content);
+  for (const [queryKey, currentDocument] of cachedDocuments) {
+    if (!currentDocument || currentDocument.id === documentId) {
+      continue;
+    }
 
-      if (nextContent === currentDocument.content) {
-        return currentDocument;
-      }
+    const nextContent = replaceSubdocTitleInContent(currentDocument.content);
 
-      return {
-        ...currentDocument,
-        content: nextContent,
-      };
-    },
-  );
+    if (nextContent === currentDocument.content) {
+      continue;
+    }
+
+    updatedDocuments.push({
+      content: nextContent,
+      documentId: currentDocument.id,
+      version: currentDocument.version,
+    });
+
+    queryClient.setQueryData<Document>(queryKey, {
+      ...currentDocument,
+      content: nextContent,
+    });
+  }
+
+  return updatedDocuments;
 }
 
 export function insertCreatedSubdocIntoCachedChildren(
