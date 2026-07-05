@@ -32,6 +32,7 @@ import { navigateAfterLogin } from './login-navigation';
 export function LoginForm() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const isDevelopment = process.env.NODE_ENV === 'development';
 
   const redirectTarget = getPostLoginRedirectTarget(
     searchParams.get('redirectTo') ?? searchParams.get('from'),
@@ -58,8 +59,8 @@ export function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
-      email: 'member@example.com',
-      password: 'password123',
+      email: isDevelopment ? 'member@example.com' : '',
+      password: isDevelopment ? 'password123' : '',
     },
   });
 
