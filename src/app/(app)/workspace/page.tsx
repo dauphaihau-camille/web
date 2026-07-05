@@ -16,15 +16,17 @@ export default async function WorkspaceEntryPage() {
   }
 
   return (
-    <section className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-semibold">Create your first workspace</h2>
-        <p className="max-w-2xl text-sm text-muted-foreground">
-          Your account is active, but there is no workspace to open yet. Create one here to make
-          the workspace slug route your default destination after login.
-        </p>
+    <section className="w-full px-4 py-8 sm:px-6">
+      <div className="mx-auto w-full max-w-4xl space-y-6">
+        <div className="space-y-2">
+          <h2 className="text-2xl font-semibold">Create your first workspace</h2>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Your account is active, but there is no workspace to open yet. Create one here to make
+            the workspace slug route your default destination after login.
+          </p>
+        </div>
+        <CreateWorkspaceForm />
       </div>
-      <CreateWorkspaceForm />
     </section>
   );
 }
