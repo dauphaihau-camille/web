@@ -17,7 +17,7 @@ export default async function WorkspaceEntryPage() {
 
   return (
     <section className="w-full px-4 py-8 sm:px-6">
-      <div className="mx-auto w-full max-w-4xl space-y-6">
+      <div className="mx-auto w-full max-w-lg space-y-6">
         <div className="space-y-2">
           <h2 className="text-2xl font-semibold">Create your first workspace</h2>
           <p className="max-w-2xl text-sm text-muted-foreground">
