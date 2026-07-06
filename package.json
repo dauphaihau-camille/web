@@ -1,22 +1,30 @@
 {
-  "name": "camille-web",
+  "name": "camille-web-monorepo",
   "version": "0.0.1",
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 4000",
-    "build": "next build",
-    "start": "next start",
+    "dev": "npm run dev:app",
+    "dev:app": "npm --prefix apps/app run dev",
+    "dev:marketing": "npm --prefix apps/marketing run dev",
+    "build": "npm run build:app && npm run build:marketing",
+    "build:app": "npm --prefix apps/app run build",
+    "build:marketing": "npm --prefix apps/marketing run build",
+    "start": "npm run start:app",
+    "start:app": "npm --prefix apps/app run start",
+    "start:marketing": "npm --prefix apps/marketing run start",
     "check": "npm run typecheck && npm run lint && npm run test",
+    "typecheck:app": "npm --prefix apps/app run typecheck",
+    "typecheck:marketing": "npm --prefix apps/marketing run typecheck",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e:api": "bun tests/e2e/helpers/mock-api-server.ts",
-    "test:e2e": "playwright test",
+    "test:e2e:api": "npm --prefix apps/app run test:e2e:api",
+    "test:e2e": "npm --prefix apps/app run test:e2e",
     "lint": "eslint .",
     "lint:fix": "eslint --fix",
     "prepare": "husky",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "npm run typecheck:app && npm run typecheck:marketing"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,jsx,ts,tsx}": [

@@ -1,0 +1,5 @@
+[build]
+command = "npm run build:marketing"
+
+[build.environment]
+NETLIFY_NEXT_PLUGIN_SKIP = "false"

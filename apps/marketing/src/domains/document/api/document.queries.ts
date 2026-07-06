@@ -1,0 +1,48 @@
+import { queryOptions } from '@tanstack/react-query';
+
+import { documentKeys } from './document.keys';
+import {
+  getDocument,
+  getWorkspaceChildDocuments,
+  getWorkspaceRootDocuments,
+} from './document.requests';
+import type { DocumentId, WorkspaceId } from './document.types';
+
+export function documentDetailQueryOptions(documentId: DocumentId) {
+  return queryOptions({
+    queryKey: documentKeys.detail(documentId),
+    queryFn: () => getDocument(documentId),
+  });
+}
+
+export function workspaceDocumentRootQueryOptions(
+  workspaceId: WorkspaceId,
+  limit = 10,
+  cursor?: string,
+  query?: string,
+) {
+  return queryOptions({
+    queryKey: documentKeys.rootList(workspaceId, limit, cursor, query),
+    queryFn: () => getWorkspaceRootDocuments(workspaceId, {
+      limit,
+      cursor,
+      query,
+    }),
+  });
+}
+
+export function workspaceDocumentChildrenQueryOptions(
+  workspaceId: WorkspaceId,
+  parentDocumentId: DocumentId,
+  limit = 50,
+  cursor?: string,
+) {
+  return queryOptions({
+    queryKey: documentKeys.childList(workspaceId, parentDocumentId, limit, cursor),
+    queryFn: () => getWorkspaceChildDocuments(workspaceId, {
+      parent_document_id: parentDocumentId,
+      limit,
+      cursor,
+    }),
+  });
+}

@@ -1,0 +1,14 @@
+{
+  "name": "camille-web-app",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 4000",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test:e2e:api": "bun tests/e2e/helpers/mock-api-server.ts",
+    "test:e2e": "playwright test"
+  }
+}

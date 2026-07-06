@@ -1,19 +1,25 @@
 # Camille Web
 
-Next.js frontend for `camille-v2`.
+Frontend monorepo for `camille-v2`.
 
-## Phase 0 decisions
+## Apps
 
-- Keep the existing `src/app` structure and domain folders as scaffolding.
-- Treat Camille v1 as the UX reference surface.
-- Use `document` and `teamspace` as fixed product terms.
-- Authenticate against the API over http-only cookies and load app state through REST queries.
+- [`apps/app`](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/apps/app): product app for `app.<domain>`
+- [`apps/marketing`](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/apps/marketing): marketing and public share routes for the main domain
 
 ## Local setup
 
 1. Copy `.env.example` to `.env.local`.
 2. Set `NEXT_PUBLIC_API_BASE_URL=http://localhost:3000/v1`.
 3. Start the API first so auth and workspace requests resolve.
-4. Run `npm run dev`.
+4. Run `npm run dev:app` for the product app.
+5. Run `npm run dev:marketing` for the marketing site.
 
-The current login page is [src/app/login/page.tsx](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/src/app/login/page.tsx). It uses the backend-owned passwordless flow via `POST /auth/email/start` and `POST /auth/email/verify`, then relies on the backend cookie session.
+## Useful scripts
+
+- `npm run typecheck:app`
+- `npm run typecheck:marketing`
+- `npm run build:app`
+- `npm run build:marketing`
+
+Netlify setup notes live in [`NETLIFY.md`](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/NETLIFY.md).
