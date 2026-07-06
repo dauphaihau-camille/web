@@ -9,7 +9,7 @@ function shouldForceLightTheme(pathname: string | null) {
   if (!pathname) {
     return false;
   }
-  return pathname === '/' || authRoutes.isLoginPath(pathname);
+  return pathname === '/' || authRoutes.isAuthPath(pathname);
 }
 
 function shouldBypassThemeProvider(pathname: string | null) {

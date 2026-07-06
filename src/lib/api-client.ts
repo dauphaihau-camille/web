@@ -47,7 +47,7 @@ function redirectToLogin() {
   }
 
   const redirectTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  const loginUrl = authRoutes.isLoginPath(window.location.pathname)
+  const loginUrl = authRoutes.isAuthPath(window.location.pathname)
     ? window.location.pathname
     : authRoutes.login(redirectTo);
 

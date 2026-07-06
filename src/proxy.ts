@@ -11,7 +11,7 @@ const AUTH_API_PATH = '/auth/me';
 const MARKETING_HOME_PATH = '/';
 
 function isAuthPage(pathname: string) {
-  return authRoutes.isLoginPath(pathname);
+  return authRoutes.isAuthPath(pathname);
 }
 
 function isAuthenticatedRedirectPage(pathname: string) {
@@ -76,5 +76,5 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login'],
+  matcher: ['/', '/login', '/signup'],
 };

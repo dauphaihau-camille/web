@@ -33,13 +33,19 @@ export const loginInputSchema = z.object({
   password: z.string().min(1),
 });
 
+export const emailAuthIntentSchema = z.enum(['login', 'signup']);
+
 export const emailAuthStartInputSchema = z.object({
   email: z.email(),
+  intent: emailAuthIntentSchema.optional(),
+  displayName: z.string().trim().max(120).optional(),
 });
 
 export const emailAuthVerifyInputSchema = z.object({
   challengeId: z.string().min(1),
   code: z.string().regex(/^\d{6}$/, 'Code must be 6 digits.'),
+  intent: emailAuthIntentSchema.optional(),
+  displayName: z.string().trim().max(120).optional(),
 });
 
 export const emailAuthStartResponseSchema = z.object({

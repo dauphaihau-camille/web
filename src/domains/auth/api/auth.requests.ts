@@ -46,7 +46,18 @@ export async function startEmailAuth(
   body: EmailAuthStartInput,
 ): Promise<EmailAuthStartResponse> {
   const payload = emailAuthStartInputSchema.parse(body);
-  const response = await apiPost<unknown, EmailAuthStartInput>('auth/email/start', payload);
+  const response = await apiPost<
+    unknown,
+    {
+      email: string;
+      intent?: 'login' | 'signup';
+      display_name?: string;
+    }
+  >('auth/email/start', {
+    email: payload.email,
+    intent: payload.intent,
+    display_name: payload.displayName,
+  });
 
   return emailAuthStartResponseApiSchema.parse(response);
 }
@@ -60,10 +71,14 @@ export async function verifyEmailAuth(
     {
       challenge_id: string;
       code: string;
+      intent?: 'login' | 'signup';
+      display_name?: string;
     }
   >('auth/email/verify', {
     challenge_id: payload.challengeId,
     code: payload.code,
+    intent: payload.intent,
+    display_name: payload.displayName,
   });
 
   return loginResponseApiSchema.parse(response);
