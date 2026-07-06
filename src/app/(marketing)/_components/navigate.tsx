@@ -79,7 +79,13 @@ export function Navigate() {
                     href="/"
                     className="flex h-full flex-col justify-end rounded-md bg-linear-to-br from-zinc-400 to-zinc-700 p-6 text-white hover:bg-linear-to-br focus:bg-linear-to-br"
                   >
-                    <svg aria-hidden width="38" height="38" viewBox="0 0 25 25" fill="white">
+                    <svg
+                      aria-hidden
+                      width="38"
+                      height="38"
+                      viewBox="0 0 25 25"
+                      fill="white"
+                    >
                       <path d="M12 25C7.58173 25 4 21.4183 4 17C4 12.5817 7.58173 9 12 9V25Z" />
                       <path d="M12 0H4V8H12V0Z" />
                       <path d="M17 8C19.2091 8 21 6.20914 21 4C21 1.79086 19.2091 0 17 0C14.7909 0 13 1.79086 13 4C13 6.20914 14.7909 8 17 8Z" />
@@ -90,7 +96,7 @@ export function Navigate() {
                     </p>
                   </NavigationMenuLink>
                 </li>
-                {solutions.map(item => (
+                {solutions.map((item) => (
                   <li key={item.title}>
                     <MarketingMenuLink title={item.title} href="#">
                       {item.description}
@@ -105,7 +111,7 @@ export function Navigate() {
             <NavigationMenuTrigger>Features</NavigationMenuTrigger>
             <NavigationMenuContent className="rounded-lg bg-white p-0 shadow-lg ring-1 ring-black/5">
               <ul className="grid w-[600px] grid-flow-col grid-rows-3 gap-2 p-5">
-                {features.map(item => (
+                {features.map((item) => (
                   <li key={item.title}>
                     <MarketingMenuLink title={item.title} href="#">
                       {item.description}
@@ -133,12 +139,18 @@ export function Navigate() {
       <div className="flex items-center gap-2">
         <Link
           href={authRoutes.login()}
-          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'px-2.5 text-[13px]')}
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'sm' }),
+            'px-2.5 text-[13px]',
+          )}
         >
           Login
         </Link>
-        <Link href={authRoutes.signup()} className={cn(buttonVariants({ size: 'sm' }), 'px-2.5 text-[13px]')}>
-          Signup
+        <Link
+          href={authRoutes.signup()}
+          className={cn(buttonVariants({ size: 'sm' }), 'px-2.5 text-[13px]')}
+        >
+          Sign up
         </Link>
       </div>
     </div>
@@ -155,8 +167,13 @@ function MarketingMenuLink({
   children: ReactNode;
 }) {
   return (
-    <NavigationMenuLink href={href} className="block rounded-md p-3 hover:bg-[#f8f9f5] focus:bg-[#f8f9f5]">
-      <div className="mb-1 text-[15px] leading-5 font-medium text-zinc-950">{title}</div>
+    <NavigationMenuLink
+      href={href}
+      className="block rounded-md p-3 hover:bg-[#f8f9f5] focus:bg-[#f8f9f5]"
+    >
+      <div className="mb-1 text-[15px] leading-5 font-medium text-zinc-950">
+        {title}
+      </div>
       <p className="text-sm leading-5 text-[#73726e]">{children}</p>
     </NavigationMenuLink>
   );
