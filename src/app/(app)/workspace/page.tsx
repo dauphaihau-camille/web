@@ -2,8 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
 import { listMyWorkspacesServer } from '@/domains/workspace/api/workspace.server.requests';
-import { workspaceRoutes } from '@/domains/workspace';
-import { CreateWorkspaceForm } from './_components/create-workspace-form';
+import { CreateWorkspaceFlow, workspaceRoutes } from '@/domains/workspace';
 
 export default async function WorkspaceEntryPage() {
   await requireCurrentUserServer(workspaceRoutes.entry());
@@ -25,7 +24,7 @@ export default async function WorkspaceEntryPage() {
             the workspace slug route your default destination after login.
           </p>
         </div>
-        <CreateWorkspaceForm />
+        <CreateWorkspaceFlow />
       </div>
     </section>
   );

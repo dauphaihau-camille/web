@@ -1,13 +1,12 @@
 'use client';
 
-import { CreateWorkspaceForm } from '@/app/(app)/workspace/_components/create-workspace-form';
+import { useState } from 'react';
+
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+  CreateWorkspaceForm,
+  CreateWorkspaceRedirectDialog,
+} from '@/domains/workspace/components';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 type CreateWorkspaceDialogProps = {
   open: boolean;
@@ -18,17 +17,21 @@ export function CreateWorkspaceDialog({
   open,
   onOpenChange,
 }: CreateWorkspaceDialogProps) {
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Create workspace</DialogTitle>
-          <DialogDescription>
-            Set up a new workspace and jump into it immediately.
-          </DialogDescription>
-        </DialogHeader>
-        <CreateWorkspaceForm variant="plain" onSuccess={() => onOpenChange(false)} />
-      </DialogContent>
-    </Dialog>
+    <>
+      <CreateWorkspaceRedirectDialog open={isRedirecting} />
+
+      <Dialog open={open && !isRedirecting} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <CreateWorkspaceForm
+            hideFormWhileRedirecting
+            onRedirectingChange={setIsRedirecting}
+            variant="plain"
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
