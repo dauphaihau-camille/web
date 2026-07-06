@@ -6,6 +6,9 @@ import {
 } from '@/domains/auth';
 
 export const requestEmailCodeFormSchema = emailAuthStartInputSchema.extend({
+  displayName: emailAuthStartInputSchema.shape.displayName.meta({
+    title: 'Name',
+  }),
   email: emailAuthStartInputSchema.shape.email.meta({
     title: 'Email',
   }),

@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { HTTPError } from 'ky';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -34,14 +35,18 @@ const OAUTH_POPUP_WINDOW_NAME = 'camille-oauth';
 const OAUTH_POPUP_WIDTH = 520;
 const OAUTH_POPUP_HEIGHT = 720;
 
-export function useLoginForm() {
+export type AuthFormMode = 'login' | 'signup';
+
+export function useLoginForm(mode: AuthFormMode = 'login') {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [emailChallenge, setEmailChallenge] = useState<{
     challengeId: string;
     email: string;
+    displayName?: string;
   } | null>(null);
   const [resendCooldownSeconds, setResendCooldownSeconds] = useState(0);
+  const [isVerifyRedirecting, setIsVerifyRedirecting] = useState(false);
   const [isOAuthRedirecting, setIsOAuthRedirecting] = useState(false);
 
   const redirectTarget = getPostLoginRedirectTarget(
@@ -52,6 +57,7 @@ export function useLoginForm() {
     resolver: zodResolver(requestEmailCodeFormSchema),
     defaultValues: {
       email: '',
+      displayName: '',
     },
   });
 
@@ -67,7 +73,7 @@ export function useLoginForm() {
     const currentUser = await queryClient.fetchQuery(currentUserQueryOptions());
 
     if (!currentUser) {
-      return authRoutes.login();
+      return mode === 'signup' ? authRoutes.signup() : authRoutes.login();
     }
 
     if (redirectTarget !== workspaceRoutes.entry()) {
@@ -93,12 +99,13 @@ export function useLoginForm() {
       setEmailChallenge({
         challengeId: result.challengeId,
         email: variables.email,
+        displayName: variables.displayName,
       });
       setResendCooldownSeconds(RESEND_COOLDOWN_SECONDS);
     },
     onError: (error) => {
       emailForm.setError('root', {
-        message: error instanceof Error ? error.message : 'Failed to send code.',
+        message: buildAuthErrorMessage(error, mode, 'start'),
       });
     },
   });
@@ -106,6 +113,7 @@ export function useLoginForm() {
   const verifyEmailAuthMutation = useMutation({
     mutationFn: verifyEmailAuth,
     onSuccess: async () => {
+      setIsVerifyRedirecting(true);
       await queryClient.invalidateQueries({
         queryKey: authKeys.all,
       });
@@ -116,20 +124,30 @@ export function useLoginForm() {
       navigateAfterLogin(await resolvePostLoginPath());
     },
     onError: (error) => {
+      setIsVerifyRedirecting(false);
       codeForm.setError('root', {
-        message: error instanceof Error ? error.message : 'Code verification failed.',
+        message: buildAuthErrorMessage(error, mode, 'verify'),
       });
     },
   });
 
   function handleRequestCode(values: RequestEmailCodeFormValues) {
     emailForm.clearErrors('root');
-    startEmailAuthMutation.mutate(values);
+    startEmailAuthMutation.mutate({
+      email: values.email,
+      displayName: values.displayName || undefined,
+      intent: mode,
+    });
   }
 
   function handleVerifyCode(values: VerifyEmailCodeFormValues) {
     codeForm.clearErrors('root');
-    verifyEmailAuthMutation.mutate(values);
+    verifyEmailAuthMutation.mutate({
+      challengeId: values.challengeId,
+      code: values.code,
+      displayName: emailChallenge?.displayName,
+      intent: mode,
+    });
   }
 
   function handleEditEmail() {
@@ -146,7 +164,11 @@ export function useLoginForm() {
       return;
     }
 
-    startEmailAuthMutation.mutate({ email: emailChallenge.email });
+    startEmailAuthMutation.mutate({
+      email: emailChallenge.email,
+      displayName: emailChallenge.displayName,
+      intent: mode,
+    });
   }
 
   function handleOAuthSignIn(provider: 'google' | 'github') {
@@ -225,9 +247,38 @@ export function useLoginForm() {
     handleRequestCode,
     handleResendCode,
     handleVerifyCode,
+    isVerifyRedirecting,
     isOAuthRedirecting,
     resendCooldownSeconds,
     startEmailAuthMutation,
     verifyEmailAuthMutation,
   };
+}
+
+function buildAuthErrorMessage(
+  error: unknown,
+  mode: AuthFormMode,
+  step: 'start' | 'verify',
+) {
+  if (error instanceof HTTPError) {
+    if (error.response.status === 429) {
+      return step === 'start'
+        ? 'Too many attempts. Please wait a moment before requesting another code.'
+        : 'Too many attempts. Please wait a moment and try again.';
+    }
+
+    if (mode === 'signup' && error.response.status === 409) {
+      return 'This email already has an account. Log in instead.';
+    }
+
+    if (mode === 'login' && error.response.status === 404) {
+      return 'No account found for this email. Sign up instead.';
+    }
+
+    if (step === 'verify' && (error.response.status === 400 || error.response.status === 401)) {
+      return 'That code is invalid or expired. Request a new code and try again.';
+    }
+  }
+
+  return step === 'start' ? 'Failed to send code.' : 'Code verification failed.';
 }

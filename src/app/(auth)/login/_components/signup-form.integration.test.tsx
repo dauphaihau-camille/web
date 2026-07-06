@@ -9,7 +9,7 @@ import type { Workspace } from '@/domains/workspace';
 import { renderWithProviders } from '@/test/render';
 import { mswServer } from '@/test/msw/server';
 
-import { LoginForm } from './login-form';
+import { SignupForm } from './signup-form';
 
 const authEmailStartUrlPattern = /\/auth\/email\/start\/?$/;
 const authEmailVerifyUrlPattern = /\/auth\/email\/verify\/?$/;
@@ -65,7 +65,7 @@ const workspaceFixture: Workspace = {
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-describe('LoginForm integration', () => {
+describe('SignupForm integration', () => {
   let searchParams: URLSearchParams;
   let currentUserResult: CurrentUser | null;
   let workspaceListResult: Workspace[];
@@ -88,30 +88,18 @@ describe('LoginForm integration', () => {
     mswServer.use(http.get(myWorkspacesUrlPattern, () => HttpResponse.json(workspaceListResult)));
   });
 
-  it('validates the email before requesting a code', async () => {
-    const user = userEvent.setup();
+  it('links back to the login route', async () => {
+    renderWithProviders(<SignupForm />);
 
-    renderWithProviders(<LoginForm />);
-
-    await user.clear(screen.getByLabelText('Email'));
-    await user.type(screen.getByLabelText('Email'), 'invalid-email');
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
-
-    expect(await screen.findByText('Invalid email address')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login');
   });
 
-  it('links to the dedicated signup route', async () => {
-    renderWithProviders(<LoginForm />);
-
-    expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/signup');
-  });
-
-  it('redirects to the requested route after a successful code verification', async () => {
+  it('submits signup intent and display name through email verification', async () => {
     const user = userEvent.setup();
     let startRequestBody: unknown = null;
     let verifyRequestBody: unknown = null;
 
-    searchParams = new URLSearchParams('redirectTo=/shared/doc-1');
+    workspaceListResult = [];
 
     mswServer.use(
       http.post(authEmailStartUrlPattern, async ({ request }) => {
@@ -130,8 +118,8 @@ describe('LoginForm integration', () => {
           refresh_token: 'refresh-token',
           user: {
             id: currentUserFixture.id,
-            email: currentUserFixture.email,
-            display_name: currentUserFixture.displayName,
+            email: 'new@example.com',
+            display_name: 'New User',
             status: currentUserFixture.status,
             session_id: currentUserFixture.sessionId,
             roles: currentUserFixture.roles,
@@ -141,9 +129,10 @@ describe('LoginForm integration', () => {
       }),
     );
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<SignupForm />);
 
-    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.type(screen.getByLabelText('Name'), 'New User');
+    await user.type(screen.getByLabelText('Email'), 'new@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     fireEvent.input(await screen.findByPlaceholderText('123456'), {
       target: { value: '123456' },
@@ -151,90 +140,23 @@ describe('LoginForm integration', () => {
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
 
     await waitFor(() => {
-      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/shared/doc-1');
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/workspace');
     });
 
     expect(startRequestBody).toEqual({
-      email: 'member@example.com',
-      intent: 'login',
+      email: 'new@example.com',
+      intent: 'signup',
+      display_name: 'New User',
     });
     expect(verifyRequestBody).toEqual({
       challenge_id: 'challenge-1',
       code: '123456',
-      intent: 'login',
+      intent: 'signup',
+      display_name: 'New User',
     });
   });
 
-  it('accepts a null display name after verification and still redirects', async () => {
-    const user = userEvent.setup();
-
-    mswServer.use(
-      http.post(authEmailStartUrlPattern, () =>
-        HttpResponse.json({
-          challenge_id: 'challenge-1',
-          expires_in_seconds: 600,
-        })),
-      http.post(authEmailVerifyUrlPattern, () =>
-        HttpResponse.json({
-          access_token: 'access-token',
-          refresh_token: 'refresh-token',
-          user: {
-            id: currentUserFixture.id,
-            email: currentUserFixture.email,
-            display_name: null,
-            status: currentUserFixture.status,
-            session_id: currentUserFixture.sessionId,
-            roles: currentUserFixture.roles,
-            permissions: currentUserFixture.permissions,
-          },
-        })),
-    );
-
-    renderWithProviders(<LoginForm />);
-
-    await user.type(screen.getByLabelText('Email'), 'member@example.com');
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.input(await screen.findByPlaceholderText('123456'), {
-      target: { value: '123456' },
-    });
-    await user.click(screen.getByRole('button', { name: 'Verify code' }));
-
-    await waitFor(() => {
-      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/acme');
-    });
-  });
-
-  it('shows the API error when sending the code fails', async () => {
-    const user = userEvent.setup();
-
-    mswServer.use(
-      http.post(authEmailStartUrlPattern, () =>
-        HttpResponse.json(
-          {
-            message: 'Too many attempts.',
-          },
-          {
-            status: 429,
-          },
-        )),
-    );
-
-    renderWithProviders(<LoginForm />);
-
-    await user.type(screen.getByLabelText('Email'), 'member@example.com');
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
-
-    const errorAlert = await screen.findByRole('alert');
-
-    expect(errorAlert).toHaveTextContent(
-      'Too many attempts. Please wait a moment before requesting another code.',
-    );
-    expect(errorAlert).not.toHaveTextContent('localhost:3000');
-    expect(errorAlert).not.toHaveTextContent('Request failed');
-    expect(navigateAfterLoginMock).not.toHaveBeenCalled();
-  });
-
-  it('shows the API error when code verification fails', async () => {
+  it('shows a login prompt when the signup email already exists', async () => {
     const user = userEvent.setup();
 
     mswServer.use(
@@ -246,15 +168,15 @@ describe('LoginForm integration', () => {
       http.post(authEmailVerifyUrlPattern, () =>
         HttpResponse.json(
           {
-            message: 'Invalid login code.',
+            message: 'Email is already registered.',
           },
           {
-            status: 401,
+            status: 409,
           },
         )),
     );
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<SignupForm />);
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
@@ -265,30 +187,6 @@ describe('LoginForm integration', () => {
 
     const errorAlert = await screen.findByRole('alert');
 
-    expect(errorAlert).toHaveTextContent(
-      'That code is invalid or expired. Request a new code and try again.',
-    );
-    expect(errorAlert).not.toHaveTextContent('localhost:3000');
-    expect(errorAlert).not.toHaveTextContent('Request failed');
-    expect(navigateAfterLoginMock).not.toHaveBeenCalled();
-  });
-
-  it('disables resend behind a countdown after sending the code', async () => {
-    const user = userEvent.setup();
-
-    mswServer.use(
-      http.post(authEmailStartUrlPattern, () =>
-        HttpResponse.json({
-          challenge_id: 'challenge-1',
-          expires_in_seconds: 600,
-        })),
-    );
-
-    renderWithProviders(<LoginForm />);
-
-    await user.type(screen.getByLabelText('Email'), 'member@example.com');
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
-
-    expect(await screen.findByRole('button', { name: /Resend in \d+s/ })).toBeDisabled();
+    expect(errorAlert.textContent).toMatch(/This email already has an account\. Log in instead\./i);
   });
 });
