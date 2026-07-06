@@ -35,10 +35,10 @@ export function LogoutConfirmDialog({
             </div>
           </AlertDialogMedia>
           <div className="space-y-3 text-center">
-            <AlertDialogTitle className="font-sans text-[1.75rem] leading-tight font-bold tracking-[-0.03em] text-foreground sm:col-auto">
+            <AlertDialogTitle className="font-sans text-[1.6rem] leading-tight font-bold tracking-[-0.03em] text-foreground sm:col-auto text-nowrap">
               Log out of your account?
             </AlertDialogTitle>
-            <AlertDialogDescription className="mx-auto max-w-[24rem] text-base  text-foreground/60">
+            <AlertDialogDescription className="mx-auto max-w-[24rem] text-[1rem] text-foreground/60">
               You will need to log back in to access your Notion workspaces.
             </AlertDialogDescription>
           </div>

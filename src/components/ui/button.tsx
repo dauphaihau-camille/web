@@ -12,7 +12,7 @@ const buttonVariants = cva(
         publish:
           'bg-sky-600 text-white hover:bg-sky-700 focus-visible:border-sky-600/40 focus-visible:ring-sky-600/30 dark:bg-sky-600 dark:text-white dark:hover:bg-sky-700 dark:focus-visible:border-sky-500/50 dark:focus-visible:ring-sky-500/40',
         'destructive-solid':
-          'bg-destructive text-white hover:bg-[color-mix(in_oklch,var(--destructive),black_10%)] focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:text-white dark:hover:bg-[color-mix(in_oklch,var(--destructive),black_12%)] dark:focus-visible:ring-destructive/40',
+          'bg-[color-mix(in_oklch,var(--destructive),white_14%)] text-white hover:bg-[color-mix(in_oklch,var(--destructive),white_8%)] focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-[color-mix(in_oklch,var(--destructive),white_10%)] dark:text-white dark:hover:bg-[color-mix(in_oklch,var(--destructive),white_6%)] dark:focus-visible:ring-destructive/40',
         outline:
           'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
         secondary:
