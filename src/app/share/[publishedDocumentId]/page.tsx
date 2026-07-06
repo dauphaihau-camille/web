@@ -45,7 +45,7 @@ export default async function SharedDocumentPage({
           />
 
           <Link
-            href={authRoutes.login()}
+            href={authRoutes.signup()}
             className={cn(buttonVariants({ size: 'lg' }), 'px-2.5 text-[13px]')}
           >
             Get Camille Free

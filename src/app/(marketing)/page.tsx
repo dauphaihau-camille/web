@@ -16,7 +16,7 @@ export default function HomePage() {
           one place.
         </h5>
         <Link
-          href={authRoutes.login()}
+          href={authRoutes.signup()}
           prefetch
           className={cn(buttonVariants({ size: 'lg' }), 'mt-6 inline-flex')}
         >

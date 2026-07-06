@@ -130,9 +130,17 @@ export function Navigate() {
         </NavigationMenuList>
       </NavigationMenu>
 
-      <Link href={authRoutes.login()} className={cn(buttonVariants({ size: 'sm' }), 'px-2.5 text-[13px]')}>
-        Login
-      </Link>
+      <div className="flex items-center gap-2">
+        <Link
+          href={authRoutes.login()}
+          className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'px-2.5 text-[13px]')}
+        >
+          Login
+        </Link>
+        <Link href={authRoutes.signup()} className={cn(buttonVariants({ size: 'sm' }), 'px-2.5 text-[13px]')}>
+          Signup
+        </Link>
+      </div>
     </div>
   );
 }
