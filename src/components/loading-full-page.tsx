@@ -1,9 +1,20 @@
-import { LoaderCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-export default function LoadingFullPage() {
+import { LoadingIcon } from './loading-icon';
+
+type LoadingFullPageProps = {
+  overlay?: boolean;
+};
+
+export default function LoadingFullPage({ overlay = false }: LoadingFullPageProps) {
   return (
-    <div className="grid h-screen place-items-center">
-      <LoaderCircle className="h-6 w-6 animate-spin text-foreground" />
+    <div
+      className={cn(
+        'grid h-screen place-items-center',
+        overlay && 'fixed inset-0 z-100 bg-background',
+      )}
+    >
+      <LoadingIcon />
     </div>
   );
 }

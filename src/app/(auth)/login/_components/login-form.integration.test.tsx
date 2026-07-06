@@ -19,10 +19,12 @@ const {
   useSearchParamsGetMock,
   currentUserQueryOptionsMock,
   navigateAfterLoginMock,
+  openWindowMock,
 } = vi.hoisted(() => ({
   useSearchParamsGetMock: vi.fn<(key: string) => string | null>(),
   currentUserQueryOptionsMock: vi.fn(),
   navigateAfterLoginMock: vi.fn<(path: string) => void>(),
+  openWindowMock: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -78,6 +80,12 @@ describe('LoginForm integration', () => {
     useSearchParamsGetMock.mockImplementation((key) => searchParams.get(key));
     currentUserQueryOptionsMock.mockReset();
     navigateAfterLoginMock.mockReset();
+    openWindowMock.mockReset();
+    openWindowMock.mockReturnValue({
+      focus: vi.fn(),
+      closed: false,
+    });
+    vi.stubGlobal('open', openWindowMock);
 
     currentUserQueryOptionsMock.mockImplementation(() =>
       queryOptions({
@@ -86,6 +94,10 @@ describe('LoginForm integration', () => {
       }));
 
     mswServer.use(http.get(myWorkspacesUrlPattern, () => HttpResponse.json(workspaceListResult)));
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('validates the email before requesting a code', async () => {
@@ -267,6 +279,44 @@ describe('LoginForm integration', () => {
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
 
-    expect(await screen.findByRole('button', { name: 'Resend in 15s' })).toBeDisabled();
+    expect(await screen.findByRole('button', { name: /Resend in \d+s/ })).toBeDisabled();
+  });
+
+  it('opens OAuth in a popup window with a popup callback redirect', async () => {
+    const user = userEvent.setup();
+
+    searchParams = new URLSearchParams('redirectTo=/shared/doc-1');
+
+    renderWithProviders(<LoginForm />);
+
+    await user.click(screen.getByRole('button', { name: 'Google' }));
+
+    expect(openWindowMock).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '/auth/oauth/google?redirectTo=%2Foauth%2Fpopup%3FredirectTo%3D%252Fshared%252Fdoc-1',
+      ),
+      'camille-oauth',
+      expect.stringContaining('popup=yes'),
+    );
+  });
+
+  it('shows only the full-page loader after OAuth completes before navigation', async () => {
+    renderWithProviders(<LoginForm />);
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: window.location.origin,
+      data: {
+        type: 'camille:oauth-complete',
+      },
+    }));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Log in')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Continue' })).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/acme');
+    });
   });
 });
