@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 
+import LoadingFullPage from '@/components/loading-full-page';
 import { Button } from '@/components/ui/button';
 import {
   Field,
@@ -46,6 +47,7 @@ export function CreateWorkspaceForm({
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isDomainManuallyEdited, setIsDomainManuallyEdited] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const form = useForm<
     CreateWorkspaceFormInput,
@@ -59,11 +61,15 @@ export function CreateWorkspaceForm({
       description: '',
     },
   });
-  const name = form.watch('name');
+  const name = useWatch({
+    control: form.control,
+    name: 'name',
+  });
 
   const createWorkspaceMutation = useMutation({
     mutationFn: createWorkspace,
     onSuccess: async (workspace) => {
+      setIsRedirecting(true);
       await queryClient.invalidateQueries({
         queryKey: workspaceKeys.lists(),
       });
@@ -71,6 +77,7 @@ export function CreateWorkspaceForm({
       router.push(workspaceRoutes.detail(workspace.slug));
     },
     onError: (error) => {
+      setIsRedirecting(false);
       form.setError('root', {
         message:
           error instanceof Error
@@ -89,8 +96,13 @@ export function CreateWorkspaceForm({
   }, [form, isDomainManuallyEdited, name]);
 
   function handleSubmit(values: CreateWorkspaceFormValues) {
+    setIsRedirecting(false);
     form.clearErrors('root');
     createWorkspaceMutation.mutate(values);
+  }
+
+  if (isRedirecting) {
+    return <LoadingFullPage overlay />;
   }
 
   const formContent = (
