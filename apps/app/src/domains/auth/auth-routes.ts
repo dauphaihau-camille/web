@@ -1,7 +1,9 @@
+import { publicEnv } from '@/lib/public-env';
+
 const LOGIN_PATH = '/login';
 const SIGNUP_PATH = '/signup';
 const OAUTH_POPUP_PATH = '/oauth/popup';
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
+const apiBaseUrl = publicEnv.apiBaseUrl;
 
 export type OAuthProvider = 'google' | 'github';
 

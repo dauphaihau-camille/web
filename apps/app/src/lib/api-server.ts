@@ -1,8 +1,9 @@
 import 'server-only';
 
 import { cookies, headers } from 'next/headers';
+import { publicEnv } from '@/lib/public-env';
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
+const apiBaseUrl = publicEnv.apiBaseUrl;
 
 function normalizePath(path: string) {
   return path.replace(/^\/+/, '');

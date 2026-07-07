@@ -2,8 +2,9 @@ import { queryOptions, type QueryKey, type UseQueryOptions } from '@tanstack/rea
 import ky, { type Input, type Options } from 'ky';
 
 import { authRoutes } from '@/domains/auth/auth-routes';
+import { publicEnv } from '@/lib/public-env';
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
+const apiBaseUrl = publicEnv.apiBaseUrl;
 const AUTH_RETRY_HEADER = 'x-auth-refresh-retry';
 
 type ApiRequestOptions = Omit<Options, 'prefix'>;

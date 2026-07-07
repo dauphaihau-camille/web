@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 
 import { authRoutes } from './domains/auth/auth-routes';
 import { getPostLoginRedirectTarget } from './domains/auth/lib/post-login-redirect';
+import { publicEnv } from './lib/public-env';
 import { workspaceRoutes } from './domains/workspace/workspace-routes';
 
 const ACCESS_COOKIE_NAME = 'accessToken';
@@ -35,7 +36,7 @@ async function hasAuthenticatedSession(request: NextRequest) {
     return false;
   }
 
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
+  const apiBaseUrl = publicEnv.apiBaseUrl;
 
   if (!apiBaseUrl) {
     return true;
