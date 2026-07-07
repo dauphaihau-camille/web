@@ -1,51 +1,24 @@
-'use client';
-
-import Link from 'next/link';
-import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-
-import { Button } from '@/components/ui/button';
 import { authRoutes, getPostLoginRedirectTarget } from '@/domains/auth';
 
-const OAUTH_POPUP_MESSAGE_TYPE = 'camille:oauth-complete';
+import { OAuthPopupClient } from './_components/oauth-popup-client';
 
-export default function OAuthPopupPage() {
-  const searchParams = useSearchParams();
-  const redirectTarget = getPostLoginRedirectTarget(
-    searchParams.get('redirectTo'),
-  );
+type OAuthPopupPageProps = {
+  searchParams?: Promise<{
+    redirectTo?: string | string[];
+  }>;
+};
 
-  useEffect(() => {
-    if (!window.opener || window.opener.closed) {
-      window.location.replace(redirectTarget);
-      return;
-    }
-
-    window.opener.postMessage(
-      {
-        type: OAUTH_POPUP_MESSAGE_TYPE,
-      },
-      window.location.origin,
-    );
-    window.close();
-  }, [redirectTarget]);
+export default async function OAuthPopupPage({ searchParams }: OAuthPopupPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const redirectTo = Array.isArray(resolvedSearchParams?.redirectTo)
+    ? resolvedSearchParams.redirectTo[0]
+    : resolvedSearchParams?.redirectTo;
+  const redirectTarget = getPostLoginRedirectTarget(redirectTo);
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6">
-      <div className="w-full max-w-sm space-y-4 text-center">
-        <div className="space-y-2">
-          <h1 className="text-xl font-semibold">Sign-in complete</h1>
-          <p className="text-sm text-muted-foreground">
-            You can close this window if it does not close automatically.
-          </p>
-        </div>
-        <div className="flex flex-col gap-2">
-          <Button render={<Link href={redirectTarget} />}>Continue</Button>
-          <Button variant="outline" render={<Link href={authRoutes.login()} />}>
-            Back to login
-          </Button>
-        </div>
-      </div>
-    </main>
+    <OAuthPopupClient
+      loginPath={authRoutes.login()}
+      redirectTarget={redirectTarget}
+    />
   );
 }
