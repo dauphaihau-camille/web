@@ -86,6 +86,7 @@ export async function verifyEmailAuth(
 
 export async function logout(): Promise<void> {
   await apiRequest('auth/logout', {
+    keepalive: true,
     method: 'post',
   });
 }

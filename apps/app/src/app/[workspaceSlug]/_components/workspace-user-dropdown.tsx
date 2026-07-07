@@ -9,7 +9,7 @@ import {
   SettingsIcon,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { startTransition, useState } from 'react';
 
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@shared/components/ui/dropdown-menu';
+import LoadingFullPage from '@shared/components/loading-full-page';
 import {
   authKeys,
   authRoutes,
@@ -51,6 +52,7 @@ export function WorkspaceUserDropdown({
   const [isOpen, setIsOpen] = useState(false);
   const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const currentUserQuery = useCurrentUserQuery();
   const workspaceQuery = useWorkspaceQuery(workspaceSlug);
   const myWorkspacesQuery = useQuery({
@@ -70,16 +72,22 @@ export function WorkspaceUserDropdown({
 
   const logoutMutation = useMutation({
     mutationFn: logout,
-    onSuccess: async () => {
-      setIsLogoutDialogOpen(false);
-      queryClient.setQueryData(authKeys.currentUser(), null);
-      queryClient.removeQueries({ queryKey: workspaceKeys.all });
-      window.location.assign(authRoutes.login());
-    },
   });
+
+  function handleLogoutConfirm() {
+    setIsLoggingOut(true);
+    setIsLogoutDialogOpen(false);
+    queryClient.setQueryData(authKeys.currentUser(), null);
+    queryClient.removeQueries({ queryKey: workspaceKeys.all });
+    logoutMutation.mutate();
+    startTransition(() => {
+      router.replace(authRoutes.login());
+    });
+  }
 
   return (
     <>
+      {isLoggingOut ? <LoadingFullPage overlay /> : null}
       <DropdownMenu onOpenChange={setIsOpen}>
         <DropdownMenuTrigger
           className={cn(
@@ -272,13 +280,14 @@ export function WorkspaceUserDropdown({
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
       <CreateWorkspaceDialog
         open={isCreateWorkspaceOpen}
         onOpenChange={setIsCreateWorkspaceOpen}
       />
       <LogoutConfirmDialog
-        isPending={logoutMutation.isPending}
-        onConfirm={() => logoutMutation.mutate()}
+        isPending={logoutMutation.isPending || isLoggingOut}
+        onConfirm={handleLogoutConfirm}
         onOpenChange={setIsLogoutDialogOpen}
         open={isLogoutDialogOpen}
       />
