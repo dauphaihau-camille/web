@@ -4,8 +4,9 @@ import { PlusIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { hasMeaningfulContent } from "@/components/editor/has-meaningful-content";
-import { Button } from "@/components/ui/button";
+import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
+import { LoadingIcon } from '@shared/components/loading-icon';
+import { Button } from '@shared/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
@@ -117,7 +118,13 @@ export function PrivateDocumentsGroup({
       }}
       disabled={createDocumentMutation.isPending}
     >
-      <PlusIcon className="size-4" />
+      {createDocumentMutation.isPending
+        ? (
+          <LoadingIcon className="size-3" />
+        )
+        : (
+          <PlusIcon className="size-4" />
+        )}
     </Button>
   );
 

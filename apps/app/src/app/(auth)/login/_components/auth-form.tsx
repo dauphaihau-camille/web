@@ -61,6 +61,10 @@ export function AuthForm({ mode }: { mode: AuthFormMode }) {
   } = useLoginForm(mode);
 
   const codeValue = codeForm.watch('code');
+  const isRequestingCode =
+    startEmailAuthMutation.isPending || emailForm.formState.isSubmitting;
+  const isVerifyingCode =
+    verifyEmailAuthMutation.isPending || codeForm.formState.isSubmitting;
 
   if (isOAuthRedirecting || isVerifyRedirecting) {
     return <LoadingFullPage overlay />;
@@ -88,6 +92,8 @@ export function AuthForm({ mode }: { mode: AuthFormMode }) {
                     id="login-code"
                     inputMode="numeric"
                     autoComplete="one-time-code"
+                    disabled={isVerifyingCode}
+                    readOnly={isVerifyingCode}
                     aria-invalid={codeForm.getFieldState('code').invalid}
                     className="h-12 px-4 text-center text-lg tracking-[0.45em]"
                     maxLength={6}
@@ -121,10 +127,7 @@ export function AuthForm({ mode }: { mode: AuthFormMode }) {
                   : null}
                 <Button
                   type="submit"
-                  disabled={
-                    verifyEmailAuthMutation.isPending
-                  || codeForm.formState.isSubmitting
-                  }
+                  disabled={isVerifyingCode}
                   className="h-11 w-full font-medium"
                 >
                   {verifyEmailAuthMutation.isPending
@@ -198,7 +201,8 @@ export function AuthForm({ mode }: { mode: AuthFormMode }) {
                         {...field}
                         id="login-email"
                         type="email"
-                        disabled={false}
+                        disabled={isRequestingCode}
+                        readOnly={isRequestingCode}
                         autoComplete="email"
                         aria-invalid={fieldState.invalid}
                         className="h-11 px-3"
@@ -223,10 +227,7 @@ export function AuthForm({ mode }: { mode: AuthFormMode }) {
                   : null}
                 <Button
                   type="submit"
-                  disabled={
-                    startEmailAuthMutation.isPending
-                  || emailForm.formState.isSubmitting
-                  }
+                  disabled={isRequestingCode}
                   className="h-11 w-full"
                 >
                   {startEmailAuthMutation.isPending ? 'Sending...' : 'Continue'}
