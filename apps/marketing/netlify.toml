@@ -1,5 +1,6 @@
 [build]
 command = "bun run --cwd apps/marketing build"
+publish = "/apps/marketing/.next"
 
 [build.environment]
 NETLIFY_NEXT_PLUGIN_SKIP = "false"
