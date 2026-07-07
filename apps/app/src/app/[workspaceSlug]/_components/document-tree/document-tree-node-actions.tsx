@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+ 
 'use client';
 
 import { useState } from 'react';
@@ -50,6 +50,7 @@ import {
   favoriteStatusQueryOptions,
   unfavoriteDocument,
 } from '@/domains/favorite';
+import { LoadingIcon } from '@shared/components/loading-icon';
 import { cn } from '@shared/lib/utils';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import { workspaceRoutes } from '@shared/domains/workspace';
@@ -258,7 +259,13 @@ export function DocumentTreeNodeActions({
       disabled={isBusy}
       onClick={handleCreateSubdocument}
     >
-      <PlusIcon className="size-4" />
+      {isBusy
+        ? (
+          <LoadingIcon className="size-4" />
+        )
+        : (
+          <PlusIcon className="size-4" />
+        )}
     </Button>
   );
 
