@@ -3,7 +3,30 @@ import ky, { type Input, type Options } from 'ky';
 
 import { authRoutes } from '@/domains/auth/auth-routes';
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.replace(/\/+$/, '');
+function normalizeUrl(value?: string) {
+  return value?.replace(/\/+$/, '');
+}
+
+function normalizePathSegment(value?: string) {
+  return value?.replace(/^\/+|\/+$/g, '');
+}
+
+function buildApiBaseUrl(origin?: string, version?: string) {
+  if (!origin) {
+    return undefined;
+  }
+
+  if (version && origin.endsWith(`/${version}`)) {
+    return origin;
+  }
+
+  return version ? `${origin}/${version}` : origin;
+}
+
+const apiBaseUrl = buildApiBaseUrl(
+  normalizeUrl(process.env.NEXT_PUBLIC_API_BASE_URL),
+  normalizePathSegment(process.env.NEXT_PUBLIC_API_VERSION) || 'v1',
+);
 const AUTH_RETRY_HEADER = 'x-auth-refresh-retry';
 
 type ApiRequestOptions = Omit<Options, 'prefix'>;
