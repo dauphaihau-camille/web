@@ -1,5 +1,5 @@
 [build]
-command = "npm --prefix apps/app run build"
+command = "bun run --cwd apps/app build"
 
 [build.environment]
 NETLIFY_NEXT_PLUGIN_SKIP = "false"
