@@ -16,7 +16,7 @@ export function PublishedDocumentBar({
   }
 
   return (
-    <div className="fixed inset-x-0 top-0 z-20 h-12 border-b border-sky-100 bg-sky-50/95 px-5 text-sky-700 backdrop-blur md:left-(--sidebar-width)">
+    <div className="fixed inset-x-0 top-0 z-20 h-12 border-b border-sky-100 bg-sky-50/95 px-5 text-sky-700 backdrop-blur dark:border-sky-700/80 dark:bg-sky-900/80 dark:text-sky-50 md:left-(--sidebar-width)">
       <div className="flex h-full items-center justify-center gap-3 text-center text-sm font-medium">
         <span>This page is live on the web.</span>
         <Link
@@ -25,7 +25,7 @@ export function PublishedDocumentBar({
           rel="noopener noreferrer"
           className={cn(
             buttonVariants({ variant: 'ghost', size: 'sm' }),
-            'h-8 gap-1 px-2 text-sky-700 hover:bg-sky-100 hover:text-sky-800',
+            'h-8 gap-1 px-2 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:text-sky-200 dark:hover:bg-sky-800/80 dark:hover:text-sky-50',
           )}
         >
           <Globe2Icon className="size-4" />
