@@ -19,19 +19,19 @@ import {
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@shared/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@shared/components/ui/tooltip";
 import {
   archiveDocument,
   createDocument,
@@ -43,16 +43,16 @@ import {
   type WorkspaceDocumentNavigation,
   workspaceDocumentChildrenQueryOptions,
   workspaceDocumentRootQueryOptions,
-} from "@/domains/document";
+} from "@shared/domains/document";
 import {
   favoriteDocument,
   favoriteKeys,
   favoriteStatusQueryOptions,
   unfavoriteDocument,
 } from "@/domains/favorite";
-import { cn } from "@/lib/utils";
+import { cn } from "@shared/lib/utils";
 import { useDocumentTreeExpansionStore } from "@/stores/document-tree-expansion-store";
-import { workspaceRoutes } from "@/domains/workspace";
+import { workspaceRoutes } from "@shared/domains/workspace";
 
 import {
   insertCreatedSubdocIntoCachedChildren,

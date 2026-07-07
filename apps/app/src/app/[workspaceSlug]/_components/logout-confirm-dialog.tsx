@@ -10,7 +10,7 @@ import {
   AlertDialogMedia,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button } from "@shared/components/ui/button";
 
 type LogoutConfirmDialogProps = {
   isPending: boolean;

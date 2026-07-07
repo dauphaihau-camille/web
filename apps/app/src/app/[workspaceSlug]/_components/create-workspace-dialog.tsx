@@ -5,11 +5,11 @@ import { useState } from "react";
 import {
   CreateWorkspaceForm,
   CreateWorkspaceRedirectDialog,
-} from "@/domains/workspace/components";
+} from "@shared/domains/workspace/components";
 import {
   Dialog,
   DialogContent,
-} from "@/components/ui/dialog";
+} from "@shared/components/ui/dialog";
 
 type CreateWorkspaceDialogProps = {
   open: boolean;

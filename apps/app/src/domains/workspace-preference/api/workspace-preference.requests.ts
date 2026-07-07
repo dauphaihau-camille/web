@@ -1,4 +1,4 @@
-import { apiGet, apiPatch } from '@/lib/api-client';
+import { apiGet, apiPatch } from '@shared/lib/api-client';
 import {
   updateWorkspacePreferenceSchema,
   workspacePreferenceSchema,

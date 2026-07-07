@@ -5,6 +5,7 @@
 @import "@blocknote/shadcn/style.css";
 
 @source "../../node_modules/@blocknote/shadcn/dist/*.js";
+@source "../../../../packages/shared/src";
 
 @custom-variant dark (&:is(.dark *));
 

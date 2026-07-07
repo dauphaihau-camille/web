@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 
-import type * as DocumentDomain from '@/domains/document';
-import { renderWithProviders } from '@/test/render';
+import type * as DocumentDomain from '@shared/domains/document';
+import { renderWithProviders } from '@shared/test/render';
 
 import { PrivateDocumentsGroup } from './private-documents-group';
 
@@ -9,9 +9,9 @@ const { useWorkspaceDocumentRootQueryMock } = vi.hoisted(() => ({
   useWorkspaceDocumentRootQueryMock: vi.fn(),
 }));
 
-vi.mock('@/domains/document', async () => {
+vi.mock('@shared/domains/document', async () => {
   const actual = await vi.importActual<typeof DocumentDomain>(
-    '@/domains/document',
+    '@shared/domains/document',
   );
 
   return {

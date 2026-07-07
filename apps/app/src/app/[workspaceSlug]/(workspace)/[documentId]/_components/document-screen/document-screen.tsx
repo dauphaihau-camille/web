@@ -12,11 +12,11 @@ import {
   setRecentWorkspaceDocumentId,
   type Document,
   updateDocument,
-} from "@/domains/document";
+} from "@shared/domains/document";
 import { BlockNoteEditorLoader } from "@/components/editor/blocknote-editor-loader";
 import { hasMeaningfulContent } from "@/components/editor/has-meaningful-content";
-import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { Input } from "@shared/components/ui/input";
+import { cn } from "@shared/lib/utils";
 
 import { DocumentBreadcrumb } from "./document-breadcrumb";
 import {

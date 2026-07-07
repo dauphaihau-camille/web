@@ -14,7 +14,7 @@ import {
   workspaceDocumentChildrenQueryOptions,
   workspaceDocumentRootQueryOptions,
   type Document,
-} from '@/domains/document';
+} from '@shared/domains/document';
 import {
   favoriteDocument as addFavoriteDocument,
   favoriteKeys,
@@ -28,8 +28,8 @@ import {
   publishKeys,
   unpublishDocument,
   usePublishStatusQuery,
-} from '@/domains/publish';
-import { workspaceRoutes } from '@/domains/workspace';
+} from '@shared/domains/publish';
+import { workspaceRoutes } from '@shared/domains/workspace';
 
 import { removeCachedNavigationDocument } from '../document-screen-cache';
 

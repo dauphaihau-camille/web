@@ -1,8 +1,8 @@
 import { redirect } from 'next/navigation';
 
-import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
-import { listMyWorkspacesServer } from '@/domains/workspace/api/workspace.server.requests';
-import { CreateWorkspaceFlow, workspaceRoutes } from '@/domains/workspace';
+import { requireCurrentUserServer } from '@shared/domains/auth/api/auth.server.requests';
+import { listMyWorkspacesServer } from '@shared/domains/workspace/api/workspace.server.requests';
+import { CreateWorkspaceFlow, workspaceRoutes } from '@shared/domains/workspace';
 
 export default async function WorkspaceEntryPage() {
   await requireCurrentUserServer(workspaceRoutes.entry());

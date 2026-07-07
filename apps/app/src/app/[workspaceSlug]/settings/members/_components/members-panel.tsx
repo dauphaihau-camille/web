@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +17,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@shared/components/ui/dialog";
+import { Input } from "@shared/components/ui/input";
+import { Label } from "@shared/components/ui/label";
 import {
   Table,
   TableBody,
@@ -27,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@shared/components/ui/table";
 import {
   addWorkspaceMember,
   removeWorkspaceMember,
@@ -37,7 +37,7 @@ import {
   type Workspace,
   type WorkspaceMember,
   type WorkspaceRole,
-} from "@/domains/workspace";
+} from "@shared/domains/workspace";
 
 const roleOptions: WorkspaceRole[] = ["owner", "admin", "member"];
 

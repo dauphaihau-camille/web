@@ -6,31 +6,31 @@ import { OPEN_SHARE_EVENT } from "@/app/[workspaceSlug]/_components/workspace-sh
 import {
   Button,
   buttonVariants,
-} from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
+} from "@shared/components/ui/button";
+import { Kbd } from "@shared/components/ui/kbd";
 import {
   InputGroup,
   InputGroupButton,
   InputGroupInput,
-} from "@/components/ui/input-group";
+} from "@shared/components/ui/input-group";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
+} from "@shared/components/ui/popover";
+import { Separator } from "@shared/components/ui/separator";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/ui/tabs";
+} from "@shared/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+} from "@shared/components/ui/tooltip";
+import { cn } from "@shared/lib/utils";
 
 type ShareButtonProps = {
   isPublished: boolean;

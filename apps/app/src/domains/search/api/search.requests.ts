@@ -1,4 +1,4 @@
-import { apiGet } from '@/lib/api-client';
+import { apiGet } from '@shared/lib/api-client';
 import { searchDocumentSchema } from './search.schemas';
 import type { SearchDocument } from './search.types';
 

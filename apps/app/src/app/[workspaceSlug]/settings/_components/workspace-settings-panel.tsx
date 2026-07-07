@@ -5,20 +5,20 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@shared/components/ui/button";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field";
+} from "@shared/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
   InputGroupTextarea,
-} from "@/components/ui/input-group";
+} from "@shared/components/ui/input-group";
 import {
   updateWorkspace,
   updateWorkspaceSchema,
@@ -26,8 +26,8 @@ import {
   type Workspace,
   workspaceKeys,
   workspaceRoutes,
-} from "@/domains/workspace";
-import { suggestWorkspaceDomain } from "@/domains/workspace/api/workspace-domain";
+} from "@shared/domains/workspace";
+import { suggestWorkspaceDomain } from "@shared/domains/workspace/api/workspace-domain";
 
 export function WorkspaceSettingsPanel({
   workspace,

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import {
   isReservedWorkspaceDomain,
   workspaceDomainPattern,
-} from '@/domains/workspace/api/workspace-domain';
+} from '@shared/domains/workspace/api/workspace-domain';
 
 import { WorkspaceProvider } from './_components/workspace-provider';
 import { WorkspaceShortcutsProvider } from './_components/workspace-shortcuts-provider';

@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { FileTextIcon, MoreHorizontalIcon } from "lucide-react";
+import Link from 'next/link';
+import { FileTextIcon, MoreHorizontalIcon } from 'lucide-react';
 
-import { Input } from "@/components/ui/input";
+import { Input } from '@shared/components/ui/input';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { ScrollFade } from "@/components/ui/scroll-fade";
-import { SidebarMenuItem } from "@/components/ui/sidebar";
-import { workspaceRoutes } from "@/domains/workspace";
+} from '@shared/components/ui/popover';
+import { ScrollFade } from '@shared/components/ui/scroll-fade';
+import { SidebarMenuItem } from '@/components/ui/sidebar';
+import { workspaceRoutes } from '@shared/domains/workspace';
 
-import { useDocumentTreeMore } from "./use-document-tree-more";
+import { useDocumentTreeMore } from './use-document-tree-more';
 
 export function DocumentTreeMoreButton({
   workspaceSlug,
@@ -85,16 +85,20 @@ export function DocumentTreeMoreButton({
                 <span className="truncate">{document.title}</span>
               </Link>
             ))}
-            {!isFetchingMore && items.length === 0 ? (
-              <p className="px-3 py-2 text-sm text-muted-foreground">
-                No documents found.
-              </p>
-            ) : null}
-            {isFetchingMore ? (
-              <p className="px-3 py-2 text-sm text-muted-foreground">
-                Loading...
-              </p>
-            ) : null}
+            {!isFetchingMore && items.length === 0
+              ? (
+                <p className="px-3 py-2 text-sm text-muted-foreground">
+                  No documents found.
+                </p>
+              )
+              : null}
+            {isFetchingMore
+              ? (
+                <p className="px-3 py-2 text-sm text-muted-foreground">
+                  Loading...
+                </p>
+              )
+              : null}
           </ScrollFade>
         </PopoverContent>
       </Popover>

@@ -1,4 +1,4 @@
-import type { Document } from '@/domains/document';
+import type { Document } from '@shared/domains/document';
 
 export type BlockNoteDocumentOperations = {
   isArchiving: boolean;

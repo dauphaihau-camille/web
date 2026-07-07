@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { PlusIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { PlusIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { hasMeaningfulContent } from "@/components/editor/has-meaningful-content";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@shared/components/ui/tooltip';
 import {
   createDocument,
   documentKeys,
@@ -18,13 +18,13 @@ import {
   type DocumentNavigationNode,
   useWorkspaceDocumentRootQuery,
   type WorkspaceDocumentNavigation,
-} from "@/domains/document";
-import { workspaceRoutes } from "@/domains/workspace";
+} from '@shared/domains/document';
+import { workspaceRoutes } from '@shared/domains/workspace';
 
-import { CollapsibleSidebarGroup } from "./collapsible-sidebar-group";
-import { DocumentTree } from "../document-tree/document-tree";
-import { DocumentTreeList } from "../document-tree/document-tree-list";
-import { DocumentTreeLoading } from "../document-tree/document-tree-loading";
+import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
+import { DocumentTree } from '../document-tree/document-tree';
+import { DocumentTreeList } from '../document-tree/document-tree-list';
+import { DocumentTreeLoading } from '../document-tree/document-tree-loading';
 
 function buildDocumentNavigationNode(
   document: Document,
@@ -43,9 +43,9 @@ function buildDocumentNavigationNode(
 
 function isUnfilteredRootListKey(queryKey: readonly unknown[]) {
   return (
-    queryKey.at(-4) === "root" &&
-    queryKey.at(-2) === null &&
-    queryKey.at(-1) === null
+    queryKey.at(-4) === 'root'
+    && queryKey.at(-2) === null
+    && queryKey.at(-1) === null
   );
 }
 
@@ -60,8 +60,8 @@ function insertCreatedPrivateRootDocument(
     queryKey,
     currentNavigation,
   ] of queryClient.getQueriesData<WorkspaceDocumentNavigation>({
-    queryKey: [...documentKeys.lists(workspaceSlug), "root"],
-  })) {
+      queryKey: [...documentKeys.lists(workspaceSlug), 'root'],
+    })) {
     if (!currentNavigation || !isUnfilteredRootListKey(queryKey)) {
       continue;
     }

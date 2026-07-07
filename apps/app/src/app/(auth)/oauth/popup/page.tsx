@@ -1,4 +1,4 @@
-import { authRoutes, getPostLoginRedirectTarget } from '@/domains/auth';
+import { authRoutes, getPostLoginRedirectTarget } from '@shared/domains/auth';
 
 import { OAuthPopupClient } from './_components/oauth-popup-client';
 

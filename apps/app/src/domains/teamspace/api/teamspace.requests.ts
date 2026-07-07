@@ -1,4 +1,4 @@
-import { apiGet, apiPatch, apiPost } from '@/lib/api-client';
+import { apiGet, apiPatch, apiPost } from '@shared/lib/api-client';
 
 import {
   teamspaceListSchema,

@@ -3,11 +3,11 @@ import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 
-import type * as AuthDomain from '@/domains/auth';
-import type { CurrentUser } from '@/domains/auth';
-import type { Workspace } from '@/domains/workspace';
-import { renderWithProviders } from '@/test/render';
-import { mswServer } from '@/test/msw/server';
+import type * as AuthDomain from '@shared/domains/auth';
+import type { CurrentUser } from '@shared/domains/auth';
+import type { Workspace } from '@shared/domains/workspace';
+import { renderWithProviders } from '@shared/test/render';
+import { mswServer } from '@shared/test/msw/server';
 
 import { SignupForm } from './signup-form';
 
@@ -31,8 +31,8 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-vi.mock('@/domains/auth', async () => {
-  const actual = await vi.importActual<typeof AuthDomain>('@/domains/auth');
+vi.mock('@shared/domains/auth', async () => {
+  const actual = await vi.importActual<typeof AuthDomain>('@shared/domains/auth');
 
   return {
     ...actual,

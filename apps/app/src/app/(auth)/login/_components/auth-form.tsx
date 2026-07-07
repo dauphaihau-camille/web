@@ -4,19 +4,19 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Controller } from 'react-hook-form';
 
-import LoadingFullPage from '@/components/loading-full-page';
-import { Button } from '@/components/ui/button';
+import LoadingFullPage from '@shared/components/loading-full-page';
+import { Button } from '@shared/components/ui/button';
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@/components/ui/field';
-import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
-import { authRoutes } from '@/domains/auth';
+} from '@shared/components/ui/field';
+import { Input } from '@shared/components/ui/input';
+import { Separator } from '@shared/components/ui/separator';
+import { authRoutes } from '@shared/domains/auth';
 
-import { GitHubIcon, GoogleIcon } from '@/components/brand-icons';
+import { GitHubIcon, GoogleIcon } from '@shared/components/brand-icons';
 import { useLoginForm, type AuthFormMode } from '../_hooks/use-login-form';
 
 const authCopy = {

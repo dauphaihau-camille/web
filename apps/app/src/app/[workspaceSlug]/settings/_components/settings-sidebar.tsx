@@ -15,7 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { workspaceRoutes } from "@/domains/workspace";
+import { workspaceRoutes } from "@shared/domains/workspace";
 
 import { WorkspaceUserDropdown } from "../../_components/workspace-user-dropdown";
 

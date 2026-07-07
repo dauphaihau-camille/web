@@ -6,8 +6,8 @@ import type {
   SuggestionMenuProps,
 } from "@blocknote/react";
 
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@shared/lib/utils";
+import { ScrollArea } from "@shared/components/ui/scroll-area";
 
 type SlashMenuProps = Pick<
   SuggestionMenuProps<DefaultReactSuggestionItem>,

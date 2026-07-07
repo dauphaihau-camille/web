@@ -1,4 +1,4 @@
-import { apiDelete, apiGet, apiPost } from '@/lib/api-client';
+import { apiDelete, apiGet, apiPost } from '@shared/lib/api-client';
 import {
   favoriteDocumentSchema,
   favoriteStatusSchema,

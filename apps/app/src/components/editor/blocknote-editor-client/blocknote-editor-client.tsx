@@ -27,7 +27,7 @@ import { useTheme } from 'next-themes';
 import type { BlockNoteEditorProps } from '../blocknote-editor.types';
 
 import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 
 import { blockNoteSchema } from '../blocknote-schema';
 import { blockNoteEditorClientStyles } from './blocknote-editor-client.styles';

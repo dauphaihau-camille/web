@@ -2,7 +2,7 @@ import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { OPEN_SHARE_EVENT } from '@/app/[workspaceSlug]/_components/workspace-shortcuts-provider';
-import { renderWithProviders } from '@/test/render';
+import { renderWithProviders } from '@shared/test/render';
 
 import { ShareButton } from './share-button';
 

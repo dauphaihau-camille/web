@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 
-import { buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@shared/components/ui/button';
 import { getAppLoginUrl, getAppSignupUrl } from '@/lib/app-url';
-import { cn } from '@/lib/utils';
+import { cn } from '@shared/lib/utils';
 
 import { MarketingNavigationMenu } from './marketing-navigation-menu';
 

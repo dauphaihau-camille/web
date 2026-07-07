@@ -5,7 +5,7 @@ import {
   COPY_LINK_EVENT,
   DUPLICATE_DOCUMENT_EVENT,
 } from "@/app/[workspaceSlug]/_components/workspace-shortcuts-provider";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@shared/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,8 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
+} from "@shared/components/ui/dropdown-menu";
+import { cn } from "@shared/lib/utils";
 
 import { RelativeTimeText } from "./relative-time-text";
 

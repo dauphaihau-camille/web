@@ -1,4 +1,4 @@
-import { createQueryKey } from '@/lib/api-client';
+import { createQueryKey } from '@shared/lib/api-client';
 
 export const searchKeys = {
   all: () => createQueryKey('search'),

@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { FileIcon, FileTextIcon } from 'lucide-react';
 import { createReactBlockSpec, type ReactCustomBlockRenderProps } from '@blocknote/react';
 
-import { workspaceRoutes } from '@/domains/workspace';
+import { workspaceRoutes } from '@shared/domains/workspace';
 
 const subdocBlockConfig = {
   type: 'subpage' as const,

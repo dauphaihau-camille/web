@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
-import { publicEnv } from '@/lib/public-env';
+import { publicEnv } from '@shared/lib/public-env';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (

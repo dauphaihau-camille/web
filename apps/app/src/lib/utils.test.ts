@@ -1,4 +1,4 @@
-import { cn } from './utils';
+import { cn } from '@shared/lib/utils';
 
 describe('cn', () => {
   it('merges conditional and tailwind classes', () => {

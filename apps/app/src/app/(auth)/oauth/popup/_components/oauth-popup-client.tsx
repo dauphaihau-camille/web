@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@shared/components/ui/button';
 
 const OAUTH_POPUP_MESSAGE_TYPE = 'camille:oauth-complete';
 

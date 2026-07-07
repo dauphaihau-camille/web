@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { usePathname } from 'next/navigation';
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
-import { authRoutes } from '@/domains/auth';
+import { authRoutes } from '@shared/domains/auth';
 
 function shouldForceLightTheme(pathname: string | null) {
   if (!pathname) {

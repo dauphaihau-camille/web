@@ -14,12 +14,12 @@ import {
   getPostLoginRedirectTarget,
   startEmailAuth,
   verifyEmailAuth,
-} from '@/domains/auth';
+} from '@shared/domains/auth';
 import {
   myWorkspaceListQueryOptions,
   workspaceKeys,
   workspaceRoutes,
-} from '@/domains/workspace';
+} from '@shared/domains/workspace';
 
 import {
   requestEmailCodeFormSchema,

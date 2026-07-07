@@ -10,11 +10,11 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { buttonVariants } from "@/components/ui/button";
-import { getPublicDocumentServer } from "@/domains/publish/api/publish.server.requests";
+} from "@shared/components/ui/breadcrumb";
+import { buttonVariants } from "@shared/components/ui/button";
+import { getPublicDocumentServer } from "@shared/domains/publish/api/publish.server.requests";
 import { getAppSignupUrl } from "@/lib/app-url";
-import { cn } from "@/lib/utils";
+import { cn } from "@shared/lib/utils";
 
 export default async function SharedDocumentPage({
   params,

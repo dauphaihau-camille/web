@@ -1,6 +1,6 @@
-import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
-import { getWorkspaceServer } from '@/domains/workspace/api/workspace.server.requests';
-import { workspaceRoutes } from '@/domains/workspace';
+import { requireCurrentUserServer } from '@shared/domains/auth/api/auth.server.requests';
+import { getWorkspaceServer } from '@shared/domains/workspace/api/workspace.server.requests';
+import { workspaceRoutes } from '@shared/domains/workspace';
 import { MembersPanel } from './_components/members-panel';
 
 export default async function WorkspaceSettingsMembersPage({

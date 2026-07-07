@@ -3,7 +3,7 @@ import type { z } from 'zod';
 import {
   emailAuthStartInputSchema,
   emailAuthVerifyInputSchema,
-} from '@/domains/auth';
+} from '@shared/domains/auth';
 
 export const requestEmailCodeFormSchema = emailAuthStartInputSchema.extend({
   displayName: emailAuthStartInputSchema.shape.displayName.meta({

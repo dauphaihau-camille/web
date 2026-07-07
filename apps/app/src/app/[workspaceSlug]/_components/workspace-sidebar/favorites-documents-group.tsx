@@ -2,7 +2,7 @@
 
 import { HTTPError } from 'ky';
 
-import type { DocumentNavigationNode } from '@/domains/document';
+import type { DocumentNavigationNode } from '@shared/domains/document';
 import { useWorkspaceFavoritesQuery } from '@/domains/favorite';
 
 import { DocumentTreeLoading } from '../document-tree/document-tree-loading';

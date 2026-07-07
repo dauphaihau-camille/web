@@ -2,9 +2,9 @@ import type { ComponentProps } from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type * as DocumentDomain from '@/domains/document';
-import type { DocumentNavigationNode } from '@/domains/document';
-import { renderWithProviders } from '@/test/render';
+import type * as DocumentDomain from '@shared/domains/document';
+import type { DocumentNavigationNode } from '@shared/domains/document';
+import { renderWithProviders } from '@shared/test/render';
 
 import { DocumentTreeNode } from './document-tree-node';
 
@@ -20,9 +20,9 @@ vi.mock('next/link', () => ({
   ),
 }));
 
-vi.mock('@/domains/document', async () => {
+vi.mock('@shared/domains/document', async () => {
   const actual = await vi.importActual<typeof DocumentDomain>(
-    '@/domains/document',
+    '@shared/domains/document',
   );
 
   return {

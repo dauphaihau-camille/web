@@ -2,9 +2,9 @@
 
 import type { ReactNode } from "react";
 
-import QueryProvider from "./query-provider";
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import QueryProvider from "@shared/components/query-provider";
+import { Toaster } from "@shared/components/ui/sonner";
+import { TooltipProvider } from "@shared/components/ui/tooltip";
 import ThemeProvider from "./theme-provider";
 
 export default function AppProviders({ children }: { children: ReactNode }) {

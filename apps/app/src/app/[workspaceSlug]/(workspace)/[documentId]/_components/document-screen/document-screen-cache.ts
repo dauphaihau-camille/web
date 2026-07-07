@@ -9,7 +9,7 @@ import {
   type DocumentNavigationNode,
   type DocumentNavigationPage,
   type WorkspaceDocumentNavigation,
-} from '@/domains/document';
+} from '@shared/domains/document';
 
 export type UpdatedReferencedSubdocDocument = {
   content: unknown[];

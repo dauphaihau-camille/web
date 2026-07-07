@@ -9,8 +9,8 @@ import {
   documentKeys,
   getDocument,
   type Document,
-} from "@/domains/document";
-import { workspaceRoutes } from "@/domains/workspace";
+} from "@shared/domains/document";
+import { workspaceRoutes } from "@shared/domains/workspace";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,7 +18,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+} from "@shared/components/ui/breadcrumb";
 
 type DocumentBreadcrumbProps = {
   document: Document;

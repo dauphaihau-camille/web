@@ -24,16 +24,16 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { Kbd } from "@/components/ui/kbd";
+} from "@shared/components/ui/empty";
+import { Kbd } from "@shared/components/ui/kbd";
 import {
   SidebarMenuBadge,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@shared/components/ui/skeleton";
 import { useWorkspaceSearchDocumentsQuery } from "@/domains/search";
-import { workspaceRoutes } from "@/domains/workspace";
-import { cn } from "@/lib/utils";
+import { workspaceRoutes } from "@shared/domains/workspace";
+import { cn } from "@shared/lib/utils";
 
 import { useWorkspaceShortcuts } from "../../_hooks/use-workspace-shortcuts";
 

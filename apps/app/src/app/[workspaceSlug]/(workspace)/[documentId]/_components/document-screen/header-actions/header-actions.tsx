@@ -2,14 +2,14 @@
 
 import { LinkIcon, StarIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@shared/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import type { Document } from "@/domains/document";
-import { cn } from "@/lib/utils";
+} from "@shared/components/ui/tooltip";
+import type { Document } from "@shared/domains/document";
+import { cn } from "@shared/lib/utils";
 
 import { DocOperations } from "./doc-operations";
 import { RelativeTimeText } from "./relative-time-text";

@@ -8,8 +8,8 @@ import {
   documentKeys,
   type Document,
   updateDocument,
-} from '@/domains/document';
-import { workspaceRoutes } from '@/domains/workspace';
+} from '@shared/domains/document';
+import { workspaceRoutes } from '@shared/domains/workspace';
 import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
 
 import {

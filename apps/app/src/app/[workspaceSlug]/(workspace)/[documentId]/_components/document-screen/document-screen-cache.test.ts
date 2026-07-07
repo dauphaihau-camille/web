@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query';
 
-import type { Document } from '@/domains/document';
-import { documentKeys } from '@/domains/document';
+import type { Document } from '@shared/domains/document';
+import { documentKeys } from '@shared/domains/document';
 
 import { updateCachedReferencedSubdocTitles } from './document-screen-cache';
 
