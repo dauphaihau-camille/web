@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
-import { Navigate } from '@/app/_components/navigate';
+import { Navigate } from '@/app/_components/navigate/navigate';
 import { buttonVariants } from '@/components/ui/button';
 import { getAppSignupUrl } from '@/lib/app-url';
 import { cn } from '@/lib/utils';

@@ -1,8 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 
 import { buttonVariants } from '@/components/ui/button';
 import { getAppLoginUrl, getAppSignupUrl } from '@/lib/app-url';
 import { cn } from '@/lib/utils';
+
+import { MarketingNavigationMenu } from './marketing-navigation-menu';
 
 export function Navigate() {
   return (
@@ -10,6 +14,8 @@ export function Navigate() {
       <Link href="/" className="text-xl font-bold hover:opacity-50">
         Camille
       </Link>
+
+      <MarketingNavigationMenu />
 
       <div className="flex items-center gap-2">
         <Link
