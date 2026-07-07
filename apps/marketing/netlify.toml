@@ -1,5 +1,5 @@
 [build]
-command = "npm run build:marketing"
+command = "npm --prefix apps/marketing run build"
 
 [build.environment]
 NETLIFY_NEXT_PLUGIN_SKIP = "false"
