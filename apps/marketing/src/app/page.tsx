@@ -1,4 +1,4 @@
-import Image from 'next/image';
+// import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
@@ -31,7 +31,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <Image
+        {/*<Image
           src="/marketing/app.png"
           width={1200}
           height={1200}
@@ -39,7 +39,7 @@ export default function HomePage() {
           alt="app"
           quality={100}
           priority
-        />
+        />*/}
       </div>
     </main>
   );
