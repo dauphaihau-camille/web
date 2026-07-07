@@ -91,14 +91,14 @@ export function MarketingNavigationMenu() {
                     <path d="M17 8C19.2091 8 21 6.20914 21 4C21 1.79086 19.2091 0 17 0C14.7909 0 13 1.79086 13 4C13 6.20914 14.7909 8 17 8Z" />
                   </svg>
                   <div className="mt-4 mb-2 text-lg font-medium">Camille</div>
-                  <p className="text-sm leading-5 text-primary-foreground/85">
+                  <p className="text-sm leading-5 text-primary-foreground/95">
                     Docs, notes, and collaboration in one focused workspace.
                   </p>
                 </NavigationMenuLink>
               </li>
               {solutions.map((item) => (
                 <li key={item.title}>
-                  <MarketingMenuLink title={item.title} href="#">
+                  <MarketingMenuLink title={item.title} disabled>
                     {item.description}
                   </MarketingMenuLink>
                 </li>
@@ -113,7 +113,7 @@ export function MarketingNavigationMenu() {
             <ul className="grid w-[600px] grid-flow-col grid-rows-3 gap-2 p-5">
               {features.map((item) => (
                 <li key={item.title}>
-                  <MarketingMenuLink title={item.title} href="#">
+                  <MarketingMenuLink title={item.title} disabled>
                     {item.description}
                   </MarketingMenuLink>
                 </li>
@@ -128,9 +128,10 @@ export function MarketingNavigationMenu() {
               <TooltipProvider delay={150}>
                 <Tooltip>
                   <TooltipTrigger
+                    aria-disabled="true"
                     className={cn(
                       navigationMenuTriggerStyle(),
-                      'cursor-not-allowed opacity-50',
+                      'cursor-not-allowed text-foreground transition-colors',
                     )}
                   >
                     Pricing
@@ -160,20 +161,41 @@ function MarketingMenuLink({
   href,
   title,
   children,
+  disabled = false,
 }: {
-  href: string;
+  href?: string;
   title: string;
   children: ReactNode;
+  disabled?: boolean;
 }) {
+  if (disabled) {
+    return (
+      <TooltipProvider delay={150}>
+        <Tooltip>
+          <TooltipTrigger
+            aria-disabled="true"
+            className="block w-full cursor-not-allowed rounded-md p-3 text-left opacity-85 transition-colors hover:bg-muted focus:bg-muted focus:outline-none"
+          >
+            <div className="mb-1 text-[15px] leading-5 font-medium text-foreground">
+              {title}
+            </div>
+            <p className="text-sm leading-5 text-foreground/75">{children}</p>
+          </TooltipTrigger>
+          <TooltipContent>This section is not available yet. Coming soon.</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  }
+
   return (
     <NavigationMenuLink
-      href={href}
+      href={href ?? '/'}
       className="block rounded-md p-3 hover:bg-muted focus:bg-muted"
     >
       <div className="mb-1 text-[15px] leading-5 font-medium text-foreground">
         {title}
       </div>
-      <p className="text-sm leading-5 text-muted-foreground">{children}</p>
+      <p className="text-sm leading-5 text-foreground/75">{children}</p>
     </NavigationMenuLink>
   );
 }
