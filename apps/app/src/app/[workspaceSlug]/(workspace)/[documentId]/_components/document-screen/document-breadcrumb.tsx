@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
-import { Fragment, useEffect, useState } from "react";
+import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
+import { Fragment, useEffect, useState } from 'react';
 
 import {
   documentDetailQueryOptions,
   documentKeys,
   getDocument,
   type Document,
-} from "@shared/domains/document";
-import { workspaceRoutes } from "@shared/domains/workspace";
+} from '@shared/domains/document';
+import { workspaceRoutes } from '@shared/domains/workspace';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -18,7 +18,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@shared/components/ui/breadcrumb";
+} from '@shared/components/ui/breadcrumb';
 
 type DocumentBreadcrumbProps = {
   document: Document;
@@ -82,20 +82,20 @@ export function DocumentBreadcrumb({
   const visibleBreadcrumbDocuments =
     resolvedBreadcrumbDocuments.length > 3
       ? [
-          resolvedBreadcrumbDocuments[0],
-          resolvedBreadcrumbDocuments[resolvedBreadcrumbDocuments.length - 2],
-          resolvedBreadcrumbDocuments[resolvedBreadcrumbDocuments.length - 1],
-        ]
+        resolvedBreadcrumbDocuments[0],
+        resolvedBreadcrumbDocuments[resolvedBreadcrumbDocuments.length - 2],
+        resolvedBreadcrumbDocuments[resolvedBreadcrumbDocuments.length - 1],
+      ]
       : resolvedBreadcrumbDocuments;
   const breadcrumbLabelClassName =
-    "block max-w-[7rem] truncate rounded px-1.5 sm:max-w-[9rem] lg:max-w-[11rem]";
+    'block max-w-[7rem] truncate rounded px-1.5 sm:max-w-[9rem] lg:max-w-[11rem]';
 
   return (
     <Breadcrumb
       className={[
-        "min-w-0 flex-1 transition-opacity duration-200",
-        isVisible ? "opacity-100" : "pointer-events-none opacity-0",
-      ].join(" ")}
+        'min-w-0 flex-1 transition-opacity duration-200',
+        isVisible ? 'opacity-100' : 'pointer-events-none opacity-0',
+      ].join(' ')}
     >
       <BreadcrumbList className="min-w-0 flex-nowrap gap-0.5 text-sm">
         {visibleBreadcrumbDocuments.map((breadcrumbDocument, index) => {
@@ -119,29 +119,31 @@ export function DocumentBreadcrumb({
                 </>
               )}
               <BreadcrumbItem className="min-w-0">
-                {isCurrentDocument ? (
-                  <BreadcrumbPage
-                    className={`${breadcrumbLabelClassName} max-w-[8rem] py-1 sm:max-w-[10rem] lg:max-w-[12rem]`}
-                  >
-                    {displayTitle}
-                  </BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink
-                    render={
-                      <Link
-                        href={workspaceRoutes.document(
-                          workspaceSlug,
-                          breadcrumbDocument.public_id,
-                          breadcrumbDocument.title,
-                        )}
-                        prefetch={false}
-                      />
-                    }
-                    className={`${breadcrumbLabelClassName} hover:bg-accent hover:text-foreground`}
-                  >
-                    {breadcrumbDocument.title}
-                  </BreadcrumbLink>
-                )}
+                {isCurrentDocument
+                  ? (
+                    <BreadcrumbPage
+                      className={`${breadcrumbLabelClassName} max-w-[8rem] py-1 sm:max-w-[10rem] lg:max-w-[12rem]`}
+                    >
+                      {displayTitle}
+                    </BreadcrumbPage>
+                  )
+                  : (
+                    <BreadcrumbLink
+                      render={
+                        <Link
+                          href={workspaceRoutes.document(
+                            workspaceSlug,
+                            breadcrumbDocument.public_id,
+                            breadcrumbDocument.title,
+                          )}
+                          prefetch={false}
+                        />
+                      }
+                      className={`${breadcrumbLabelClassName} hover:bg-accent hover:text-foreground`}
+                    >
+                      {breadcrumbDocument.title}
+                    </BreadcrumbLink>
+                  )}
               </BreadcrumbItem>
             </Fragment>
           );

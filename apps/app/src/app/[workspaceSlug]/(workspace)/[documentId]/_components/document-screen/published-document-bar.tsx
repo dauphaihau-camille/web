@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { Globe2Icon } from "lucide-react";
+import Link from 'next/link';
+import { Globe2Icon } from 'lucide-react';
 
-import { buttonVariants } from "@shared/components/ui/button";
-import { cn } from "@shared/lib/utils";
+import { buttonVariants } from '@shared/components/ui/button';
+import { cn } from '@shared/lib/utils';
 
 export function PublishedDocumentBar({
   publishedPath,
@@ -24,8 +24,8 @@ export function PublishedDocumentBar({
           target="_blank"
           rel="noopener noreferrer"
           className={cn(
-            buttonVariants({ variant: "ghost", size: "sm" }),
-            "h-8 gap-1 px-2 text-sky-700 hover:bg-sky-100 hover:text-sky-800",
+            buttonVariants({ variant: 'ghost', size: 'sm' }),
+            'h-8 gap-1 px-2 text-sky-700 hover:bg-sky-100 hover:text-sky-800',
           )}
         >
           <Globe2Icon className="size-4" />

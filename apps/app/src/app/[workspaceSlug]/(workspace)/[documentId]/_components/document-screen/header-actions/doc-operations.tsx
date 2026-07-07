@@ -1,11 +1,13 @@
-import { useEffect } from "react";
-import { CopyIcon, EllipsisIcon, LinkIcon, Trash2Icon } from "lucide-react";
+import { useEffect } from 'react';
+import {
+  CopyIcon, EllipsisIcon, LinkIcon, Trash2Icon, 
+} from 'lucide-react';
 
 import {
   COPY_LINK_EVENT,
   DUPLICATE_DOCUMENT_EVENT,
-} from "@/app/[workspaceSlug]/_components/workspace-shortcuts-provider";
-import { buttonVariants } from "@shared/components/ui/button";
+} from '@/app/[workspaceSlug]/_components/workspace-shortcuts-provider';
+import { buttonVariants } from '@shared/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,10 +15,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@shared/components/ui/dropdown-menu";
-import { cn } from "@shared/lib/utils";
+} from '@shared/components/ui/dropdown-menu';
+import { cn } from '@shared/lib/utils';
 
-import { RelativeTimeText } from "./relative-time-text";
+import { RelativeTimeText } from './relative-time-text';
 
 type DocOperationsProps = {
   isArchiving: boolean;
@@ -69,8 +71,8 @@ export function DocOperations({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          buttonVariants({ variant: "ghost", size: "icon" }),
-          "text-muted-foreground",
+          buttonVariants({ variant: 'ghost', size: 'icon' }),
+          'text-muted-foreground',
         )}
       >
         <EllipsisIcon className="size-4" />
@@ -84,13 +86,13 @@ export function DocOperations({
       >
         <DropdownMenuItem disabled={isDuplicating} onClick={onDuplicate}>
           <CopyIcon className="size-4" />
-          <span>{isDuplicating ? "Duplicating..." : "Duplicate"}</span>
-          <DropdownMenuShortcut>{"\u2318D"}</DropdownMenuShortcut>
+          <span>{isDuplicating ? 'Duplicating...' : 'Duplicate'}</span>
+          <DropdownMenuShortcut>{'\u2318D'}</DropdownMenuShortcut>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => void onCopyLink()}>
           <LinkIcon className="size-4" />
           <span>Copy link</span>
-          <DropdownMenuShortcut>{"\u21e7\u2318L"}</DropdownMenuShortcut>
+          <DropdownMenuShortcut>{'\u21e7\u2318L'}</DropdownMenuShortcut>
         </DropdownMenuItem>
         <DropdownMenuItem
           variant="destructive"
@@ -99,7 +101,7 @@ export function DocOperations({
           onClick={onArchive}
         >
           <Trash2Icon className="size-4" />
-          <span>{isArchiving ? "Moving to Trash..." : "Move to Trash"}</span>
+          <span>{isArchiving ? 'Moving to Trash...' : 'Move to Trash'}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <div className="px-2 py-1.5">

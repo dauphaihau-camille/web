@@ -22,7 +22,7 @@ function callHandler(
   }
 }
 
-export const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(function ScrollFade(
+export const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(function ScrollFadeComponent(
   {
     className,
     direction = 'y',

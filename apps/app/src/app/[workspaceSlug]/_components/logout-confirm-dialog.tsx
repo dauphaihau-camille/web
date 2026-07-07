@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { UserRoundXIcon } from "lucide-react";
+import { UserRoundXIcon } from 'lucide-react';
 
 import {
   AlertDialog,
@@ -9,8 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogMedia,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@shared/components/ui/button";
+} from '@/components/ui/alert-dialog';
+import { Button } from '@shared/components/ui/button';
 
 type LogoutConfirmDialogProps = {
   isPending: boolean;
@@ -51,7 +51,7 @@ export function LogoutConfirmDialog({
             onClick={onConfirm}
             variant="destructive-solid"
           >
-            {isPending ? "Logging out..." : "Log out"}
+            {isPending ? 'Logging out...' : 'Log out'}
           </Button>
           <Button
             size="lg"

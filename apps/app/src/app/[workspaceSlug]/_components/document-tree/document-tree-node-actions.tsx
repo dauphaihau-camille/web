@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 import {
   CopyIcon,
   EllipsisIcon,
@@ -9,29 +9,29 @@ import {
   PlusIcon,
   StarIcon,
   Trash2Icon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import {
   useMutation,
   useQuery,
   useQueryClient,
   type QueryClient,
-} from "@tanstack/react-query";
-import { toast } from "sonner";
+} from '@tanstack/react-query';
+import { toast } from 'sonner';
 
-import { Button } from "@shared/components/ui/button";
+import { Button } from '@shared/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@shared/components/ui/dropdown-menu";
+} from '@shared/components/ui/dropdown-menu';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@shared/components/ui/tooltip";
+} from '@shared/components/ui/tooltip';
 import {
   archiveDocument,
   createDocument,
@@ -43,22 +43,22 @@ import {
   type WorkspaceDocumentNavigation,
   workspaceDocumentChildrenQueryOptions,
   workspaceDocumentRootQueryOptions,
-} from "@shared/domains/document";
+} from '@shared/domains/document';
 import {
   favoriteDocument,
   favoriteKeys,
   favoriteStatusQueryOptions,
   unfavoriteDocument,
-} from "@/domains/favorite";
-import { cn } from "@shared/lib/utils";
-import { useDocumentTreeExpansionStore } from "@/stores/document-tree-expansion-store";
-import { workspaceRoutes } from "@shared/domains/workspace";
+} from '@/domains/favorite';
+import { cn } from '@shared/lib/utils';
+import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
+import { workspaceRoutes } from '@shared/domains/workspace';
 
 import {
   insertCreatedSubdocIntoCachedChildren,
   markCachedNavigationNodeHasChildren,
   removeCachedNavigationDocument,
-} from "../../(workspace)/[documentId]/_components/document-screen/document-screen-cache";
+} from '../../(workspace)/[documentId]/_components/document-screen/document-screen-cache';
 
 type DocumentTreeNodeActionsProps = {
   document: DocumentNavigationNode;
@@ -161,7 +161,7 @@ export function DocumentTreeNodeActions({
         queryKey: favoriteKeys.workspaceList(workspaceSlug),
       });
       toast(
-        status.is_favorite ? "Added to favorites" : "Removed from favorites",
+        status.is_favorite ? 'Added to favorites' : 'Removed from favorites',
       );
     },
   });
@@ -186,7 +186,7 @@ export function DocumentTreeNodeActions({
       await queryClient.invalidateQueries({
         queryKey: favoriteKeys.workspaceList(workspaceSlug),
       });
-      toast("Moved to trash");
+      toast('Moved to trash');
     },
   });
 
@@ -199,7 +199,7 @@ export function DocumentTreeNodeActions({
   };
 
   const handleCopyLink = async () => {
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
       return;
     }
 
@@ -210,7 +210,7 @@ export function DocumentTreeNodeActions({
         document.title,
       )}`,
     );
-    toast("Copied page link to clipboard");
+    toast('Copied page link to clipboard');
   };
 
   const handleToggleFavorite = () => {
@@ -224,10 +224,10 @@ export function DocumentTreeNodeActions({
       );
       const nextDocument = isActive
         ? await resolveArchiveDestination({
-            document: documentDetail,
-            queryClient,
-            workspaceSlug,
-          })
+          document: documentDetail,
+          queryClient,
+          workspaceSlug,
+        })
         : null;
 
       await archiveDocumentMutation.mutateAsync();
@@ -236,10 +236,10 @@ export function DocumentTreeNodeActions({
         router.replace(
           nextDocument
             ? workspaceRoutes.document(
-                workspaceSlug,
-                nextDocument.public_id,
-                nextDocument.title,
-              )
+              workspaceSlug,
+              nextDocument.public_id,
+              nextDocument.title,
+            )
             : workspaceRoutes.detail(workspaceSlug),
         );
       }
@@ -265,8 +265,8 @@ export function DocumentTreeNodeActions({
   return (
     <div
       className={cn(
-        "absolute inset-y-0 right-1 z-20 flex items-center gap-0.5 rounded pr-0.5 pl-1 opacity-0 transition-opacity group-hover/menu-sub-item:opacity-100",
-        isMenuOpen && "opacity-100",
+        'absolute inset-y-0 right-1 z-20 flex items-center gap-0.5 rounded pr-0.5 pl-1 opacity-0 transition-opacity group-hover/menu-sub-item:opacity-100',
+        isMenuOpen && 'opacity-100',
       )}
     >
       <Tooltip>
@@ -281,7 +281,7 @@ export function DocumentTreeNodeActions({
             render={
               <DropdownMenuTrigger
                 className={cn(
-                  "flex size-5 items-center justify-center rounded-sm bg-transparent text-sidebar-foreground/70 outline-hidden transition-colors hover:bg-sidebar-accent-foreground/10 hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring aria-expanded:bg-sidebar-accent-foreground/10 aria-expanded:text-sidebar-accent-foreground",
+                  'flex size-5 items-center justify-center rounded-sm bg-transparent text-sidebar-foreground/70 outline-hidden transition-colors hover:bg-sidebar-accent-foreground/10 hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring aria-expanded:bg-sidebar-accent-foreground/10 aria-expanded:text-sidebar-accent-foreground',
                 )}
               >
                 <EllipsisIcon className="size-4" />
@@ -306,8 +306,8 @@ export function DocumentTreeNodeActions({
             <CopyIcon className="size-4" />
             <span>
               {duplicateDocumentMutation.isPending
-                ? "Duplicating..."
-                : "Duplicate"}
+                ? 'Duplicating...'
+                : 'Duplicate'}
             </span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => void handleCopyLink()}>
@@ -322,12 +322,12 @@ export function DocumentTreeNodeActions({
           >
             <StarIcon
               className={cn(
-                "size-4",
-                isFavorite && "fill-current text-amber-300",
+                'size-4',
+                isFavorite && 'fill-current text-amber-300',
               )}
             />
             <span>
-              {isFavorite ? "Remove from favorites" : "Add to favorites"}
+              {isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             </span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -340,8 +340,8 @@ export function DocumentTreeNodeActions({
             <Trash2Icon className="size-4" />
             <span>
               {archiveDocumentMutation.isPending
-                ? "Moving to Trash..."
-                : "Move to Trash"}
+                ? 'Moving to Trash...'
+                : 'Move to Trash'}
             </span>
           </DropdownMenuItem>
         </DropdownMenuContent>

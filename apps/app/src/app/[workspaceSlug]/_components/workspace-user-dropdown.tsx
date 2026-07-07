@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ChevronDownIcon,
   EllipsisIcon,
   LogOutIcon,
   PlusIcon,
   SettingsIcon,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import {
   DropdownMenu,
@@ -23,23 +23,23 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@shared/components/ui/dropdown-menu";
+} from '@shared/components/ui/dropdown-menu';
 import {
   authKeys,
   authRoutes,
   logout,
   useCurrentUserQuery,
-} from "@shared/domains/auth";
+} from '@shared/domains/auth';
 import {
   myWorkspaceListQueryOptions,
   workspaceKeys,
   useWorkspaceQuery,
   workspaceRoutes,
-} from "@shared/domains/workspace";
-import { cn } from "@shared/lib/utils";
-import { CreateWorkspaceDialog } from "./create-workspace-dialog";
-import { LogoutConfirmDialog } from "./logout-confirm-dialog";
-import { Skeleton } from "@shared/components/ui/skeleton";
+} from '@shared/domains/workspace';
+import { cn } from '@shared/lib/utils';
+import { CreateWorkspaceDialog } from './create-workspace-dialog';
+import { LogoutConfirmDialog } from './logout-confirm-dialog';
+import { Skeleton } from '@shared/components/ui/skeleton';
 
 export function WorkspaceUserDropdown({
   workspaceSlug,
@@ -63,9 +63,9 @@ export function WorkspaceUserDropdown({
   const visibleWorkspaces = workspaces.slice(0, 3);
   const overflowWorkspaces = workspaces.slice(3);
   const workspaceInitial = (
-    workspace?.name?.trim().charAt(0) ||
-    workspaceSlug.trim().charAt(0) ||
-    "W"
+    workspace?.name?.trim().charAt(0)
+    || workspaceSlug.trim().charAt(0)
+    || 'W'
   ).toUpperCase();
 
   const logoutMutation = useMutation({
@@ -83,32 +83,34 @@ export function WorkspaceUserDropdown({
       <DropdownMenu onOpenChange={setIsOpen}>
         <DropdownMenuTrigger
           className={cn(
-            "flex w-full items-center gap-3 rounded-lg border border-transparent bg-transparent px-2 py-2 text-left outline-hidden transition-colors hover:bg-sidebar-accent/40 focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+            'flex w-full items-center gap-3 rounded-lg border border-transparent bg-transparent px-2 py-2 text-left outline-hidden transition-colors hover:bg-sidebar-accent/40 focus-visible:ring-2 focus-visible:ring-sidebar-ring',
           )}
         >
-          {workspace ? (
-            <>
-              <div className="flex size-6 shrink-0 items-center justify-center rounded bg-sidebar-accent text-sidebar-accent-foreground">
-                <span className="text-sm font-semibold">
-                  {workspaceInitial}
-                </span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[15px] font-medium text-sidebar-foreground">
-                  {workspace.name}
-                </p>
-              </div>
-              <ChevronDownIcon className="size-4 text-sidebar-foreground/60" />
-            </>
-          ) : (
-            <>
-              <Skeleton className="size-6 shrink-0 rounded" />
-              <div className="min-w-0 flex-1">
-                <Skeleton className="h-4 w-28" />
-              </div>
-              <ChevronDownIcon className="size-4 text-sidebar-foreground/60" />
-            </>
-          )}
+          {workspace
+            ? (
+              <>
+                <div className="flex size-6 shrink-0 items-center justify-center rounded bg-sidebar-accent text-sidebar-accent-foreground">
+                  <span className="text-sm font-semibold">
+                    {workspaceInitial}
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[15px] font-medium text-sidebar-foreground">
+                    {workspace.name}
+                  </p>
+                </div>
+                <ChevronDownIcon className="size-4 text-sidebar-foreground/60" />
+              </>
+            )
+            : (
+              <>
+                <Skeleton className="size-6 shrink-0 rounded" />
+                <div className="min-w-0 flex-1">
+                  <Skeleton className="h-4 w-28" />
+                </div>
+                <ChevronDownIcon className="size-4 text-sidebar-foreground/60" />
+              </>
+            )}
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="start" sideOffset={8}>
@@ -122,11 +124,11 @@ export function WorkspaceUserDropdown({
                     </span>
                   </div>
                   <p className="text-[14px] font-medium text-foreground">
-                    {workspace?.name ?? "Workspace"}
+                    {workspace?.name ?? 'Workspace'}
                   </p>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {currentUser?.email ?? "Loading session..."}
+                  {currentUser?.email ?? 'Loading session...'}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -134,33 +136,39 @@ export function WorkspaceUserDropdown({
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
-            {myWorkspacesQuery.isLoading ? (
-              <DropdownMenuItem disabled>
-                <div className="flex w-full items-center gap-2">
-                  <Skeleton className="size-4 shrink-0 rounded-sm" />
-                  <Skeleton className="h-4 w-32" />
-                </div>
-              </DropdownMenuItem>
-            ) : null}
-            {myWorkspacesQuery.isError ? (
-              <DropdownMenuItem disabled>
-                <span className="truncate">Failed to load workspaces</span>
-              </DropdownMenuItem>
-            ) : null}
-            {!myWorkspacesQuery.isLoading &&
-            !myWorkspacesQuery.isError &&
-            workspaces.length === 0 ? (
-              <DropdownMenuItem disabled>
-                <span className="truncate">No workspaces yet</span>
-              </DropdownMenuItem>
-            ) : null}
+            {myWorkspacesQuery.isLoading
+              ? (
+                <DropdownMenuItem disabled>
+                  <div className="flex w-full items-center gap-2">
+                    <Skeleton className="size-4 shrink-0 rounded-sm" />
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                </DropdownMenuItem>
+              )
+              : null}
+            {myWorkspacesQuery.isError
+              ? (
+                <DropdownMenuItem disabled>
+                  <span className="truncate">Failed to load workspaces</span>
+                </DropdownMenuItem>
+              )
+              : null}
+            {!myWorkspacesQuery.isLoading
+            && !myWorkspacesQuery.isError
+            && workspaces.length === 0
+              ? (
+                <DropdownMenuItem disabled>
+                  <span className="truncate">No workspaces yet</span>
+                </DropdownMenuItem>
+              )
+              : null}
             {visibleWorkspaces.map((userWorkspace) => {
               const isCurrentWorkspace =
                 userWorkspace.slug === (workspace?.slug ?? workspaceSlug);
               const userWorkspaceInitial = (
-                userWorkspace.name.trim().charAt(0) ||
-                userWorkspace.slug.trim().charAt(0) ||
-                "W"
+                userWorkspace.name.trim().charAt(0)
+                || userWorkspace.slug.trim().charAt(0)
+                || 'W'
               ).toUpperCase();
 
               return (
@@ -184,48 +192,50 @@ export function WorkspaceUserDropdown({
                 </DropdownMenuCheckboxItem>
               );
             })}
-            {overflowWorkspaces.length > 0 ? (
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
-                  <EllipsisIcon />
-                  <span>More</span>
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  {overflowWorkspaces.map((userWorkspace) => {
-                    const isCurrentWorkspace =
-                      userWorkspace.slug === (workspace?.slug ?? workspaceSlug);
-                    const userWorkspaceInitial = (
-                      userWorkspace.name.trim().charAt(0) ||
-                      userWorkspace.slug.trim().charAt(0) ||
-                      "W"
-                    ).toUpperCase();
+            {overflowWorkspaces.length > 0
+              ? (
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <EllipsisIcon />
+                    <span>More</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {overflowWorkspaces.map((userWorkspace) => {
+                      const isCurrentWorkspace =
+                        userWorkspace.slug === (workspace?.slug ?? workspaceSlug);
+                      const userWorkspaceInitial = (
+                        userWorkspace.name.trim().charAt(0)
+                      || userWorkspace.slug.trim().charAt(0)
+                      || 'W'
+                      ).toUpperCase();
 
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={userWorkspace.id}
-                        checked={isCurrentWorkspace}
-                        onClick={() => {
-                          if (!isCurrentWorkspace) {
-                            router.push(
-                              workspaceRoutes.detail(userWorkspace.slug),
-                            );
-                          }
-                        }}
-                      >
-                        <div className="flex min-w-0 items-center gap-2">
-                          <div className="flex size-4 shrink-0 items-center justify-center rounded bg-sidebar-accent text-sidebar-accent-foreground">
-                            <span className="text-xs font-semibold">
-                              {userWorkspaceInitial}
-                            </span>
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={userWorkspace.id}
+                          checked={isCurrentWorkspace}
+                          onClick={() => {
+                            if (!isCurrentWorkspace) {
+                              router.push(
+                                workspaceRoutes.detail(userWorkspace.slug),
+                              );
+                            }
+                          }}
+                        >
+                          <div className="flex min-w-0 items-center gap-2">
+                            <div className="flex size-4 shrink-0 items-center justify-center rounded bg-sidebar-accent text-sidebar-accent-foreground">
+                              <span className="text-xs font-semibold">
+                                {userWorkspaceInitial}
+                              </span>
+                            </div>
+                            <span className="truncate">{userWorkspace.name}</span>
                           </div>
-                          <span className="truncate">{userWorkspace.name}</span>
-                        </div>
-                      </DropdownMenuCheckboxItem>
-                    );
-                  })}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-            ) : null}
+                        </DropdownMenuCheckboxItem>
+                      );
+                    })}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              )
+              : null}
 
             <DropdownMenuItem
               onClick={() => {

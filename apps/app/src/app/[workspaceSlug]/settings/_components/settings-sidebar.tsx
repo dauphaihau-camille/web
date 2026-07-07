@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ArrowLeftIcon, Settings2Icon, UsersIcon } from "lucide-react";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { ArrowLeftIcon, Settings2Icon, UsersIcon } from 'lucide-react';
 
 import {
   Sidebar,
@@ -14,17 +14,17 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
-import { workspaceRoutes } from "@shared/domains/workspace";
+} from '@/components/ui/sidebar';
+import { workspaceRoutes } from '@shared/domains/workspace';
 
-import { WorkspaceUserDropdown } from "../../_components/workspace-user-dropdown";
+import { WorkspaceUserDropdown } from '../../_components/workspace-user-dropdown';
 
 const workspaceSettingsItems = [
-  { getHref: workspaceRoutes.settings, icon: Settings2Icon, label: "General" },
+  { getHref: workspaceRoutes.settings, icon: Settings2Icon, label: 'General' },
   {
     getHref: workspaceRoutes.settingsMembers,
     icon: UsersIcon,
-    label: "Members",
+    label: 'Members',
   },
 ];
 

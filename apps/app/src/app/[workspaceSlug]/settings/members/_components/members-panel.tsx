@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent } from 'react';
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
   type ColumnDef,
-} from "@tanstack/react-table";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+} from '@tanstack/react-table';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { Button } from "@shared/components/ui/button";
+import { Button } from '@shared/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -17,9 +17,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@shared/components/ui/dialog";
-import { Input } from "@shared/components/ui/input";
-import { Label } from "@shared/components/ui/label";
+} from '@shared/components/ui/dialog';
+import { Input } from '@shared/components/ui/input';
+import { Label } from '@shared/components/ui/label';
 import {
   Table,
   TableBody,
@@ -27,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shared/components/ui/table";
+} from '@shared/components/ui/table';
 import {
   addWorkspaceMember,
   removeWorkspaceMember,
@@ -37,24 +37,24 @@ import {
   type Workspace,
   type WorkspaceMember,
   type WorkspaceRole,
-} from "@shared/domains/workspace";
+} from '@shared/domains/workspace';
 
-const roleOptions: WorkspaceRole[] = ["owner", "admin", "member"];
+const roleOptions: WorkspaceRole[] = ['owner', 'admin', 'member'];
 
 export function MembersPanel({ workspace }: { workspace: Workspace }) {
   const queryClient = useQueryClient();
   const membersQuery = useQuery(workspaceMemberListQueryOptions(workspace.id));
   const members = membersQuery.data ?? [];
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [role, setRole] = useState<WorkspaceRole>("member");
+  const [email, setEmail] = useState('');
+  const [role, setRole] = useState<WorkspaceRole>('member');
   const [addMemberErrorMessage, setAddMemberErrorMessage] = useState<
     string | null
   >(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const canManageMembers =
-    workspace.current_user_role === "owner" ||
-    workspace.current_user_role === "admin";
+    workspace.current_user_role === 'owner'
+    || workspace.current_user_role === 'admin';
 
   const addMemberMutation = useMutation({
     mutationFn: () =>
@@ -63,8 +63,8 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
         role,
       }),
     onSuccess: async () => {
-      setEmail("");
-      setRole("member");
+      setEmail('');
+      setRole('member');
       setAddMemberErrorMessage(null);
       setErrorMessage(null);
       setIsAddMemberDialogOpen(false);
@@ -76,7 +76,7 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
       setAddMemberErrorMessage(
         error instanceof Error
           ? error.message
-          : "Could not add workspace member.",
+          : 'Could not add workspace member.',
       );
     },
   });
@@ -105,7 +105,7 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Could not update workspace member.",
+          : 'Could not update workspace member.',
       );
     },
   });
@@ -123,7 +123,7 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Could not remove workspace member.",
+          : 'Could not remove workspace member.',
       );
     },
   });
@@ -143,8 +143,8 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
 
   const columns: ColumnDef<WorkspaceMember>[] = [
     {
-      accessorKey: "display_name",
-      header: "Member",
+      accessorKey: 'display_name',
+      header: 'Member',
       cell: ({ row }) => (
         <div className="min-w-48">
           <p className="font-medium">
@@ -155,13 +155,13 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
       ),
     },
     {
-      accessorKey: "role",
-      header: "Role",
+      accessorKey: 'role',
+      header: 'Role',
       cell: ({ row }) => {
         const member = row.original;
         const canEditThisMember =
-          canManageMembers &&
-          (workspace.current_user_role === "owner" || member.role !== "owner");
+          canManageMembers
+          && (workspace.current_user_role === 'owner' || member.role !== 'owner');
 
         if (!canEditThisMember) {
           return (
@@ -189,7 +189,7 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
                 key={option}
                 value={option}
                 disabled={
-                  option === "owner" && workspace.current_user_role !== "owner"
+                  option === 'owner' && workspace.current_user_role !== 'owner'
                 }
               >
                 {option}
@@ -200,13 +200,13 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
       },
     },
     {
-      id: "actions",
-      header: "",
+      id: 'actions',
+      header: '',
       cell: ({ row }) => {
         const member = row.original;
         const canEditThisMember =
-          canManageMembers &&
-          (workspace.current_user_role === "owner" || member.role !== "owner");
+          canManageMembers
+          && (workspace.current_user_role === 'owner' || member.role !== 'owner');
 
         if (!canEditThisMember) {
           return null;
@@ -235,73 +235,79 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
 
   return (
     <section className="">
-      {canManageMembers ? (
-        <div className="mt-4 flex justify-end">
-          <Dialog
-            open={isAddMemberDialogOpen}
-            onOpenChange={handleAddMemberDialogOpenChange}
-          >
-            <DialogTrigger render={<Button />}>Add member</DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Add member</DialogTitle>
-                <DialogDescription>
-                  Invite someone to this workspace and choose their starting
-                  role.
-                </DialogDescription>
-              </DialogHeader>
-              <form className="grid gap-4" onSubmit={handleAddMember}>
-                <div className="space-y-2">
-                  <Label htmlFor="member-email">Email</Label>
-                  <Input
-                    id="member-email"
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="member@example.com"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="member-role">Role</Label>
-                  <select
-                    id="member-role"
-                    value={role}
-                    onChange={(event) =>
-                      setRole(event.target.value as WorkspaceRole)
-                    }
-                    className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                  >
-                    {roleOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                {addMemberErrorMessage ? (
-                  <p className="text-sm text-destructive">
-                    {addMemberErrorMessage}
-                  </p>
-                ) : null}
-                <div className="flex justify-end">
-                  <Button
-                    disabled={
-                      addMemberMutation.isPending || email.trim().length === 0
-                    }
-                    type="submit"
-                  >
-                    {addMemberMutation.isPending ? "Adding..." : "Add member"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      ) : null}
-      {errorMessage ? (
-        <p className="mt-4 text-sm text-destructive">{errorMessage}</p>
-      ) : null}
+      {canManageMembers
+        ? (
+          <div className="mt-4 flex justify-end">
+            <Dialog
+              open={isAddMemberDialogOpen}
+              onOpenChange={handleAddMemberDialogOpenChange}
+            >
+              <DialogTrigger render={<Button />}>Add member</DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add member</DialogTitle>
+                  <DialogDescription>
+                    Invite someone to this workspace and choose their starting
+                    role.
+                  </DialogDescription>
+                </DialogHeader>
+                <form className="grid gap-4" onSubmit={handleAddMember}>
+                  <div className="space-y-2">
+                    <Label htmlFor="member-email">Email</Label>
+                    <Input
+                      id="member-email"
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="member@example.com"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="member-role">Role</Label>
+                    <select
+                      id="member-role"
+                      value={role}
+                      onChange={(event) =>
+                        setRole(event.target.value as WorkspaceRole)
+                      }
+                      className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                    >
+                      {roleOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {addMemberErrorMessage
+                    ? (
+                      <p className="text-sm text-destructive">
+                        {addMemberErrorMessage}
+                      </p>
+                    )
+                    : null}
+                  <div className="flex justify-end">
+                    <Button
+                      disabled={
+                        addMemberMutation.isPending || email.trim().length === 0
+                      }
+                      type="submit"
+                    >
+                      {addMemberMutation.isPending ? 'Adding...' : 'Add member'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        )
+        : null}
+      {errorMessage
+        ? (
+          <p className="mt-4 text-sm text-destructive">{errorMessage}</p>
+        )
+        : null}
       <div className="mt-6 rounded-lg border">
         <Table>
           <TableHeader>
@@ -312,50 +318,54 @@ export function MembersPanel({ workspace }: { workspace: Workspace }) {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {membersQuery.isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  Loading members...
-                </TableCell>
-              </TableRow>
-            ) : null}
+            {membersQuery.isLoading
+              ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-muted-foreground"
+                  >
+                    Loading members...
+                  </TableCell>
+                </TableRow>
+              )
+              : null}
             {!membersQuery.isLoading && table.getRowModel().rows.length > 0
               ? table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
               : null}
-            {!membersQuery.isLoading &&
-            table.getRowModel().rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No members found.
-                </TableCell>
-              </TableRow>
-            ) : null}
+            {!membersQuery.isLoading
+            && table.getRowModel().rows.length === 0
+              ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-muted-foreground"
+                  >
+                    No members found.
+                  </TableCell>
+                </TableRow>
+              )
+              : null}
           </TableBody>
         </Table>
       </div>

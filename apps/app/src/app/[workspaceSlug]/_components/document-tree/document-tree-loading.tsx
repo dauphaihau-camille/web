@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuSkeleton,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 
 export function DocumentTreeLoading() {
   return (

@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { Fragment } from "react";
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { Fragment } from 'react';
 
-import { BlockNoteEditorLoader } from "@/components/editor/blocknote-editor-loader";
+import { BlockNoteEditorLoader } from '@/components/editor/blocknote-editor-loader';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,11 +10,11 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@shared/components/ui/breadcrumb";
-import { buttonVariants } from "@shared/components/ui/button";
-import { getPublicDocumentServer } from "@shared/domains/publish/api/publish.server.requests";
-import { getAppSignupUrl } from "@/lib/app-url";
-import { cn } from "@shared/lib/utils";
+} from '@shared/components/ui/breadcrumb';
+import { buttonVariants } from '@shared/components/ui/button';
+import { getPublicDocumentServer } from '@shared/domains/publish/api/publish.server.requests';
+import { getAppSignupUrl } from '@/lib/app-url';
+import { cn } from '@shared/lib/utils';
 
 export default async function SharedDocumentPage({
   params,
@@ -28,7 +28,8 @@ export default async function SharedDocumentPage({
 
   try {
     document = await getPublicDocumentServer(publishedDocumentId);
-  } catch (error) {
+  }
+  catch (error) {
     if (isUnavailablePublicDocumentError(error)) {
       notFound();
     }
@@ -47,7 +48,7 @@ export default async function SharedDocumentPage({
 
           <Link
             href={getAppSignupUrl()}
-            className={cn(buttonVariants({ size: "lg" }), "px-2.5 text-[13px]")}
+            className={cn(buttonVariants({ size: 'lg' }), 'px-2.5 text-[13px]')}
           >
             Get Camille Free
           </Link>
@@ -89,15 +90,15 @@ function DocumentBreadcrumb({
     breadcrumb.length > 0
       ? breadcrumb
       : [
-          {
-            id: "",
-            title,
-            published_document_id: "",
-            public_path: "",
-          },
-        ];
+        {
+          id: '',
+          title,
+          published_document_id: '',
+          public_path: '',
+        },
+      ];
   const breadcrumbLabelClassName =
-    "block max-w-[7rem] truncate rounded px-1.5 sm:max-w-[9rem] lg:max-w-[11rem]";
+    'block max-w-[7rem] truncate rounded px-1.5 sm:max-w-[9rem] lg:max-w-[11rem]';
 
   return (
     <Breadcrumb className="min-w-0 flex-1">
@@ -113,26 +114,28 @@ function DocumentBreadcrumb({
                 </BreadcrumbSeparator>
               )}
               <BreadcrumbItem className="min-w-0">
-                {isCurrent ? (
-                  <BreadcrumbPage
-                    className={cn(
-                      breadcrumbLabelClassName,
-                      "max-w-[8rem] py-1 sm:max-w-[10rem] lg:max-w-[12rem]",
-                    )}
-                  >
-                    {item.title}
-                  </BreadcrumbPage>
-                ) : (
-                  <BreadcrumbLink
-                    href={item.public_path}
-                    className={cn(
-                      breadcrumbLabelClassName,
-                      "hover:bg-accent hover:text-foreground",
-                    )}
-                  >
-                    {item.title}
-                  </BreadcrumbLink>
-                )}
+                {isCurrent
+                  ? (
+                    <BreadcrumbPage
+                      className={cn(
+                        breadcrumbLabelClassName,
+                        'max-w-[8rem] py-1 sm:max-w-[10rem] lg:max-w-[12rem]',
+                      )}
+                    >
+                      {item.title}
+                    </BreadcrumbPage>
+                  )
+                  : (
+                    <BreadcrumbLink
+                      href={item.public_path}
+                      className={cn(
+                        breadcrumbLabelClassName,
+                        'hover:bg-accent hover:text-foreground',
+                      )}
+                    >
+                      {item.title}
+                    </BreadcrumbLink>
+                  )}
               </BreadcrumbItem>
             </Fragment>
           );
@@ -144,8 +147,8 @@ function DocumentBreadcrumb({
 
 function isUnavailablePublicDocumentError(error: unknown) {
   return (
-    error instanceof Error &&
-    (error.message.includes("Status: 403.") ||
-      error.message.includes("Status: 404."))
+    error instanceof Error
+    && (error.message.includes('Status: 403.')
+      || error.message.includes('Status: 404.'))
   );
 }

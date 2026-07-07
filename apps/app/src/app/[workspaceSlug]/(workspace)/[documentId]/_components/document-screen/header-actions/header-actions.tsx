@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { LinkIcon, StarIcon } from "lucide-react";
-import type { ReactNode } from "react";
-import { Button } from "@shared/components/ui/button";
+import { LinkIcon, StarIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Button } from '@shared/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@shared/components/ui/tooltip";
-import type { Document } from "@shared/domains/document";
-import { cn } from "@shared/lib/utils";
+} from '@shared/components/ui/tooltip';
+import type { Document } from '@shared/domains/document';
+import { cn } from '@shared/lib/utils';
 
-import { DocOperations } from "./doc-operations";
-import { RelativeTimeText } from "./relative-time-text";
-import { ShareButton } from "./share-button";
+import { DocOperations } from './doc-operations';
+import { RelativeTimeText } from './relative-time-text';
+import { ShareButton } from './share-button';
 
 type HeaderActionsProps = {
   archiveCurrentDocument: () => void;
@@ -36,7 +36,7 @@ type HeaderActionsProps = {
   };
   toggleFavorite: () => void;
   unpublishCurrentDocument: () => void;
-  updatedAt: Document["updated_at"];
+  updatedAt: Document['updated_at'];
 };
 
 export function HeaderActions({
@@ -60,8 +60,8 @@ export function HeaderActions({
   return (
     <div
       className={cn(
-        "shrink-0 flex items-center transition-opacity duration-200",
-        isVisible ? "opacity-100" : "pointer-events-none opacity-0",
+        'shrink-0 flex items-center transition-opacity duration-200',
+        isVisible ? 'opacity-100' : 'pointer-events-none opacity-0',
       )}
     >
       <div className="hidden items-center gap-1 text-sm font-medium text-muted-foreground md:flex mr-2">
@@ -91,8 +91,8 @@ export function HeaderActions({
         icon={
           <StarIcon
             className={cn(
-              "size-4",
-              favoriteStatus?.is_favorite ? "fill-current text-amber-300" : "",
+              'size-4',
+              favoriteStatus?.is_favorite ? 'fill-current text-amber-300' : '',
             )}
           />
         }
@@ -100,8 +100,8 @@ export function HeaderActions({
         onClick={toggleFavorite}
         tooltip={
           favoriteStatus?.is_favorite
-            ? "Remove from favorites"
-            : "Add to favorites"
+            ? 'Remove from favorites'
+            : 'Add to favorites'
         }
       />
       <DocOperations
@@ -135,8 +135,8 @@ function HeaderActionButton({
       size="icon"
       aria-label={ariaLabel}
       className={cn(
-        "text-muted-foreground",
-        disabled && "pointer-events-none opacity-50",
+        'text-muted-foreground',
+        disabled && 'pointer-events-none opacity-50',
       )}
       onClick={() => {
         void onClick?.();

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { toast } from "sonner";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 import {
   archiveDocument,
@@ -12,24 +12,24 @@ import {
   setRecentWorkspaceDocumentId,
   type Document,
   updateDocument,
-} from "@shared/domains/document";
-import { BlockNoteEditorLoader } from "@/components/editor/blocknote-editor-loader";
-import { hasMeaningfulContent } from "@/components/editor/has-meaningful-content";
-import { Input } from "@shared/components/ui/input";
-import { cn } from "@shared/lib/utils";
+} from '@shared/domains/document';
+import { BlockNoteEditorLoader } from '@/components/editor/blocknote-editor-loader';
+import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
+import { Input } from '@shared/components/ui/input';
+import { cn } from '@shared/lib/utils';
 
-import { DocumentBreadcrumb } from "./document-breadcrumb";
+import { DocumentBreadcrumb } from './document-breadcrumb';
 import {
   insertCreatedSubdocIntoCachedChildren,
   markCachedNavigationNodeHasChildren,
   removeCachedNavigationDocument,
   updateCachedNavigationContentStatus,
-} from "./document-screen-cache";
-import { HeaderActions } from "./header-actions/header-actions";
-import { useHeaderActions } from "./header-actions/use-header-actions";
-import { PublishedDocumentBar } from "./published-document-bar";
-import { useDocumentTitle } from "./_hooks/use-document-title";
-import { useDocumentChromeVisibility } from "./use-document-chrome-visibility";
+} from './document-screen-cache';
+import { HeaderActions } from './header-actions/header-actions';
+import { useHeaderActions } from './header-actions/use-header-actions';
+import { PublishedDocumentBar } from './published-document-bar';
+import { useDocumentTitle } from './_hooks/use-document-title';
+import { useDocumentChromeVisibility } from './use-document-chrome-visibility';
 
 export function DocumentScreen({
   document,
@@ -140,7 +140,7 @@ export function DocumentScreen({
       await queryClient.invalidateQueries({
         queryKey: documentKeys.lists(workspaceSlug),
       });
-      toast("Moved to trash");
+      toast('Moved to trash');
     },
   });
 
@@ -156,8 +156,8 @@ export function DocumentScreen({
 
       <div
         className={cn(
-          "fixed inset-x-0 z-10 bg-background px-2 backdrop-blur md:left-(--sidebar-width)",
-          isPublished ? "top-12" : "top-0",
+          'fixed inset-x-0 z-10 bg-background px-2 backdrop-blur md:left-(--sidebar-width)',
+          isPublished ? 'top-12' : 'top-0',
         )}
       >
         <div className="flex h-11 items-center justify-between gap-3">
@@ -176,7 +176,7 @@ export function DocumentScreen({
         </div>
       </div>
 
-      <div className={cn("mx-auto max-w-2xl", isPublished ? "pt-32" : "pt-20")}>
+      <div className={cn('mx-auto max-w-2xl', isPublished ? 'pt-32' : 'pt-20')}>
         <div className="space-y-3 px-[3.8rem]">
           <div className="min-w-0 flex-1 space-y-2">
             <Input

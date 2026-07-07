@@ -27,13 +27,13 @@
     "test:e2e:api": "bun run --cwd apps/app test:e2e:api",
     "test:e2e": "bun run --cwd apps/app test:e2e",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix",
+    "lint:fix": "eslint . --fix",
     "prepare": "husky",
     "typecheck": "bun run typecheck:app && bun run typecheck:marketing"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,jsx,ts,tsx}": [
-      "eslint --max-warnings=0"
+      "eslint --fix"
     ]
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 import { formatRelativeTime } from './header-actions.utils';
 
@@ -15,11 +15,11 @@ export function RelativeTimeText({
   prefix,
   value,
 }: RelativeTimeTextProps) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const isMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
   const text = isMounted ? formatRelativeTime(value) : fallback;
 

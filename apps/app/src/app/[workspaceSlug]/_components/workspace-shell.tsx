@@ -1,12 +1,12 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 import {
   SidebarInset,
   SidebarProvider,
-} from "@/components/ui/sidebar";
-import { ScrollFade } from "@shared/components/ui/scroll-fade";
+} from '@/components/ui/sidebar';
+import { ScrollFade } from '@shared/components/ui/scroll-fade';
 
-import { WorkspaceSidebar } from "./workspace-sidebar/workspace-sidebar";
+import { WorkspaceSidebar } from './workspace-sidebar/workspace-sidebar';
 
 export function WorkspaceShell({
   children,

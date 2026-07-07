@@ -1,11 +1,11 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 import {
   SidebarInset,
   SidebarProvider,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 
-import { SettingsSidebar } from "./settings-sidebar";
+import { SettingsSidebar } from './settings-sidebar';
 
 export function SettingsShell({
   children,

@@ -3,7 +3,7 @@ import {
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
-} from "@shared/components/ui/empty";
+} from '@shared/components/ui/empty';
 
 export default function SharedDocumentNotFound() {
   return (

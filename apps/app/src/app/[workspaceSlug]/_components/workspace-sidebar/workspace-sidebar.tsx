@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Sidebar,
@@ -8,12 +8,12 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 
-import { WorkspaceUserDropdown } from "../workspace-user-dropdown";
-import { PrivateDocumentsGroup } from "./private-documents-group";
-import { FavoritesDocumentsGroup } from "./favorites-documents-group";
-import { WorkspaceSearchButton } from "./workspace-search-button";
+import { WorkspaceUserDropdown } from '../workspace-user-dropdown';
+import { PrivateDocumentsGroup } from './private-documents-group';
+import { FavoritesDocumentsGroup } from './favorites-documents-group';
+import { WorkspaceSearchButton } from './workspace-search-button';
 
 export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
   return (

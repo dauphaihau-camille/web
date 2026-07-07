@@ -1,47 +1,47 @@
-"use client";
+'use client';
 
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 import type {
   DefaultReactSuggestionItem,
   SuggestionMenuProps,
-} from "@blocknote/react";
+} from '@blocknote/react';
 
-import { cn } from "@shared/lib/utils";
-import { ScrollArea } from "@shared/components/ui/scroll-area";
+import { cn } from '@shared/lib/utils';
+import { ScrollArea } from '@shared/components/ui/scroll-area';
 
 type SlashMenuProps = Pick<
   SuggestionMenuProps<DefaultReactSuggestionItem>,
-  "items" | "loadingState" | "selectedIndex" | "onItemClick"
+  'items' | 'loadingState' | 'selectedIndex' | 'onItemClick'
 > & {
   query: string;
 };
 
 const SLASH_MENU_HINTS: Record<string, string> = {
-  paragraph: "T",
-  text: "T",
-  "heading 1": "#",
-  "heading 2": "##",
-  "heading 3": "###",
-  "heading 4": "####",
-  "heading 5": "#####",
-  "heading 6": "######",
-  "bullet list": "-",
-  "bulleted list": "-",
-  "numbered list": "1.",
-  "check list": "[]",
-  "to-do list": "[]",
-  "toggle list": ">",
+  paragraph: 'T',
+  text: 'T',
+  'heading 1': '#',
+  'heading 2': '##',
+  'heading 3': '###',
+  'heading 4': '####',
+  'heading 5': '#####',
+  'heading 6': '######',
+  'bullet list': '-',
+  'bulleted list': '-',
+  'numbered list': '1.',
+  'check list': '[]',
+  'to-do list': '[]',
+  'toggle list': '>',
   quote: '"',
-  divider: "---",
-  "code block": "```",
-  table: "+",
-  image: "/image",
-  video: "/video",
-  audio: "/audio",
-  file: "/file",
-  emoji: ":",
-  document: "/doc",
-  subdoc: "/subdoc",
+  divider: '---',
+  'code block': '```',
+  table: '+',
+  image: '/image',
+  video: '/video',
+  audio: '/audio',
+  file: '/file',
+  emoji: ':',
+  document: '/doc',
+  subdoc: '/subdoc',
 };
 
 function getSlashMenuHint(item: DefaultReactSuggestionItem) {
@@ -56,7 +56,7 @@ export function SlashMenu({
   onItemClick,
   query,
 }: SlashMenuProps) {
-  if (loadingState === "loaded" && items.length === 0) {
+  if (loadingState === 'loaded' && items.length === 0) {
     return null;
   }
 
@@ -94,10 +94,10 @@ export function SlashMenu({
         key={`${item.group}-${item.title}`}
         type="button"
         className={cn(
-          "group relative flex w-full cursor-default items-center gap-2 rounded-md px-1.5 py-1 text-left text-sm text-foreground outline-hidden transition-colors select-none",
+          'group relative flex w-full cursor-default items-center gap-2 rounded-md px-1.5 py-1 text-left text-sm text-foreground outline-hidden transition-colors select-none',
           index === selectedIndex && (hasSearchQuery || selectedIndex !== 0)
-            ? "bg-accent text-accent-foreground"
-            : "hover:bg-accent hover:text-accent-foreground",
+            ? 'bg-accent text-accent-foreground'
+            : 'hover:bg-accent hover:text-accent-foreground',
         )}
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => onItemClick?.(item)}
@@ -108,11 +108,13 @@ export function SlashMenu({
         <div className="min-w-0 flex-1">
           <div className="truncate font-medium">{item.title}</div>
         </div>
-        {getSlashMenuHint(item) ? (
-          <div className="shrink-0 text-xs tracking-widest text-muted-foreground group-hover:text-accent-foreground">
-            {getSlashMenuHint(item)}
-          </div>
-        ) : null}
+        {getSlashMenuHint(item)
+          ? (
+            <div className="shrink-0 text-xs tracking-widest text-muted-foreground group-hover:text-accent-foreground">
+              {getSlashMenuHint(item)}
+            </div>
+          )
+          : null}
       </button>,
     );
   }
@@ -120,29 +122,35 @@ export function SlashMenu({
   return (
     <div className="w-[min(16rem,calc(100vw-2rem))]">
       <div className="min-w-32 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10">
-        {shouldScroll ? (
-          <ScrollArea className="h-112">
-            <div className="p-1 pr-3">
+        {shouldScroll
+          ? (
+            <ScrollArea className="h-112">
+              <div className="p-1 pr-3">
+                {renderedItems}
+
+                {loadingState !== 'loaded'
+                  ? (
+                    <div className="px-3 py-6 text-sm text-muted-foreground">
+                      Searching...
+                    </div>
+                  )
+                  : null}
+              </div>
+            </ScrollArea>
+          )
+          : (
+            <div className="p-1 pr-2">
               {renderedItems}
 
-              {loadingState !== "loaded" ? (
-                <div className="px-3 py-6 text-sm text-muted-foreground">
-                  Searching...
-                </div>
-              ) : null}
+              {loadingState !== 'loaded'
+                ? (
+                  <div className="px-3 py-6 text-sm text-muted-foreground">
+                    Searching...
+                  </div>
+                )
+                : null}
             </div>
-          </ScrollArea>
-        ) : (
-          <div className="p-1 pr-2">
-            {renderedItems}
-
-            {loadingState !== "loaded" ? (
-              <div className="px-3 py-6 text-sm text-muted-foreground">
-                Searching...
-              </div>
-            ) : null}
-          </div>
-        )}
+          )}
       </div>
     </div>
   );

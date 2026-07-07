@@ -8,11 +8,18 @@ const nextRules = {
 };
 
 export default defineConfig([
-  ...(await dauphaihauConfig()),
+  ...(await dauphaihauConfig({
+    typescript: true,
+  })),
   {
     files: ['**/*.{js,mjs,cjs,jsx,ts,tsx}'],
     plugins: {
       '@next/next': eslintNextPlugin,
+    },
+    settings: {
+      next: {
+        rootDir: ['apps/app', 'apps/marketing'],
+      },
     },
     rules: nextRules,
   },
@@ -24,6 +31,6 @@ export default defineConfig([
     },
   },
   {
-    ignores: ['out/**', 'next-env.d.ts'],
+    ignores: ['out/**', '**/next-env.d.ts'],
   },
 ]);

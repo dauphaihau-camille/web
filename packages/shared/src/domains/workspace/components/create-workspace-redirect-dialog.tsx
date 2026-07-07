@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { LoadingIcon } from "../../../components/loading-icon";
-import { Dialog, DialogContent } from "../../../components/ui/dialog";
+import { LoadingIcon } from '../../../components/loading-icon';
+import { Dialog, DialogContent } from '../../../components/ui/dialog';
 
 type CreateWorkspaceRedirectDialogProps = {
   open: boolean;

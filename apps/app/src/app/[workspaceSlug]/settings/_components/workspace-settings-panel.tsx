@@ -1,24 +1,24 @@
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 
-import { Button } from "@shared/components/ui/button";
+import { Button } from '@shared/components/ui/button';
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@shared/components/ui/field";
+} from '@shared/components/ui/field';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
   InputGroupText,
   InputGroupTextarea,
-} from "@shared/components/ui/input-group";
+} from '@shared/components/ui/input-group';
 import {
   updateWorkspace,
   updateWorkspaceSchema,
@@ -26,8 +26,8 @@ import {
   type Workspace,
   workspaceKeys,
   workspaceRoutes,
-} from "@shared/domains/workspace";
-import { suggestWorkspaceDomain } from "@shared/domains/workspace/api/workspace-domain";
+} from '@shared/domains/workspace';
+import { suggestWorkspaceDomain } from '@shared/domains/workspace/api/workspace-domain';
 
 export function WorkspaceSettingsPanel({
   workspace,
@@ -38,8 +38,8 @@ export function WorkspaceSettingsPanel({
   const router = useRouter();
   const queryClient = useQueryClient();
   const canEditWorkspace =
-    workspace.current_user_role === "owner" ||
-    workspace.current_user_role === "admin";
+    workspace.current_user_role === 'owner'
+    || workspace.current_user_role === 'admin';
 
   const form = useForm<UpdateWorkspaceInput>({
     resolver: zodResolver(updateWorkspaceSchema),
@@ -47,12 +47,14 @@ export function WorkspaceSettingsPanel({
       version: workspace.version,
       name: workspace.name,
       slug: workspace.slug,
-      description: workspace.description ?? "",
+      description: workspace.description ?? '',
     },
   });
 
   const updateWorkspaceMutation = useMutation({
-    mutationFn: ({ version, name, description, slug }: UpdateWorkspaceInput) =>
+    mutationFn: ({
+      version, name, description, slug, 
+    }: UpdateWorkspaceInput) =>
       updateWorkspace(workspaceId, {
         version,
         ...(name ? { name } : {}),
@@ -60,12 +62,12 @@ export function WorkspaceSettingsPanel({
         ...(description !== undefined ? { description } : {}),
       }),
     onSuccess: async (updatedWorkspace) => {
-      form.clearErrors("root");
+      form.clearErrors('root');
       form.reset({
         version: updatedWorkspace.version,
         name: updatedWorkspace.name,
         slug: updatedWorkspace.slug,
-        description: updatedWorkspace.description ?? "",
+        description: updatedWorkspace.description ?? '',
       });
       await Promise.all([
         queryClient.invalidateQueries({
@@ -78,17 +80,17 @@ export function WorkspaceSettingsPanel({
       router.replace(workspaceRoutes.settings(updatedWorkspace.slug));
     },
     onError: (error) => {
-      form.setError("root", {
+      form.setError('root', {
         message:
           error instanceof Error
             ? error.message
-            : "Could not update workspace.",
+            : 'Could not update workspace.',
       });
     },
   });
 
   function handleUpdateWorkspace(values: UpdateWorkspaceInput) {
-    form.clearErrors("root");
+    form.clearErrors('root');
     updateWorkspaceMutation.mutate({
       ...values,
       version: workspace.version,
@@ -100,7 +102,7 @@ export function WorkspaceSettingsPanel({
 
   const description = useWatch({
     control: form.control,
-    name: "description",
+    name: 'description',
   });
 
   return (
@@ -108,7 +110,7 @@ export function WorkspaceSettingsPanel({
       <div className="space-y-1">
         <p className="text-sm font-medium">General</p>
         <p className="text-sm text-muted-foreground">
-          Current role:{" "}
+          Current role:{' '}
           <span className="font-mono">{workspace.current_user_role}</span>
         </p>
       </div>
@@ -135,9 +137,11 @@ export function WorkspaceSettingsPanel({
                     placeholder="Camille Product"
                   />
                 </InputGroup>
-                {fieldState.invalid ? (
-                  <FieldError errors={[fieldState.error]} />
-                ) : null}
+                {fieldState.invalid
+                  ? (
+                    <FieldError errors={[fieldState.error]} />
+                  )
+                  : null}
               </Field>
             )}
           />
@@ -168,9 +172,11 @@ export function WorkspaceSettingsPanel({
                     }}
                   />
                 </InputGroup>
-                {fieldState.invalid ? (
-                  <FieldError errors={[fieldState.error]} />
-                ) : null}
+                {fieldState.invalid
+                  ? (
+                    <FieldError errors={[fieldState.error]} />
+                  )
+                  : null}
               </Field>
             )}
           />
@@ -199,35 +205,41 @@ export function WorkspaceSettingsPanel({
                     </InputGroupText>
                   </InputGroupAddon>
                 </InputGroup>
-                {fieldState.invalid ? (
-                  <FieldError errors={[fieldState.error]} />
-                ) : null}
+                {fieldState.invalid
+                  ? (
+                    <FieldError errors={[fieldState.error]} />
+                  )
+                  : null}
               </Field>
             )}
           />
-          {form.formState.errors.root?.message ? (
-            <Field data-invalid>
-              <FieldError>{form.formState.errors.root.message}</FieldError>
-            </Field>
-          ) : null}
-          {canEditWorkspace ? (
-            <Button
-              size="lg"
-              disabled={
-                updateWorkspaceMutation.isPending || form.formState.isSubmitting
-              }
-              type="submit"
-            >
-              {updateWorkspaceMutation.isPending
-                ? "Saving..."
-                : "Save workspace"}
-            </Button>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Members can view workspace settings, but only admins and owners
-              can update them.
-            </p>
-          )}
+          {form.formState.errors.root?.message
+            ? (
+              <Field data-invalid>
+                <FieldError>{form.formState.errors.root.message}</FieldError>
+              </Field>
+            )
+            : null}
+          {canEditWorkspace
+            ? (
+              <Button
+                size="lg"
+                disabled={
+                  updateWorkspaceMutation.isPending || form.formState.isSubmitting
+                }
+                type="submit"
+              >
+                {updateWorkspaceMutation.isPending
+                  ? 'Saving...'
+                  : 'Save workspace'}
+              </Button>
+            )
+            : (
+              <p className="text-sm text-muted-foreground">
+                Members can view workspace settings, but only admins and owners
+                can update them.
+              </p>
+            )}
         </FieldGroup>
       </form>
     </section>
