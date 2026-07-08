@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useDebounceFn } from 'ahooks';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   documentKeys,
@@ -16,6 +16,7 @@ import {
   updateCachedNavigationTitle,
   updateCachedReferencedSubdocTitles,
 } from '../document-screen-cache';
+import { useLatestWinsSaveQueue } from './use-latest-wins-save-queue';
 
 type UseDocumentTitleArgs = {
   document: Document;
@@ -29,15 +30,6 @@ export function useDocumentTitle({
   const queryClient = useQueryClient();
   const [savedTitle, setSavedTitle] = useState(document.title);
   const [draftTitle, setDraftTitle] = useState<string | null>(null);
-  const titleSaveStateRef = useRef<{
-    inFlight: boolean;
-    pendingTitle: string | null;
-    pendingFinalize: boolean;
-  }>({
-    inFlight: false,
-    pendingTitle: null,
-    pendingFinalize: false,
-  });
   const activeDraftDocumentId = useDocumentTitleDraftStore((state) => state.activeDocumentId);
   const activeDraftTitle = useDocumentTitleDraftStore((state) => state.draftTitle);
   const clearDraftTitle = useDocumentTitleDraftStore((state) => state.clearDraftTitle);
@@ -106,75 +98,48 @@ export function useDocumentTitle({
     );
   };
 
-  const flushQueuedTitleSave = async () => {
-    const state = titleSaveStateRef.current;
+  const queueTitleSave = useLatestWinsSaveQueue<string, { finalize: boolean }>({
+    initialMeta: { finalize: false },
+    onFlush: async (nextTitle, meta) => {
+      const latestDocument =
+        queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
 
-    if (state.inFlight) {
-      return;
-    }
-
-    state.inFlight = true;
-
-    try {
-      while (state.pendingTitle !== null) {
-        const nextTitle = state.pendingTitle;
-        const shouldFinalize = state.pendingFinalize;
-
-        state.pendingTitle = null;
-        state.pendingFinalize = false;
-
-        const latestDocument =
-          queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
-
-        if (nextTitle === latestDocument.title) {
-          setSavedTitle(latestDocument.title);
-          if (shouldFinalize) {
-            finalizeTitleDraft(latestDocument.title);
-          }
-          continue;
+      if (nextTitle === latestDocument.title) {
+        setSavedTitle(latestDocument.title);
+        if (meta.finalize) {
+          finalizeTitleDraft(latestDocument.title);
         }
-
-        const optimisticDocument = {
-          ...latestDocument,
-          title: nextTitle,
-        };
-
-        setSavedTitle(nextTitle);
-        syncTitleCaches(optimisticDocument);
-
-        const updatedDocument = await updateDocument(documentId, {
-          version: latestDocument.version,
-          title: nextTitle,
-        });
-
-        setSavedTitle(updatedDocument.title);
-        syncTitleCaches(updatedDocument);
-        await persistReferencedSubdocTitles(updatedDocument.title);
-
-        if (shouldFinalize) {
-          finalizeTitleDraft(updatedDocument.title);
-        }
+        return;
       }
-    }
-    finally {
-      state.inFlight = false;
-    }
-  };
 
-  const queueTitleSave = (value: string, options?: { finalize?: boolean }) => {
-    const state = titleSaveStateRef.current;
+      const optimisticDocument = {
+        ...latestDocument,
+        title: nextTitle,
+      };
 
-    state.pendingTitle = normalizeTitle(value);
-    state.pendingFinalize = state.pendingFinalize || Boolean(options?.finalize);
+      setSavedTitle(nextTitle);
+      syncTitleCaches(optimisticDocument);
 
-    void flushQueuedTitleSave();
-  };
+      const updatedDocument = await updateDocument(documentId, {
+        version: latestDocument.version,
+        title: nextTitle,
+      });
+
+      setSavedTitle(updatedDocument.title);
+      syncTitleCaches(updatedDocument);
+      await persistReferencedSubdocTitles(updatedDocument.title);
+
+      if (meta.finalize) {
+        finalizeTitleDraft(updatedDocument.title);
+      }
+    },
+  });
 
   const {
     run: scheduleTitleSave,
     cancel: cancelScheduledTitleSave,
   } = useDebounceFn((nextTitle: string) => {
-    queueTitleSave(nextTitle);
+    void queueTitleSave(nextTitle);
   }, { wait: 600 });
 
   useEffect(() => () => {
@@ -206,7 +171,7 @@ export function useDocumentTitle({
     cancelScheduledTitleSave();
     cancelScheduledRouteUpdate();
     updateDocumentRoute(normalizeTitle(nextTitle));
-    queueTitleSave(nextTitle, { finalize: true });
+    void queueTitleSave(nextTitle, { finalize: true });
   };
 
   return {

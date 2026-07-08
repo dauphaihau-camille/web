@@ -29,7 +29,8 @@ import { HeaderActions } from './header-actions/header-actions';
 import { useHeaderActions } from './header-actions/use-header-actions';
 import { PublishedDocumentBar } from './published-document-bar';
 import { useDocumentTitle } from './_hooks/use-document-title';
-import { useDocumentChromeVisibility } from './use-document-chrome-visibility';
+import { useDocumentChromeVisibility } from './_hooks/use-document-chrome-visibility';
+import { useLatestWinsSaveQueue } from './_hooks/use-latest-wins-save-queue';
 
 export function DocumentScreen({
   document,
@@ -86,6 +87,41 @@ export function DocumentScreen({
       );
       await queryClient.invalidateQueries({
         queryKey: documentKeys.tree(workspaceSlug),
+      });
+    },
+  });
+
+  const syncDocumentContentCache = (nextDocument: Document) => {
+    queryClient.setQueryData<Document>(documentKeys.detail(documentId), nextDocument);
+    updateCachedNavigationContentStatus(
+      queryClient,
+      workspaceSlug,
+      documentId,
+      hasMeaningfulContent(nextDocument.content),
+    );
+  };
+
+  const queueContentSave = useLatestWinsSaveQueue<Document['content'], Record<string, never>>({
+    initialMeta: {},
+    onFlush: async (nextContent) => {
+      const latestDocument =
+        queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
+
+      const optimisticDocument = {
+        ...latestDocument,
+        content: nextContent,
+      };
+
+      syncDocumentContentCache(optimisticDocument);
+
+      const updatedDocument = await updateContentMutation.mutateAsync({
+        version: latestDocument.version,
+        content: nextContent,
+      });
+
+      syncDocumentContentCache({
+        ...updatedDocument,
+        content: nextContent,
       });
     },
   });
@@ -209,19 +245,7 @@ export function DocumentScreen({
             onDuplicate: headerActions.duplicateDocument,
           }}
           onStartContentChangeAction={hideChrome}
-          onContentChangeAction={async (content) => {
-            const latest =
-              queryClient.getQueryData<typeof document>(
-                documentKeys.detail(documentId),
-              ) ?? document;
-
-            const updated = await updateContentMutation.mutateAsync({
-              version: latest.version,
-              content,
-            });
-
-            queryClient.setQueryData(documentKeys.detail(documentId), updated);
-          }}
+          onContentChangeAction={(content) => queueContentSave(content)}
           onCreateSubdocAction={() => createSubDocMutation.mutateAsync()}
         />
       </div>

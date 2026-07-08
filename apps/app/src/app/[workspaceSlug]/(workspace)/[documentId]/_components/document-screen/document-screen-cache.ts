@@ -113,6 +113,34 @@ export function updateCachedNavigationContentStatus(
   );
 }
 
+export function updateCachedNavigationFavoriteStatus(
+  queryClient: QueryClient,
+  workspaceSlug: string,
+  documentId: string,
+  isFavorite: boolean,
+) {
+  queryClient.setQueriesData<WorkspaceDocumentNavigation | DocumentNavigationPage>(
+    { queryKey: documentKeys.lists(workspaceSlug) },
+    (currentNavigation) => {
+      if (isWorkspaceNavigation(currentNavigation)) {
+        return updateWorkspaceNavigationItem(currentNavigation, documentId, (item) => ({
+          ...item,
+          is_favorite: isFavorite,
+        }));
+      }
+
+      if (!currentNavigation) {
+        return currentNavigation;
+      }
+
+      return updateNavigationPageItem(currentNavigation, documentId, (item) => ({
+        ...item,
+        is_favorite: isFavorite,
+      }));
+    },
+  );
+}
+
 export function markCachedNavigationNodeHasChildren(
   queryClient: QueryClient,
   workspaceSlug: string,
@@ -282,6 +310,7 @@ export function insertCreatedSubdocIntoCachedChildren(
     sort_key: childDocument.sort_key,
     has_children: false,
     has_content: hasMeaningfulContent(childDocument.content),
+    is_favorite: false,
   };
 
   queryClient.setQueriesData<DocumentNavigationPage>(

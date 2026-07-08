@@ -156,10 +156,16 @@ export async function apiPatch<TResponse, TBody = unknown>(
 }
 
 export async function apiDelete<TResponse>(path: Input, options?: ApiRequestOptions) {
-  return apiRequest(path, {
+  const response = await apiRequest(path, {
     ...options,
     method: 'delete',
-  }).json<TResponse>();
+  });
+
+  if (response.status === 204) {
+    return undefined as TResponse;
+  }
+
+  return response.json<TResponse>();
 }
 
 export function createApiQueryOptions<
