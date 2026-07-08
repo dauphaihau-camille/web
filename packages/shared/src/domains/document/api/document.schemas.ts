@@ -15,6 +15,7 @@ export const documentSchema = z.object({
   content: z.array(z.unknown()),
   sort_key: z.number().int(),
   archived_at: z.string().optional(),
+  archived_by_name: z.string().optional(),
   created_at: z.string(),
   updated_at: z.string(),
 });
@@ -28,10 +29,26 @@ export const documentNavigationNodeSchema = z.object({
   sort_key: z.number().int(),
   has_children: z.boolean(),
   has_content: z.boolean(),
+  is_favorite: z.boolean(),
 });
 
 export const documentNavigationPageSchema = z.object({
   items: z.array(documentNavigationNodeSchema),
+  next_cursor: z.string().optional(),
+});
+
+export const archivedDocumentListItemSchema = z.object({
+  id: documentIdSchema,
+  public_id: z.string().min(1),
+  version: z.number().int().positive(),
+  title: z.string(),
+  has_content: z.boolean(),
+  breadcrumb_path: z.array(z.string()),
+  archived_at: z.string(),
+});
+
+export const archivedDocumentListPageSchema = z.object({
+  items: z.array(archivedDocumentListItemSchema),
   next_cursor: z.string().optional(),
 });
 

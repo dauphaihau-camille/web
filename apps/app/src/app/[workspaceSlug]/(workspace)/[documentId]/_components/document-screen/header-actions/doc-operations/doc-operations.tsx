@@ -22,6 +22,7 @@ import { RelativeTimeText } from './relative-time-text';
 
 type DocOperationsProps = {
   isArchiving: boolean;
+  isArchived?: boolean;
   isDuplicating: boolean;
   updatedAt: string;
   onArchive: () => void;
@@ -31,6 +32,7 @@ type DocOperationsProps = {
 
 export function DocOperations({
   isArchiving,
+  isArchived = false,
   isDuplicating,
   updatedAt,
   onArchive,
@@ -94,15 +96,19 @@ export function DocOperations({
           <span>Copy link</span>
           <DropdownMenuShortcut>{'\u21e7\u2318L'}</DropdownMenuShortcut>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          variant="destructive"
-          className="!text-foreground focus:bg-accent focus:!text-destructive dark:focus:bg-accent [&_svg]:!text-muted-foreground focus:[&_svg]:!text-destructive data-disabled:[&_svg]:!text-muted-foreground"
-          disabled={isArchiving}
-          onClick={onArchive}
-        >
-          <Trash2Icon className="size-4" />
-          <span>{isArchiving ? 'Moving to Trash...' : 'Move to Trash'}</span>
-        </DropdownMenuItem>
+        {!isArchived
+          ? (
+            <DropdownMenuItem
+              variant="destructive"
+              className="!text-foreground focus:bg-accent focus:!text-destructive dark:focus:bg-accent [&_svg]:!text-muted-foreground focus:[&_svg]:!text-destructive data-disabled:[&_svg]:!text-muted-foreground"
+              disabled={isArchiving}
+              onClick={onArchive}
+            >
+              <Trash2Icon className="size-4" />
+              <span>{isArchiving ? 'Moving to Trash...' : 'Move to Trash'}</span>
+            </DropdownMenuItem>
+          )
+          : null}
         <DropdownMenuSeparator />
         <div className="px-2 py-1.5">
           <p className="text-xs text-muted-foreground">

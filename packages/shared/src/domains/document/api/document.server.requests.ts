@@ -85,6 +85,7 @@ export async function getDocumentServer(documentId: DocumentId): Promise<Documen
       contentBlockCount: document.content.length,
       updatedAt: document.updated_at,
       archivedAt: document.archived_at,
+      archivedByName: document.archived_by_name,
     },
   }, 'Fetched document response summary on the server');
 

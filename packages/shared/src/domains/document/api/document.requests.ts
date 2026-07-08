@@ -1,6 +1,9 @@
-import { apiGet, apiPatch, apiPost } from '../../../lib/api-client';
+import {
+  apiDelete, apiGet, apiPatch, apiPost, 
+} from '../../../lib/api-client';
 
 import {
+  archivedDocumentListPageSchema,
   createDocumentSchema,
   documentSchema,
   documentNavigationPageSchema,
@@ -9,6 +12,7 @@ import {
 import type {
   CreateDocumentInput,
   Document,
+  ArchivedDocumentListPage,
   DocumentId,
   DocumentNavigationPage,
   MoveDocumentInput,
@@ -40,6 +44,25 @@ export async function getWorkspaceRootDocuments(
   });
 
   return workspaceDocumentNavigationSchema.parse(response) as WorkspaceDocumentNavigation;
+}
+
+export async function getArchivedWorkspaceDocuments(
+  workspaceId: WorkspaceId,
+  input?: {
+    limit?: number;
+    cursor?: string;
+    query?: string;
+  },
+): Promise<ArchivedDocumentListPage> {
+  const response = await apiGet<unknown>(`workspaces/${workspaceId}/documents/archived`, {
+    searchParams: {
+      limit: String(input?.limit ?? 50),
+      ...(input?.cursor ? { cursor: input.cursor } : {}),
+      ...(input?.query ? { q: input.query } : {}),
+    },
+  });
+
+  return archivedDocumentListPageSchema.parse(response) as ArchivedDocumentListPage;
 }
 
 export async function getWorkspaceChildDocuments(
@@ -108,6 +131,17 @@ export async function restoreDocument(
   );
 
   return documentSchema.parse(response);
+}
+
+export async function permanentlyDeleteDocument(
+  documentId: DocumentId,
+  version: number,
+): Promise<void> {
+  await apiDelete<void>(`documents/${documentId}`, {
+    searchParams: {
+      version: String(version),
+    },
+  });
 }
 
 export async function moveDocument(

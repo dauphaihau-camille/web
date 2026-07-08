@@ -68,6 +68,7 @@ describe('PrivateDocumentsGroup', () => {
                   sort_key: 0,
                   has_children: false,
                   has_content: true,
+                  is_favorite: false,
                 },
               ],
             },

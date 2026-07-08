@@ -17,15 +17,12 @@ import {
   documentKeys,
   type Document,
   type DocumentNavigationNode,
-  useWorkspaceDocumentRootQuery,
   type WorkspaceDocumentNavigation,
 } from '@shared/domains/document';
 import { workspaceRoutes } from '@shared/domains/workspace';
 
 import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
 import { DocumentTree } from '../document-tree/document-tree';
-import { DocumentTreeList } from '../document-tree/document-tree-list';
-import { DocumentTreeLoading } from '../document-tree/document-tree-loading';
 
 function buildDocumentNavigationNode(
   document: Document,
@@ -39,6 +36,7 @@ function buildDocumentNavigationNode(
     sort_key: document.sort_key,
     has_children: false,
     has_content: hasMeaningfulContent(document.content),
+    is_favorite: false,
   };
 }
 
@@ -141,34 +139,6 @@ export function PrivateDocumentsGroup({
       >
         <DocumentTree workspaceSlug={workspaceSlug} />
       </CollapsibleSidebarGroup>
-      <TeamspaceDocumentsGroups workspaceSlug={workspaceSlug} />
     </>
   );
-}
-
-function TeamspaceDocumentsGroups({
-  workspaceSlug,
-}: {
-  workspaceSlug: string;
-}) {
-  const rootQuery = useWorkspaceDocumentRootQuery(workspaceSlug);
-
-  if (rootQuery.isLoading) {
-    return <DocumentTreeLoading />;
-  }
-
-  if (rootQuery.isError || !rootQuery.data) {
-    return null;
-  }
-
-  return rootQuery.data.teamspaces.map((teamspace) => (
-    <CollapsibleSidebarGroup key={teamspace.id} label={teamspace.name}>
-      <DocumentTreeList
-        workspaceSlug={workspaceSlug}
-        items={teamspace.documents.items}
-        emptyMessage={`No documents in ${teamspace.name.toLowerCase()} yet.`}
-        nextCursor={teamspace.documents.next_cursor}
-      />
-    </CollapsibleSidebarGroup>
-  ));
 }

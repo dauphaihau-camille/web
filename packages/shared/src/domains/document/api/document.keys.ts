@@ -7,6 +7,14 @@ export const documentKeys = {
   detail: (documentId: DocumentId) => createQueryKey(...documentKeys.all, 'detail', documentId),
   tree: (workspaceId: WorkspaceId) => createQueryKey(...documentKeys.all, 'tree', workspaceId),
   lists: (workspaceId: WorkspaceId) => createQueryKey(...documentKeys.all, 'list', workspaceId),
+  archivedList: (workspaceId: WorkspaceId, limit: number, cursor?: string, query?: string) =>
+    createQueryKey(
+      ...documentKeys.lists(workspaceId),
+      'archived',
+      limit,
+      cursor ?? null,
+      query ?? null,
+    ),
   rootList: (workspaceId: WorkspaceId, limit: number, cursor?: string, query?: string) =>
     createQueryKey(...documentKeys.lists(workspaceId), 'root', limit, cursor ?? null, query ?? null),
   childList: (

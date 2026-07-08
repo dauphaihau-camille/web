@@ -8,9 +8,11 @@ import {
   archiveDocument,
   documentDetailQueryOptions,
   documentKeys,
+  permanentlyDeleteDocument,
   type DocumentNavigationNode,
   type WorkspaceDocumentNavigation,
   duplicateDocument as duplicateDocumentRequest,
+  restoreDocument,
   workspaceDocumentChildrenQueryOptions,
   workspaceDocumentRootQueryOptions,
   type Document,
@@ -41,6 +43,10 @@ type UseHeaderActionsOptions = {
 type FavoriteMutationContext = {
   previousFavoriteStatus?: FavoriteStatus;
   previousWorkspaceFavorites?: FavoriteDocument[];
+};
+
+type RestoreMutationContext = {
+  previousDocument?: Document;
 };
 
 export function useHeaderActions({
@@ -77,15 +83,20 @@ export function useHeaderActions({
 
   const archiveDocumentMutation = useMutation({
     mutationFn: () => archiveDocument(document.id, document.version),
-    onSuccess: async (archivedDocument) => {
+    onSuccess: (archivedDocument) => {
       queryClient.setQueryData(documentKeys.detail(document.id), archivedDocument);
       removeCachedNavigationDocument(queryClient, workspaceSlug, document.id);
-      await queryClient.invalidateQueries({
-        queryKey: documentKeys.lists(workspaceSlug),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: favoriteKeys.workspaceList(workspaceSlug),
-      });
+      void Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.lists(workspaceSlug),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: favoriteKeys.workspaceList(workspaceSlug),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: publishKeys.status(document.id),
+        }),
+      ]);
       toast('Moved to trash');
     },
   });
@@ -185,6 +196,85 @@ export function useHeaderActions({
     },
   });
 
+  const restoreDocumentMutation = useMutation({
+    mutationFn: async () => {
+      const latestDocument = await queryClient.ensureQueryData(
+        documentDetailQueryOptions(document.id),
+      );
+
+      return restoreDocument(document.id, latestDocument.version);
+    },
+    onMutate: async (): Promise<RestoreMutationContext> => {
+      await queryClient.cancelQueries({
+        queryKey: documentKeys.detail(document.id),
+      });
+
+      const previousDocument = queryClient.getQueryData<Document>(
+        documentKeys.detail(document.id),
+      );
+
+      if (previousDocument) {
+        queryClient.setQueryData<Document>(documentKeys.detail(document.id), {
+          ...previousDocument,
+          archived_at: undefined,
+          archived_by_name: undefined,
+        });
+      }
+
+      return {
+        previousDocument,
+      };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previousDocument) {
+        queryClient.setQueryData(
+          documentKeys.detail(document.id),
+          context.previousDocument,
+        );
+      }
+    },
+    onSuccess: async (restoredDocument) => {
+      queryClient.setQueryData(documentKeys.detail(document.id), restoredDocument);
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.archivedList(workspaceSlug, 50),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.lists(workspaceSlug),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: publishKeys.status(document.id),
+        }),
+      ]);
+      toast('Document restored');
+    },
+  });
+
+  const permanentlyDeleteDocumentMutation = useMutation({
+    mutationFn: async () => {
+      const latestDocument = await queryClient.ensureQueryData(
+        documentDetailQueryOptions(document.id),
+      );
+
+      await permanentlyDeleteDocument(document.id, latestDocument.version);
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.archivedList(workspaceSlug, 50),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.lists(workspaceSlug),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: publishKeys.status(document.id),
+        }),
+      ]);
+      toast('Document permanently deleted');
+      router.replace(workspaceRoutes.detail(workspaceSlug));
+    },
+  });
+
   const copyLink = async () => {
     if (typeof window === 'undefined') {
       return;
@@ -260,19 +350,32 @@ export function useHeaderActions({
     void unpublishMutation.mutateAsync();
   };
 
+  const restoreCurrentDocument = () => {
+    void restoreDocumentMutation.mutateAsync();
+  };
+
+  const permanentlyDeleteCurrentDocument = () => {
+    void permanentlyDeleteDocumentMutation.mutateAsync();
+  };
+
   return {
     archiveCurrentDocument,
     copyLink,
     copyPublishedLink,
     duplicateDocument,
     favoriteStatus,
+    isArchived: Boolean(document.archived_at),
     isFavoriting: favoriteMutation.isPending || favoriteStatusQuery.isLoading,
     isArchiving: archiveDocumentMutation.isPending,
+    isPermanentlyDeleting: permanentlyDeleteDocumentMutation.isPending,
+    isRestoring: restoreDocumentMutation.isPending,
     isDuplicating: duplicateDocumentMutation.isPending,
     isPublishing: publishMutation.isPending,
     isUnpublishing: unpublishMutation.isPending,
+    permanentlyDeleteCurrentDocument,
     publishStatus: publishStatusQuery.data,
     publishCurrentDocument,
+    restoreCurrentDocument,
     toggleFavorite,
     unpublishCurrentDocument,
   };

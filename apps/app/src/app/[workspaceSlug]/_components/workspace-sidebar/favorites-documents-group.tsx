@@ -6,7 +6,7 @@ import type { DocumentNavigationNode } from '@shared/domains/document';
 import { useWorkspaceFavoritesQuery } from '@/domains/favorite';
 
 import { DocumentTreeLoading } from '../document-tree/document-tree-loading';
-import { DocumentTreeList } from '../document-tree/document-tree-list';
+import { DocumentTreeList } from '../document-tree/document-tree-list/document-tree-list';
 import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
 
 function toFavoriteDocumentNode(favorite: {
@@ -26,6 +26,7 @@ function toFavoriteDocumentNode(favorite: {
     sort_key: favorite.sort_key,
     has_children: false,
     has_content: false,
+    is_favorite: true,
   };
 }
 

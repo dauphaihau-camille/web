@@ -2,6 +2,7 @@ import { queryOptions } from '@tanstack/react-query';
 
 import { documentKeys } from './document.keys';
 import {
+  getArchivedWorkspaceDocuments,
   getDocument,
   getWorkspaceChildDocuments,
   getWorkspaceRootDocuments,
@@ -24,6 +25,22 @@ export function workspaceDocumentRootQueryOptions(
   return queryOptions({
     queryKey: documentKeys.rootList(workspaceId, limit, cursor, query),
     queryFn: () => getWorkspaceRootDocuments(workspaceId, {
+      limit,
+      cursor,
+      query,
+    }),
+  });
+}
+
+export function workspaceArchivedDocumentListQueryOptions(
+  workspaceId: WorkspaceId,
+  limit = 50,
+  cursor?: string,
+  query?: string,
+) {
+  return queryOptions({
+    queryKey: documentKeys.archivedList(workspaceId, limit, cursor, query),
+    queryFn: () => getArchivedWorkspaceDocuments(workspaceId, {
       limit,
       cursor,
       query,

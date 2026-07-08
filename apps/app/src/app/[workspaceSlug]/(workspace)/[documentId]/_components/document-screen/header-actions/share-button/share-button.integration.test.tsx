@@ -16,11 +16,14 @@ describe('ShareButton integration', () => {
 
     renderWithProviders(
       <ShareButton
+        isArchived={false}
         isPublished={false}
         isPublishing={false}
+        isRestoring={false}
         isUnpublishing={false}
         onCopyPublishedLink={vi.fn()}
         onPublish={onPublish}
+        onRestore={vi.fn()}
         onUnpublish={vi.fn()}
       />,
     );
@@ -43,12 +46,15 @@ describe('ShareButton integration', () => {
 
     renderWithProviders(
       <ShareButton
+        isArchived={false}
         isPublished
         isPublishing={false}
+        isRestoring={false}
         isUnpublishing={false}
         publishedPath="/share/published-doc"
         onCopyPublishedLink={onCopyPublishedLink}
         onPublish={vi.fn()}
+        onRestore={vi.fn()}
         onUnpublish={onUnpublish}
       />,
     );

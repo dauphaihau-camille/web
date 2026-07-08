@@ -16,7 +16,6 @@ import {
 import { BlockNoteEditorLoader } from '@/components/editor/blocknote-editor-loader';
 import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
 import { Input } from '@shared/components/ui/input';
-import { cn } from '@shared/lib/utils';
 
 import { DocumentBreadcrumb } from './document-breadcrumb';
 import {
@@ -27,6 +26,7 @@ import {
 } from './document-screen-cache';
 import { HeaderActions } from './header-actions/header-actions';
 import { useHeaderActions } from './header-actions/use-header-actions';
+import { ArchivedDocumentBar } from './archived-document-bar';
 import { PublishedDocumentBar } from './published-document-bar';
 import { useDocumentTitle } from './_hooks/use-document-title';
 import { useDocumentChromeVisibility } from './_hooks/use-document-chrome-visibility';
@@ -62,6 +62,10 @@ export function DocumentScreen({
   const isPublished = Boolean(
     headerActions.publishStatus?.published_document_id,
   );
+  const isArchived = Boolean(document.archived_at);
+  const publishedBarOffset = isArchived ? 48 : 0;
+  const fixedHeaderOffset =
+    (isPublished ? 48 : 0) + (isArchived ? 48 : 0);
 
   const updateContentMutation = useMutation({
     mutationFn: (input: Parameters<typeof updateDocument>[1]) =>
@@ -150,6 +154,9 @@ export function DocumentScreen({
         childDocument,
       );
       await queryClient.invalidateQueries({
+        queryKey: documentKeys.detail(document.id),
+      });
+      await queryClient.invalidateQueries({
         queryKey: documentKeys.lists(workspaceSlug),
       });
     },
@@ -188,13 +195,25 @@ export function DocumentScreen({
     <section className="space-y-6" onPointerMove={revealChrome}>
       <PublishedDocumentBar
         publishedPath={headerActions.publishStatus?.public_path}
+        offsetTop={publishedBarOffset}
       />
+      {document.archived_at
+        ? (
+          <ArchivedDocumentBar
+            archivedAt={document.archived_at}
+            archivedByName={document.archived_by_name}
+            isDeleting={headerActions.isPermanentlyDeleting}
+            isRestoring={headerActions.isRestoring}
+            offsetTop={0}
+            onDelete={headerActions.permanentlyDeleteCurrentDocument}
+            onRestore={headerActions.restoreCurrentDocument}
+          />
+        )
+        : null}
 
       <div
-        className={cn(
-          'fixed inset-x-0 z-10 bg-background px-2 backdrop-blur md:left-(--sidebar-width)',
-          isPublished ? 'top-12' : 'top-0',
-        )}
+        className="fixed inset-x-0 z-10 bg-background px-2 backdrop-blur md:left-(--sidebar-width)"
+        style={{ top: fixedHeaderOffset }}
       >
         <div className="flex h-11 items-center justify-between gap-3">
           <DocumentBreadcrumb
@@ -212,7 +231,10 @@ export function DocumentScreen({
         </div>
       </div>
 
-      <div className={cn('mx-auto max-w-2xl', isPublished ? 'pt-32' : 'pt-20')}>
+      <div
+        className="mx-auto max-w-2xl"
+        style={{ paddingTop: `${80 + fixedHeaderOffset}px` }}
+      >
         <div className="space-y-3 px-[3.8rem]">
           <div className="min-w-0 flex-1 space-y-2">
             <Input

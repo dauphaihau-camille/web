@@ -11,9 +11,9 @@ import {
 import type { Document } from '@shared/domains/document';
 import { cn } from '@shared/lib/utils';
 
-import { DocOperations } from './doc-operations';
-import { RelativeTimeText } from './relative-time-text';
-import { ShareButton } from './share-button';
+import { DocOperations } from './doc-operations/doc-operations';
+import { RelativeTimeText } from './doc-operations/relative-time-text';
+import { ShareButton } from './share-button/share-button';
 
 type HeaderActionsProps = {
   archiveCurrentDocument: () => void;
@@ -24,8 +24,10 @@ type HeaderActionsProps = {
     is_favorite: boolean;
   };
   isArchiving: boolean;
+  isArchived?: boolean;
   isDuplicating: boolean;
   isFavoriting: boolean;
+  isRestoring?: boolean;
   isVisible?: boolean;
   isPublishing: boolean;
   isUnpublishing: boolean;
@@ -34,6 +36,7 @@ type HeaderActionsProps = {
     public_path?: string;
     published_document_id?: string;
   };
+  restoreCurrentDocument: () => void;
   toggleFavorite: () => void;
   unpublishCurrentDocument: () => void;
   updatedAt: Document['updated_at'];
@@ -46,13 +49,16 @@ export function HeaderActions({
   duplicateDocument,
   favoriteStatus,
   isArchiving,
+  isArchived = false,
   isDuplicating,
   isFavoriting,
+  isRestoring = false,
   isVisible = true,
   isPublishing,
   isUnpublishing,
   publishCurrentDocument,
   publishStatus,
+  restoreCurrentDocument,
   toggleFavorite,
   unpublishCurrentDocument,
   updatedAt,
@@ -72,12 +78,15 @@ export function HeaderActions({
         />
       </div>
       <ShareButton
+        isArchived={isArchived}
         isPublished={Boolean(publishStatus?.published_document_id)}
         isPublishing={isPublishing}
+        isRestoring={isRestoring}
         isUnpublishing={isUnpublishing}
         publishedPath={publishStatus?.public_path}
         onCopyPublishedLink={copyPublishedLink}
         onPublish={publishCurrentDocument}
+        onRestore={restoreCurrentDocument}
         onUnpublish={unpublishCurrentDocument}
       />
       <HeaderActionButton
@@ -106,6 +115,7 @@ export function HeaderActions({
       />
       <DocOperations
         isArchiving={isArchiving}
+        isArchived={isArchived}
         isDuplicating={isDuplicating}
         updatedAt={updatedAt}
         onArchive={archiveCurrentDocument}

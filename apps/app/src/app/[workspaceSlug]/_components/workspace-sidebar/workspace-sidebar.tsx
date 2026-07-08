@@ -14,6 +14,7 @@ import { WorkspaceUserDropdown } from '../workspace-user-dropdown';
 import { PrivateDocumentsGroup } from './private-documents-group';
 import { FavoritesDocumentsGroup } from './favorites-documents-group';
 import { WorkspaceSearchButton } from './workspace-search-button';
+import { WorkspaceTrashButton } from './workspace-trash-button/workspace-trash-button';
 
 export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
   return (
@@ -31,6 +32,9 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
             <SidebarMenu>
               <SidebarMenuItem className="font-semibold">
                 <WorkspaceSearchButton workspaceSlug={workspaceSlug} />
+              </SidebarMenuItem>
+              <SidebarMenuItem className="font-semibold">
+                <WorkspaceTrashButton workspaceSlug={workspaceSlug} />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

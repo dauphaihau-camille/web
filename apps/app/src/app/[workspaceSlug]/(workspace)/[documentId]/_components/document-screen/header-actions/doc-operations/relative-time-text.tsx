@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 
-import { formatRelativeTime } from './header-actions.utils';
+import { formatRelativeTime } from '../header-actions.utils';
 
 type RelativeTimeTextProps = {
   fallback: string;
