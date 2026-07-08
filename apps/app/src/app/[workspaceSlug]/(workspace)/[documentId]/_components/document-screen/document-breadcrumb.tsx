@@ -1,14 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useQueryClient } from '@tanstack/react-query';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment } from 'react';
 
-import {
-  documentDetailQueryOptions,
-  documentKeys,
-  getDocument,
-  type Document,
+import type {
+  Document,
 } from '@shared/domains/document';
 import { workspaceRoutes } from '@shared/domains/workspace';
 import {
@@ -33,52 +29,10 @@ export function DocumentBreadcrumb({
   isVisible,
   workspaceSlug,
 }: DocumentBreadcrumbProps) {
-  const queryClient = useQueryClient();
-  const [breadcrumbDocuments, setBreadcrumbDocuments] = useState<Document[]>([
+  const resolvedBreadcrumbDocuments = [
+    ...(document.breadcrumb ?? []),
     document,
-  ]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadBreadcrumbDocuments() {
-      const ancestors: Document[] = [];
-      const visitedDocumentIds = new Set([document.id]);
-      let parentDocumentId = document.parent_document_id;
-
-      while (parentDocumentId && !visitedDocumentIds.has(parentDocumentId)) {
-        visitedDocumentIds.add(parentDocumentId);
-
-        const cachedParentDocument = queryClient.getQueryData<Document>(
-          documentKeys.detail(parentDocumentId),
-        );
-        const parentDocument =
-          cachedParentDocument ?? (await getDocument(parentDocumentId));
-
-        queryClient.setQueryData(
-          documentDetailQueryOptions(parentDocumentId).queryKey,
-          parentDocument,
-        );
-        ancestors.push(parentDocument);
-        parentDocumentId = parentDocument.parent_document_id;
-      }
-
-      if (!cancelled) {
-        setBreadcrumbDocuments([...ancestors.reverse(), document]);
-      }
-    }
-
-    void loadBreadcrumbDocuments();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [document, queryClient]);
-
-  const resolvedBreadcrumbDocuments =
-    breadcrumbDocuments[breadcrumbDocuments.length - 1]?.id === document.id
-      ? breadcrumbDocuments
-      : [document];
+  ];
   const visibleBreadcrumbDocuments =
     resolvedBreadcrumbDocuments.length > 3
       ? [

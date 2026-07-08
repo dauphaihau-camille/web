@@ -23,13 +23,10 @@ import {
   type FavoriteDocument,
   type FavoriteStatus,
   unfavoriteDocument,
-  useFavoriteStatusQuery,
 } from '@/domains/favorite';
 import {
   publishDocument,
-  publishKeys,
   unpublishDocument,
-  usePublishStatusQuery,
 } from '@shared/domains/publish';
 import { workspaceRoutes } from '@shared/domains/workspace';
 
@@ -55,8 +52,6 @@ export function useHeaderActions({
 }: UseHeaderActionsOptions) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const favoriteStatusQuery = useFavoriteStatusQuery(document.id);
-  const publishStatusQuery = usePublishStatusQuery(document.id);
 
   const duplicateDocumentMutation = useMutation({
     mutationFn: async (targetDocumentId: string) => duplicateDocumentRequest(targetDocumentId),
@@ -93,9 +88,6 @@ export function useHeaderActions({
         queryClient.invalidateQueries({
           queryKey: favoriteKeys.workspaceList(workspaceSlug),
         }),
-        queryClient.invalidateQueries({
-          queryKey: publishKeys.status(document.id),
-        }),
       ]);
       toast('Moved to trash');
     },
@@ -131,6 +123,15 @@ export function useHeaderActions({
           is_favorite: nextIsFavorite,
         },
       );
+      queryClient.setQueryData<Document>(
+        documentKeys.detail(document.id),
+        (currentDocument) => currentDocument
+          ? {
+            ...currentDocument,
+            is_favorite: nextIsFavorite,
+          }
+          : currentDocument,
+      );
       updateWorkspaceFavoritesCache({
         document,
         isFavorite: nextIsFavorite,
@@ -150,6 +151,15 @@ export function useHeaderActions({
           context.previousFavoriteStatus,
         );
       }
+      queryClient.setQueryData<Document>(
+        documentKeys.detail(document.id),
+        (currentDocument) => currentDocument
+          ? {
+            ...currentDocument,
+            is_favorite: context?.previousFavoriteStatus?.is_favorite ?? currentDocument.is_favorite,
+          }
+          : currentDocument,
+      );
 
       if (context?.previousWorkspaceFavorites) {
         queryClient.setQueryData(
@@ -162,6 +172,15 @@ export function useHeaderActions({
     },
     onSuccess: (status) => {
       queryClient.setQueryData(favoriteKeys.status(document.id), status);
+      queryClient.setQueryData<Document>(
+        documentKeys.detail(document.id),
+        (currentDocument) => currentDocument
+          ? {
+            ...currentDocument,
+            is_favorite: status.is_favorite,
+          }
+          : currentDocument,
+      );
       updateWorkspaceFavoritesCache({
         document,
         isFavorite: status.is_favorite,
@@ -172,9 +191,6 @@ export function useHeaderActions({
     },
     onSettled: async () => {
       await queryClient.invalidateQueries({
-        queryKey: favoriteKeys.status(document.id),
-      });
-      await queryClient.invalidateQueries({
         queryKey: favoriteKeys.workspaceList(workspaceSlug),
       });
     },
@@ -183,7 +199,16 @@ export function useHeaderActions({
   const publishMutation = useMutation({
     mutationFn: () => publishDocument(document.id),
     onSuccess: (status) => {
-      queryClient.setQueryData(publishKeys.status(document.id), status);
+      queryClient.setQueryData<Document>(
+        documentKeys.detail(document.id),
+        (currentDocument) => currentDocument
+          ? {
+            ...currentDocument,
+            published_document_id: status.published_document_id,
+            public_path: status.public_path,
+          }
+          : currentDocument,
+      );
       toast('Published document');
     },
   });
@@ -191,7 +216,16 @@ export function useHeaderActions({
   const unpublishMutation = useMutation({
     mutationFn: () => unpublishDocument(document.id),
     onSuccess: (status) => {
-      queryClient.setQueryData(publishKeys.status(document.id), status);
+      queryClient.setQueryData<Document>(
+        documentKeys.detail(document.id),
+        (currentDocument) => currentDocument
+          ? {
+            ...currentDocument,
+            published_document_id: status.published_document_id,
+            public_path: status.public_path,
+          }
+          : currentDocument,
+      );
       toast('Unpublished document');
     },
   });
@@ -242,9 +276,6 @@ export function useHeaderActions({
         queryClient.invalidateQueries({
           queryKey: documentKeys.lists(workspaceSlug),
         }),
-        queryClient.invalidateQueries({
-          queryKey: publishKeys.status(document.id),
-        }),
       ]);
       toast('Document restored');
     },
@@ -265,9 +296,6 @@ export function useHeaderActions({
         }),
         queryClient.invalidateQueries({
           queryKey: documentKeys.lists(workspaceSlug),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: publishKeys.status(document.id),
         }),
       ]);
       toast('Document permanently deleted');
@@ -313,7 +341,10 @@ export function useHeaderActions({
   const toggleFavorite = () => {
     const currentStatus =
       queryClient.getQueryData<FavoriteStatus>(favoriteKeys.status(document.id)) ??
-      favoriteStatusQuery.data;
+      {
+        document_id: document.id,
+        is_favorite: Boolean(document.is_favorite),
+      };
 
     void favoriteMutation.mutateAsync({
       nextIsFavorite: !currentStatus?.is_favorite,
@@ -325,14 +356,24 @@ export function useHeaderActions({
       document_id: document.id,
       is_favorite: favoriteMutation.variables.nextIsFavorite,
     }
-    : favoriteStatusQuery.data;
+    : {
+      document_id: document.id,
+      is_favorite: Boolean(document.is_favorite),
+    };
 
   const copyPublishedLink = async () => {
     if (typeof window === 'undefined') {
       return;
     }
 
-    const status = publishStatusQuery.data ?? await publishMutation.mutateAsync();
+    const status =
+      document.published_document_id && document.public_path
+        ? {
+          document_id: document.id,
+          published_document_id: document.published_document_id,
+          public_path: document.public_path,
+        }
+        : await publishMutation.mutateAsync();
 
     if (!status.public_path) {
       return;
@@ -365,7 +406,7 @@ export function useHeaderActions({
     duplicateDocument,
     favoriteStatus,
     isArchived: Boolean(document.archived_at),
-    isFavoriting: favoriteMutation.isPending || favoriteStatusQuery.isLoading,
+    isFavoriting: favoriteMutation.isPending,
     isArchiving: archiveDocumentMutation.isPending,
     isPermanentlyDeleting: permanentlyDeleteDocumentMutation.isPending,
     isRestoring: restoreDocumentMutation.isPending,
@@ -373,7 +414,11 @@ export function useHeaderActions({
     isPublishing: publishMutation.isPending,
     isUnpublishing: unpublishMutation.isPending,
     permanentlyDeleteCurrentDocument,
-    publishStatus: publishStatusQuery.data,
+    publishStatus: {
+      document_id: document.id,
+      published_document_id: document.published_document_id,
+      public_path: document.public_path,
+    },
     publishCurrentDocument,
     restoreCurrentDocument,
     toggleFavorite,

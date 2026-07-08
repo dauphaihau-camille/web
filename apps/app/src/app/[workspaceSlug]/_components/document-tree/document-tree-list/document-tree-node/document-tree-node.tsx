@@ -84,7 +84,7 @@ export function DocumentTreeNode({
       <SidebarMenuSub className="mx-0 translate-x-0 border-l-0 px-0 py-0">
         <SidebarMenuSubItem>
           <SidebarMenuSubButton
-            render={<Link href={href} />}
+            render={<Link href={href} prefetch={false} />}
             isActive={isActive}
             className="pr-14 group-hover/menu-sub-item:bg-sidebar-accent group-hover/menu-sub-item:text-sidebar-accent-foreground group-focus-within/menu-sub-item:bg-sidebar-accent group-focus-within/menu-sub-item:text-sidebar-accent-foreground"
           >

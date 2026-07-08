@@ -15,8 +15,6 @@ export function DocumentRouteScreen({
   const canonicalDocumentId = initialDocument.id;
   const documentQuery = useDocumentQuery(canonicalDocumentId, {
     initialData: initialDocument,
-    initialDataUpdatedAt: 0,
-    refetchOnMount: 'always',
   });
   const document = documentQuery.data ?? initialDocument;
 

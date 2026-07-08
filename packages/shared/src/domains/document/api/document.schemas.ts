@@ -2,6 +2,11 @@ import { z } from 'zod';
 
 export const documentIdSchema = z.string().min(1);
 export const documentContentFormatSchema = z.literal('blocknote_v1');
+export const documentBreadcrumbItemSchema = z.object({
+  id: documentIdSchema,
+  public_id: z.string().min(1),
+  title: z.string(),
+});
 
 export const documentSchema = z.object({
   id: documentIdSchema,
@@ -18,6 +23,10 @@ export const documentSchema = z.object({
   archived_by_name: z.string().optional(),
   created_at: z.string(),
   updated_at: z.string(),
+  is_favorite: z.boolean().optional(),
+  published_document_id: z.string().optional(),
+  public_path: z.string().optional(),
+  breadcrumb: z.array(documentBreadcrumbItemSchema).optional(),
 });
 
 export const documentNavigationNodeSchema = z.object({

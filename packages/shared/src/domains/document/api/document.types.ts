@@ -2,6 +2,7 @@ import type { z } from 'zod';
 
 import type {
   createDocumentSchema,
+  documentBreadcrumbItemSchema,
   documentContentFormatSchema,
   documentNavigationPageSchema,
   documentNavigationNodeSchema,
@@ -18,6 +19,7 @@ import type {
 export type DocumentId = z.infer<typeof documentIdSchema>;
 export type WorkspaceId = string;
 export type DocumentContentFormat = z.infer<typeof documentContentFormatSchema>;
+export type DocumentBreadcrumbItem = z.infer<typeof documentBreadcrumbItemSchema>;
 export type Document = z.infer<typeof documentSchema>;
 export type DocumentNavigationNode = z.infer<typeof documentNavigationNodeSchema>;
 export type DocumentNavigationPage = z.infer<typeof documentNavigationPageSchema>;
