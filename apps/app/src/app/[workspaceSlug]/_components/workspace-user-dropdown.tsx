@@ -251,7 +251,7 @@ export function WorkspaceUserDropdown({
                 setIsCreateWorkspaceOpen(true);
               }}
             >
-              <PlusIcon />
+              <PlusIcon className="size-4" />
               <span>Create workspace</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -262,7 +262,7 @@ export function WorkspaceUserDropdown({
                 router.push(workspaceRoutes.settings(workspaceSlug))
               }
             >
-              <SettingsIcon />
+              <SettingsIcon className="size-4" />
               <span>Settings</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
@@ -275,7 +275,7 @@ export function WorkspaceUserDropdown({
               setIsLogoutDialogOpen(true);
             }}
           >
-            <LogOutIcon />
+            <LogOutIcon className="size-4" />
             <span>Log out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -21,7 +21,7 @@ import {
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
 
-import { DocumentTreeNodeActions } from './document-tree-node-actions';
+import { DocumentTreeNodeActions } from './document-tree-node-actions/document-tree-node-actions';
 
 export function DocumentTreeNode({
   document,
@@ -118,6 +118,7 @@ export function DocumentTreeNode({
               )}
             <span className="font-semibold">{displayTitle}</span>
           </SidebarMenuSubButton>
+
           <DocumentTreeNodeActions
             document={document}
             isActive={isActive}
@@ -139,6 +140,7 @@ export function DocumentTreeNode({
                 </>
               )
               : null}
+
             {orderedChildDocuments.map((childDocument) => (
               <DocumentTreeNode
                 key={childDocument.id}

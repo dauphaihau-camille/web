@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/sidebar';
 import type { DocumentNavigationNode } from '@shared/domains/document';
 
-import { DocumentTreeMoreButton } from './document-tree-more-button';
-import { DocumentTreeNode } from './document-tree-node';
+import { DocumentTreeMoreButton } from './document-tree-more-button/document-tree-more-button';
+import { DocumentTreeNode } from './document-tree-node/document-tree-node';
 
 export function DocumentTreeList({
   workspaceSlug,
@@ -45,6 +45,7 @@ export function DocumentTreeList({
               />
             ))
           )}
+
         {nextCursor
           ? (
             <DocumentTreeMoreButton

@@ -55,7 +55,7 @@ export function CollapsibleSidebarGroup({
           )
           : null}
       </div>
-      <SidebarGroupContent id={contentId} hidden={!isExpanded}>
+      <SidebarGroupContent id={contentId} hidden={!isExpanded} className='pb-2'>
         {children}
       </SidebarGroupContent>
     </SidebarGroup>

@@ -44,15 +44,22 @@ export function DocumentTreeMoreButton({
       onMouseLeave={handleMouseLeave}
     >
       <Popover open={isOpen} onOpenChange={handleOpenChange}>
-        <PopoverTrigger className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm font-semibold text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+        <PopoverTrigger
+          className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-sm font-semibold transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
+            isOpen
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground/70'
+          }`}
+        >
           <MoreHorizontalIcon className="size-4 shrink-0" />
           <span>More</span>
         </PopoverTrigger>
+
         <PopoverContent
           side="right"
           align="start"
           sideOffset={12}
-          className="w-80 gap-3 rounded-2xl border border-sidebar-border bg-sidebar p-3 text-sidebar-foreground shadow-xl"
+          className="min-h-100 w-90 gap-3 rounded-2xl border border-sidebar-border bg-sidebar p-3 text-sidebar-foreground shadow-xl"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
@@ -78,7 +85,7 @@ export function DocumentTreeMoreButton({
                   document.public_id,
                   document.title,
                 )}
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 onClick={handleDocumentClick}
               >
                 <FileTextIcon className="size-4 shrink-0 text-sidebar-foreground/70" />

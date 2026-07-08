@@ -44,6 +44,7 @@ const parentDocument: DocumentNavigationNode = {
   sort_key: 10,
   has_children: true,
   has_content: true,
+  is_favorite: false,
 };
 
 const childDocuments: DocumentNavigationNode[] = [
@@ -56,6 +57,7 @@ const childDocuments: DocumentNavigationNode[] = [
     sort_key: 1,
     has_children: false,
     has_content: true,
+    is_favorite: false,
   },
   {
     id: 'child-2',
@@ -66,6 +68,7 @@ const childDocuments: DocumentNavigationNode[] = [
     sort_key: 5,
     has_children: false,
     has_content: false,
+    is_favorite: true,
   },
 ];
 

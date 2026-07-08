@@ -75,9 +75,22 @@ Preferred split:
 Local file structure:
 - if a route-specific component needs support files, keep them under that route tree in `src/app/...`
 - use private folders like `_components/`, `_hooks/`, and `_forms/` for route-local code
+- if a hook, helper, or test exists only for one component, convert that component into its own local folder instead of leaving sibling files flat
+- prefer component folders like `workspace-trash-button/` when the component has private support files
+- inside that folder, keep the entry component as `workspace-trash-button.tsx` and place private hooks under `_hooks/`
 - keep reusable cross-route UI in [`src/components/`](../src/components/)
 - do not move route-private helpers into global shared folders just to avoid creating a local folder
 - if a shared component needs several private support files, convert it into a local folder under `src/components/`
+
+Example:
+
+```text
+workspace-sidebar/
+  workspace-trash-button/
+    workspace-trash-button.tsx
+    _hooks/
+      use-workspace-trash.ts
+```
 
 Guidelines:
 - if a component starts carrying large constant maps, transformation helpers, multiple `useEffect` blocks, and submit side effects together, split it

@@ -5,7 +5,7 @@ import { useWorkspaceDocumentRootQuery } from '@shared/domains/document';
 import {
   DocumentTreeLoading,
 } from './document-tree-loading';
-import { DocumentTreeList } from './document-tree-list';
+import { DocumentTreeList } from './document-tree-list/document-tree-list';
 import { useSyncDocumentTreeExpansion } from './use-sync-document-tree-expansion';
 
 export function DocumentTree({
