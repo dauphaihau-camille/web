@@ -13,5 +13,7 @@ export const favoriteDocumentSchema = z.object({
   parent_document_id: z.string().optional(),
   title: z.string(),
   sort_key: z.number().int(),
+  has_children: z.boolean(),
+  has_content: z.boolean(),
   favorited_at: z.string(),
 });

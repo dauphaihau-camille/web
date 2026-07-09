@@ -17,6 +17,7 @@ import {
   type WorkspaceDocumentNavigation,
 } from '@shared/domains/document';
 import { workspaceRoutes } from '@shared/domains/workspace';
+import { favoriteKeys, type FavoriteDocument } from '@/domains/favorite';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import type * as DocumentTreeNodeActionHelpers from './document-tree-node-action-helpers';
 
@@ -26,6 +27,7 @@ const replaceMock = vi.fn();
 const pushMock = vi.fn();
 const toastMock = vi.fn();
 const archiveDocumentMock = vi.fn();
+const createDocumentMock = vi.fn();
 const documentDetailQueryOptionsMock = vi.fn();
 const resolveArchiveDestinationMock = vi.fn();
 
@@ -48,6 +50,7 @@ vi.mock('@shared/domains/document', async () => {
   return {
     ...actual,
     archiveDocument: archiveDocumentMock,
+    createDocument: createDocumentMock,
     documentDetailQueryOptions: documentDetailQueryOptionsMock,
   };
 });
@@ -103,6 +106,22 @@ const nextDocumentFixture: DocumentNavigationNode = {
   is_favorite: false,
 };
 
+const childDocumentFixture: Document = {
+  id: 'child-1',
+  public_id: 'public-child-1',
+  version: 1,
+  workspace_id: 'acme',
+  teamspace_id: undefined,
+  parent_document_id: documentFixture.id,
+  title: 'Untitled',
+  content_format: 'blocknote_v1',
+  content: [],
+  sort_key: 20,
+  archived_at: undefined,
+  created_at: '2026-01-03T00:00:00.000Z',
+  updated_at: '2026-01-03T00:00:00.000Z',
+};
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -141,6 +160,7 @@ describe('useDocumentTreeNodeActions integration', () => {
     pushMock.mockReset();
     toastMock.mockReset();
     archiveDocumentMock.mockReset();
+    createDocumentMock.mockReset();
     documentDetailQueryOptionsMock.mockReset();
     resolveArchiveDestinationMock.mockReset();
     useDocumentTreeExpansionStore.setState({
@@ -296,6 +316,73 @@ describe('useDocumentTreeNodeActions integration', () => {
         useDocumentTreeExpansionStore.getState().expandedByWorkspace.acme,
       ).toEqual([documentFixture.id]);
       expect(toastMock).toHaveBeenCalledWith('Could not move to trash');
+    });
+  });
+
+  it('marks a favorited parent as having children after creating a subdocument', async () => {
+    createDocumentMock.mockResolvedValue(childDocumentFixture);
+
+    const { Wrapper, queryClient } = createWrapper();
+    queryClient.setQueryData(documentKeys.detail(documentFixture.id), documentFixture);
+    queryClient.setQueryData(
+      documentKeys.rootList('acme', 10),
+      createNavigation([documentNodeFixture]),
+    );
+    queryClient.setQueryData<FavoriteDocument[]>(
+      favoriteKeys.workspaceList('acme'),
+      [
+        {
+          document_id: documentFixture.id,
+          public_id: documentFixture.public_id,
+          workspace_id: documentFixture.workspace_id,
+          teamspace_id: documentFixture.teamspace_id,
+          parent_document_id: documentFixture.parent_document_id,
+          title: documentFixture.title,
+          sort_key: documentFixture.sort_key,
+          has_children: false,
+          has_content: false,
+          favorited_at: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    );
+
+    const { result } = renderHook(
+      () =>
+        useDocumentTreeNodeActions({
+          document: documentNodeFixture,
+          isActive: true,
+          workspaceSlug: 'acme',
+        }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.handleCreateSubdocument();
+    });
+
+    await waitFor(() => {
+      expect(createDocumentMock).toHaveBeenCalledWith({
+        workspace_id: 'acme',
+        teamspace_id: undefined,
+        parent_document_id: documentFixture.id,
+      });
+      expect(
+        queryClient.getQueryData<FavoriteDocument[]>(
+          favoriteKeys.workspaceList('acme'),
+        ),
+      ).toEqual([
+        expect.objectContaining({
+          document_id: documentFixture.id,
+          has_children: true,
+        }),
+      ]);
+      expect(pushMock).toHaveBeenCalledWith(
+        workspaceRoutes.document(
+          'acme',
+          childDocumentFixture.public_id,
+          childDocumentFixture.title,
+        ),
+      );
     });
   });
 });

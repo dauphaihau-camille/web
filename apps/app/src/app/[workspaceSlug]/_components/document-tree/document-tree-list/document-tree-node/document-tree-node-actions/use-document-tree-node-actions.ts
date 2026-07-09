@@ -35,6 +35,24 @@ import { resolveArchiveDestination } from './document-tree-node-action-helpers';
 
 const ARCHIVE_TOAST_ID = 'document-tree-archive';
 
+function markCachedFavoriteDocumentHasChildren(
+  queryClient: ReturnType<typeof useQueryClient>,
+  workspaceSlug: string,
+  documentId: string,
+) {
+  queryClient.setQueryData<FavoriteDocument[] | undefined>(
+    favoriteKeys.workspaceList(workspaceSlug),
+    (currentFavorites) =>
+      currentFavorites?.map((favorite) =>
+        favorite.document_id === documentId
+          ? {
+            ...favorite,
+            has_children: true,
+          }
+          : favorite),
+  );
+}
+
 type ArchiveMutationVariables = {
   previousRoute?: string;
   version: number;
@@ -84,6 +102,11 @@ export function useDocumentTreeNodeActions({
         childDocument,
       );
       markCachedNavigationNodeHasChildren(
+        queryClient,
+        workspaceSlug,
+        document.id,
+      );
+      markCachedFavoriteDocumentHasChildren(
         queryClient,
         workspaceSlug,
         document.id,

@@ -16,6 +16,8 @@ function toFavoriteDocumentNode(favorite: {
   teamspace_id?: string;
   parent_document_id?: string;
   sort_key: number;
+  has_children: boolean;
+  has_content: boolean;
 }): DocumentNavigationNode {
   return {
     id: favorite.document_id,
@@ -24,8 +26,8 @@ function toFavoriteDocumentNode(favorite: {
     teamspace_id: favorite.teamspace_id,
     parent_document_id: favorite.parent_document_id,
     sort_key: favorite.sort_key,
-    has_children: false,
-    has_content: false,
+    has_children: favorite.has_children,
+    has_content: favorite.has_content,
     is_favorite: true,
   };
 }

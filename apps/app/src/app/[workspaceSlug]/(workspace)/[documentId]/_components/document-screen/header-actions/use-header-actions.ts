@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
 import {
   archiveDocument,
   documentDetailQueryOptions,
@@ -520,6 +521,8 @@ function createOptimisticFavoriteDocument(document: Document): FavoriteDocument 
   return {
     document_id: document.id,
     favorited_at: new Date().toISOString(),
+    has_children: false,
+    has_content: hasMeaningfulContent(document.content),
     parent_document_id: document.parent_document_id,
     public_id: document.public_id,
     sort_key: document.sort_key,
