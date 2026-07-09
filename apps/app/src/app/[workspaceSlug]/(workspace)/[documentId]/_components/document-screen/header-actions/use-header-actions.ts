@@ -29,8 +29,7 @@ import {
   unpublishDocument,
 } from '@shared/domains/publish';
 import { workspaceRoutes } from '@shared/domains/workspace';
-
-import { removeCachedNavigationDocument } from '../document-screen-cache';
+import { removeCachedNavigationDocument } from '@/domains/document/cache/document-query-cache';
 
 type UseHeaderActionsOptions = {
   workspaceSlug: string;

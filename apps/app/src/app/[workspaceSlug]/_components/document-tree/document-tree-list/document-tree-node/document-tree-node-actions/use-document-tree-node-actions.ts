@@ -24,13 +24,13 @@ import {
 } from '@/domains/favorite';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import { workspaceRoutes } from '@shared/domains/workspace';
-
 import {
   insertCreatedSubdocIntoCachedChildren,
   markCachedNavigationNodeHasChildren,
   removeCachedNavigationDocument,
   updateCachedNavigationFavoriteStatus,
-} from '../../../../../(workspace)/[documentId]/_components/document-screen/document-screen-cache';
+} from '@/domains/document/cache/document-query-cache';
+
 import { resolveArchiveDestination } from './document-tree-node-action-helpers';
 
 const ARCHIVE_TOAST_ID = 'document-tree-archive';

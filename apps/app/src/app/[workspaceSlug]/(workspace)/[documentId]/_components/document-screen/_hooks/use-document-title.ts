@@ -9,13 +9,13 @@ import {
   type Document,
   updateDocument,
 } from '@shared/domains/document';
-import { workspaceRoutes } from '@shared/domains/workspace';
-import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
-
 import {
   updateCachedNavigationTitle,
   updateCachedReferencedSubdocTitles,
-} from '../document-screen-cache';
+} from '@/domains/document/cache/document-query-cache';
+import { workspaceRoutes } from '@shared/domains/workspace';
+import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
+
 import { useLatestWinsSaveQueue } from './use-latest-wins-save-queue';
 
 type UseDocumentTitleArgs = {
