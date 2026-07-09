@@ -82,6 +82,18 @@ export const createDocumentSchema = z.object({
   content: z.array(z.unknown()).optional(),
 });
 
+export const createSubdocCommandResultSchema = z.object({
+  parent_document: documentSchema,
+  child_document: documentSchema,
+});
+
+export const createSubdocCommandSchema = z.object({
+  anchor_block_id: z.string().min(1).optional(),
+  slash_command_text: z.string().min(1).optional(),
+  version: z.number().int().positive().optional(),
+  content: z.array(z.unknown()).optional(),
+});
+
 export const updateDocumentSchema = z.object({
   version: z.number().int().positive(),
   title: z.string().max(180).optional(),

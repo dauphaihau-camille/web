@@ -6,8 +6,8 @@ import { toast } from 'sonner';
 
 import {
   archiveDocument,
+  createSubdocCommand,
   documentDetailQueryOptions,
-  createDocument,
   documentKeys,
   setRecentWorkspaceDocumentId,
   type Document,
@@ -131,17 +131,27 @@ export function DocumentScreen({
   });
 
   const createSubDocMutation = useMutation({
-    mutationFn: () =>
-      createDocument({
-        workspace_id: workspaceSlug,
-        teamspace_id: document.teamspace_id,
-        parent_document_id: document.id,
-      }),
-    onSuccess: async (childDocument) => {
+    mutationFn: (input?: {
+      anchorBlockId?: string;
+      slashCommandText?: string;
+      content?: unknown[];
+    }) => {
+      const latestDocument =
+        queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
+
+      return createSubdocCommand(document.id, {
+        anchor_block_id: input?.anchorBlockId,
+        slash_command_text: input?.slashCommandText,
+        version: latestDocument.version,
+        content: input?.content,
+      });
+    },
+    onSuccess: async ({ child_document: childDocument, parent_document: parentDocument }) => {
       queryClient.setQueryData(
         documentKeys.detail(childDocument.id),
         childDocument,
       );
+      syncDocumentContentCache(parentDocument);
       markCachedNavigationNodeHasChildren(
         queryClient,
         workspaceSlug,
@@ -153,9 +163,6 @@ export function DocumentScreen({
         document.id,
         childDocument,
       );
-      await queryClient.invalidateQueries({
-        queryKey: documentKeys.detail(document.id),
-      });
       await queryClient.invalidateQueries({
         queryKey: documentKeys.lists(workspaceSlug),
       });
@@ -268,7 +275,15 @@ export function DocumentScreen({
           }}
           onStartContentChangeAction={hideChrome}
           onContentChangeAction={(content) => queueContentSave(content)}
-          onCreateSubdocAction={() => createSubDocMutation.mutateAsync()}
+          onCreateSubdocAction={async (input) => {
+            const result = await createSubDocMutation.mutateAsync({
+              anchorBlockId: input?.anchorBlockId,
+              slashCommandText: input?.slashCommandText,
+              content: input?.content,
+            });
+
+            return result.child_document;
+          }}
         />
       </div>
     </section>

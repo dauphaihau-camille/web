@@ -73,6 +73,9 @@ export function BlockNoteEditorClient({
   const [_saveError, setSaveError] = useState<string | null>(null);
   const [slashMenuQuery, setSlashMenuQuery] = useState('');
   const lastSerializedContentRef = useRef(JSON.stringify(content));
+  const isSlashMenuOpenRef = useRef(false);
+  const isSelectingSlashMenuItemRef = useRef(false);
+  const pendingSlashMenuSaveRef = useRef<unknown[] | null>(null);
   const { resolvedTheme } = useTheme();
 
   const editor = useCreateBlockNote({
@@ -115,6 +118,27 @@ export function BlockNoteEditorClient({
       cancelScheduledSave();
     };
   }, [cancelScheduledSave]);
+
+  const flushPendingSlashMenuSave = () => {
+    if (isSelectingSlashMenuItemRef.current) {
+      isSelectingSlashMenuItemRef.current = false;
+      pendingSlashMenuSaveRef.current = null;
+      return;
+    }
+
+    const pendingContent = pendingSlashMenuSaveRef.current;
+
+    if (!pendingContent || !onContentChangeAction) {
+      pendingSlashMenuSaveRef.current = null;
+      return;
+    }
+
+    pendingSlashMenuSaveRef.current = null;
+    onStartContentChangeAction?.();
+    setIsSaving(true);
+    setSaveError(null);
+    scheduleSave(pendingContent);
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -234,6 +258,11 @@ export function BlockNoteEditorClient({
 
           lastSerializedContentRef.current = serializedContent;
 
+          if (isSlashMenuOpenRef.current) {
+            pendingSlashMenuSaveRef.current = nextContent;
+            return;
+          }
+
           onStartContentChangeAction?.();
           setIsSaving(true);
           setSaveError(null);
@@ -253,6 +282,26 @@ export function BlockNoteEditorClient({
                 shouldOpen={(state) =>
                   !state.selection.$from.parent.type.isInGroup('tableContent')
                 }
+                onItemClick={(item) => {
+                  isSelectingSlashMenuItemRef.current = true;
+                  item.onItemClick();
+                }}
+                floatingUIOptions={{
+                  useFloatingOptions: {
+                    onOpenChange: (open) => {
+                      isSlashMenuOpenRef.current = open;
+
+                      if (open) {
+                        pendingSlashMenuSaveRef.current = editor.document as unknown[];
+                        cancelScheduledSave();
+                        setIsSaving(false);
+                        return;
+                      }
+
+                      flushPendingSlashMenuSave();
+                    },
+                  },
+                }}
                 getItems={getSlashMenuItems}
                 suggestionMenuComponent={(props) => (
                   <SlashMenu

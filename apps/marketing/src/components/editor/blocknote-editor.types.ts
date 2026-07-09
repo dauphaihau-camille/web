@@ -18,7 +18,11 @@ export type BlockNoteEditorProps = {
   editable?: boolean;
   documentOperations?: BlockNoteDocumentOperations;
   onContentChangeAction?: (content: unknown[]) => Promise<void>;
-  onCreateSubdocAction?: () => Promise<Document>;
+  onCreateSubdocAction?: (input?: {
+    anchorBlockId?: string;
+    slashCommandText?: string;
+    content?: unknown[];
+  }) => Promise<Document>;
   onSelectionChangeAction?: () => void;
   onStartContentChangeAction?: () => void;
 };

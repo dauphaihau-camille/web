@@ -25,7 +25,7 @@ const subdocBlockConfig = {
       default: 'Untitled',
     },
     hasContent: {
-      default: true,
+      default: false,
     },
   },
   content: 'none' as const,

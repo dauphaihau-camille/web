@@ -7,10 +7,10 @@ import {
 } from 'react';
 import {
   filterSuggestionItems,
-  insertOrUpdateBlockForSlashMenu,
 } from '@blocknote/core/extensions';
 import {
   createExtension,
+  type Block,
 } from '@blocknote/core';
 import {
   SideMenuController,
@@ -26,7 +26,7 @@ import { useTheme } from 'next-themes';
 
 import type { BlockNoteEditorProps } from '../blocknote-editor.types';
 
-import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
+import { normalizeBlockNoteContent } from '@/components/editor/normalize-blocknote-content';
 import { cn } from '@shared/lib/utils';
 
 import { blockNoteSchema } from '../blocknote-schema';
@@ -73,11 +73,16 @@ export function BlockNoteEditorClient({
   const [_saveError, setSaveError] = useState<string | null>(null);
   const [slashMenuQuery, setSlashMenuQuery] = useState('');
   const lastSerializedContentRef = useRef(JSON.stringify(content));
+  const isSlashMenuOpenRef = useRef(false);
+  const isSelectingSlashMenuItemRef = useRef(false);
+  const isExecutingSlashCommandRef = useRef(false);
+  const pendingSlashMenuSaveRef = useRef<unknown[] | null>(null);
   const { resolvedTheme } = useTheme();
+  const normalizedContent = normalizeBlockNoteContent(content);
 
   const editor = useCreateBlockNote({
     schema: blockNoteSchema,
-    initialContent: content as never[],
+    initialContent: normalizedContent as never[],
     extensions: [editorKeyboardExtension],
   }, []);
 
@@ -100,21 +105,45 @@ export function BlockNoteEditorClient({
   );
 
   useEffect(() => {
-    const nextSerializedContent = JSON.stringify(content);
+    const nextSerializedContent = JSON.stringify(normalizedContent);
 
     if (nextSerializedContent === lastSerializedContentRef.current) {
       return;
     }
 
     lastSerializedContentRef.current = nextSerializedContent;
-    editor.replaceBlocks(editor.document, content as never[]);
-  }, [content, editor]);
+    editor.replaceBlocks(editor.document, normalizedContent as never[]);
+  }, [normalizedContent, editor]);
 
   useEffect(() => {
     return () => {
       cancelScheduledSave();
     };
   }, [cancelScheduledSave]);
+
+  const flushPendingSlashMenuSave = () => {
+    if (
+      isSelectingSlashMenuItemRef.current
+      || isExecutingSlashCommandRef.current
+    ) {
+      isSelectingSlashMenuItemRef.current = false;
+      pendingSlashMenuSaveRef.current = null;
+      return;
+    }
+
+    const pendingContent = pendingSlashMenuSaveRef.current;
+
+    if (!pendingContent || !onContentChangeAction) {
+      pendingSlashMenuSaveRef.current = null;
+      return;
+    }
+
+    pendingSlashMenuSaveRef.current = null;
+    onStartContentChangeAction?.();
+    setIsSaving(true);
+    setSaveError(null);
+    scheduleSave(pendingContent);
+  };
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -158,6 +187,43 @@ export function BlockNoteEditorClient({
     '[--bn-colors-side-menu:var(--color-muted-foreground)]',
   );
 
+  const getInlineText = (value: unknown) => {
+    if (!Array.isArray(value) || value.length === 0) {
+      return '';
+    }
+
+    return value.map((item) => {
+      if (!item || typeof item !== 'object' || Array.isArray(item)) {
+        return '';
+      }
+
+      const text = (item as { text?: unknown }).text;
+      return typeof text === 'string' ? text : '';
+    }).join('');
+  };
+
+  const shouldReplaceSlashAnchorBlock = (
+    block: Block,
+    slashCommandText: string,
+  ) => {
+    if (block.type !== 'paragraph') {
+      return false;
+    }
+
+    const inlineText = getInlineText((block as { content?: unknown }).content).trim();
+    const hasChildren = Array.isArray(block.children) && block.children.length > 0;
+
+    if (hasChildren) {
+      return false;
+    }
+
+    if (inlineText === slashCommandText.trim()) {
+      return true;
+    }
+
+    return inlineText.length === 0;
+  };
+
   const getSlashMenuItems = async (query: string) => {
     setSlashMenuQuery(query);
 
@@ -179,18 +245,56 @@ export function BlockNoteEditorClient({
       group: 'Basic blocks',
       icon: <FilePlus2Icon size={18} />,
       onItemClick: () => {
-        void createSubdoc().then((subdoc) => {
-          insertOrUpdateBlockForSlashMenu(editor, {
-            type: 'subpage',
-            props: {
-              documentId: subdoc.id,
-              publicId: subdoc.public_id,
-              workspaceId: workspaceSlug,
-              title: subdoc.title,
-              hasContent: hasMeaningfulContent(subdoc.content),
-            },
-          });
+        const anchorBlock = editor.getTextCursorPosition().block as Block;
+        const anchorBlockId = anchorBlock.id;
+        const slashCommandText = `/${slashMenuQuery.trim()}`;
+        const previousContent = JSON.parse(
+          JSON.stringify(editor.document as unknown[]),
+        ) as unknown[];
+        const optimisticSubdocBlock = {
+          type: 'subpage' as const,
+          props: {
+            documentId: `pending-${anchorBlockId}`,
+            publicId: '',
+            workspaceId: workspaceSlug,
+            title: 'Untitled',
+            hasContent: false,
+          },
+        };
+
+        isExecutingSlashCommandRef.current = true;
+        pendingSlashMenuSaveRef.current = null;
+        cancelScheduledSave();
+        setIsSaving(false);
+
+        editor.focus();
+        editor.transact(() => {
+          if (shouldReplaceSlashAnchorBlock(anchorBlock, slashCommandText)) {
+            editor.updateBlock(anchorBlock, optimisticSubdocBlock as never);
+            return;
+          }
+
+          editor.insertBlocks(
+            [optimisticSubdocBlock] as never[],
+            anchorBlock,
+            'after',
+          );
         });
+
+        void createSubdoc({
+          anchorBlockId,
+          slashCommandText,
+          content: previousContent,
+        })
+          .catch(() => {
+            lastSerializedContentRef.current = JSON.stringify(previousContent);
+            editor.replaceBlocks(editor.document, previousContent as never[]);
+          })
+          .finally(() => {
+            isExecutingSlashCommandRef.current = false;
+            isSelectingSlashMenuItemRef.current = false;
+            pendingSlashMenuSaveRef.current = null;
+          });
       },
     };
 
@@ -234,6 +338,16 @@ export function BlockNoteEditorClient({
 
           lastSerializedContentRef.current = serializedContent;
 
+          if (isExecutingSlashCommandRef.current) {
+            pendingSlashMenuSaveRef.current = null;
+            return;
+          }
+
+          if (isSlashMenuOpenRef.current) {
+            pendingSlashMenuSaveRef.current = nextContent;
+            return;
+          }
+
           onStartContentChangeAction?.();
           setIsSaving(true);
           setSaveError(null);
@@ -253,6 +367,26 @@ export function BlockNoteEditorClient({
                 shouldOpen={(state) =>
                   !state.selection.$from.parent.type.isInGroup('tableContent')
                 }
+                onItemClick={(item) => {
+                  isSelectingSlashMenuItemRef.current = true;
+                  item.onItemClick();
+                }}
+                floatingUIOptions={{
+                  useFloatingOptions: {
+                    onOpenChange: (open) => {
+                      isSlashMenuOpenRef.current = open;
+
+                      if (open) {
+                        pendingSlashMenuSaveRef.current = editor.document as unknown[];
+                        cancelScheduledSave();
+                        setIsSaving(false);
+                        return;
+                      }
+
+                      flushPendingSlashMenuSave();
+                    },
+                  },
+                }}
                 getItems={getSlashMenuItems}
                 suggestionMenuComponent={(props) => (
                   <SlashMenu

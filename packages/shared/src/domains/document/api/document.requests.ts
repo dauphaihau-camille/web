@@ -5,6 +5,8 @@ import {
 import {
   archivedDocumentListPageSchema,
   createDocumentSchema,
+  createSubdocCommandSchema,
+  createSubdocCommandResultSchema,
   documentSchema,
   documentNavigationPageSchema,
   workspaceDocumentNavigationSchema,
@@ -16,6 +18,8 @@ import type {
   DocumentId,
   DocumentNavigationPage,
   MoveDocumentInput,
+  CreateSubdocCommandInput,
+  CreateSubdocCommandResult,
   UpdateDocumentInput,
   WorkspaceDocumentNavigation,
   WorkspaceId,
@@ -92,6 +96,19 @@ export async function createDocument(input: CreateDocumentInput): Promise<Docume
   const response = await apiPost<unknown, CreateDocumentInput>('documents', payload);
 
   return documentSchema.parse(response);
+}
+
+export async function createSubdocCommand(
+  documentId: DocumentId,
+  input?: CreateSubdocCommandInput,
+): Promise<CreateSubdocCommandResult> {
+  const payload = createSubdocCommandSchema.parse(input ?? {});
+  const response = await apiPost<unknown, CreateSubdocCommandInput>(
+    `documents/${documentId}/commands/create-subdoc`,
+    payload,
+  );
+
+  return createSubdocCommandResultSchema.parse(response);
 }
 
 export async function duplicateDocument(documentId: DocumentId): Promise<Document> {

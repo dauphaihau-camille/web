@@ -14,6 +14,8 @@ import type {
   workspaceDocumentNavigationSchema,
   archivedDocumentListItemSchema,
   archivedDocumentListPageSchema,
+  createSubdocCommandSchema,
+  createSubdocCommandResultSchema,
 } from './document.schemas';
 
 export type DocumentId = z.infer<typeof documentIdSchema>;
@@ -28,5 +30,7 @@ export type ArchivedDocumentListPage = z.infer<typeof archivedDocumentListPageSc
 export type TeamspaceDocumentNavigationGroup = z.infer<typeof teamspaceDocumentNavigationSchema>;
 export type WorkspaceDocumentNavigation = z.infer<typeof workspaceDocumentNavigationSchema>;
 export type CreateDocumentInput = z.infer<typeof createDocumentSchema>;
+export type CreateSubdocCommandInput = z.infer<typeof createSubdocCommandSchema>;
+export type CreateSubdocCommandResult = z.infer<typeof createSubdocCommandResultSchema>;
 export type UpdateDocumentInput = z.infer<typeof updateDocumentSchema>;
 export type MoveDocumentInput = z.infer<typeof moveDocumentSchema>;
