@@ -34,6 +34,13 @@ import { blockNoteEditorClientStyles } from './blocknote-editor-client.styles';
 import { EditorSideMenu } from './side-menu';
 import { SlashMenu } from './slash-menu';
 
+const HIDDEN_SLASH_MENU_TITLES = new Set([
+  'Image',
+  'Video',
+  'Audio',
+  'File',
+]);
+
 const editorKeyboardExtension = createExtension({
   key: 'select-current-block',
   keyboardShortcuts: {
@@ -227,7 +234,9 @@ export function BlockNoteEditorClient({
   const getSlashMenuItems = async (query: string) => {
     setSlashMenuQuery(query);
 
-    const defaultItems = getDefaultReactSlashMenuItems(editor);
+    const defaultItems = getDefaultReactSlashMenuItems(editor).filter(
+      (item) => !HIDDEN_SLASH_MENU_TITLES.has(item.title),
+    );
 
     if (!onCreateSubdocAction) {
       return filterSuggestionItems(
