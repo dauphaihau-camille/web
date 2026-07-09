@@ -268,7 +268,6 @@ export function WorkspaceUserDropdown({
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            variant="destructive"
             disabled={logoutMutation.isPending}
             onClick={() => {
               setIsOpen(false);

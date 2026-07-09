@@ -22,12 +22,12 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
       collapsible="none"
       className="h-auto min-h-svh self-stretch border-r border-sidebar-border bg-sidebar"
     >
-      <SidebarHeader className="gap-3 p-3">
+      <SidebarHeader className="gap-3 p-1">
         <WorkspaceUserDropdown workspaceSlug={workspaceSlug} />
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
-        <SidebarGroup>
+      <SidebarContent>
+        <SidebarGroup className='pt-0'>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem className="font-semibold">
