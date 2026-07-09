@@ -20,6 +20,7 @@ import {
   favoriteDocument,
   favoriteKeys,
   type FavoriteDocument,
+  type FavoriteStatus,
   unfavoriteDocument,
 } from '@/domains/favorite';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
@@ -34,6 +35,49 @@ import {
 import { resolveArchiveDestination } from './document-tree-node-action-helpers';
 
 const ARCHIVE_TOAST_ID = 'document-tree-archive';
+
+function createOptimisticFavoriteDocument(
+  document: DocumentNavigationNode,
+  workspaceSlug: string,
+): FavoriteDocument {
+  return {
+    document_id: document.id,
+    public_id: document.public_id,
+    workspace_id: workspaceSlug,
+    teamspace_id: document.teamspace_id,
+    parent_document_id: document.parent_document_id,
+    title: document.title,
+    sort_key: document.sort_key,
+    has_children: document.has_children,
+    has_content: document.has_content,
+    favorited_at: new Date().toISOString(),
+  };
+}
+
+function updateWorkspaceFavoritesCache(
+  queryClient: ReturnType<typeof useQueryClient>,
+  workspaceSlug: string,
+  document: DocumentNavigationNode,
+  isFavorite: boolean,
+) {
+  queryClient.setQueryData<FavoriteDocument[] | undefined>(
+    favoriteKeys.workspaceList(workspaceSlug),
+    (currentFavorites) => {
+      if (!currentFavorites) {
+        return currentFavorites;
+      }
+
+      if (!isFavorite) {
+        return currentFavorites.filter((favorite) => favorite.document_id !== document.id);
+      }
+
+      return [
+        createOptimisticFavoriteDocument(document, workspaceSlug),
+        ...currentFavorites.filter((favorite) => favorite.document_id !== document.id),
+      ];
+    },
+  );
+}
 
 function markCachedFavoriteDocumentHasChildren(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -67,6 +111,18 @@ type ArchiveMutationContext = {
     ]
   >;
   previousExpandedDocumentIds: string[];
+  previousWorkspaceFavorites?: FavoriteDocument[];
+};
+
+type FavoriteMutationContext = {
+  previousDocument?: Document;
+  previousDocumentLists: Array<
+    readonly [
+      readonly unknown[],
+      WorkspaceDocumentNavigation | DocumentNavigationPage | undefined,
+    ]
+  >;
+  previousFavoriteStatus?: FavoriteStatus;
   previousWorkspaceFavorites?: FavoriteDocument[];
 };
 
@@ -158,28 +214,148 @@ export function useDocumentTreeNodeActions({
     },
   });
 
-  const favoriteMutation = useMutation({
-    mutationFn: async () => {
-      if (document.is_favorite) {
+  const favoriteMutation = useMutation<
+    FavoriteStatus,
+    Error,
+    { nextIsFavorite: boolean },
+    FavoriteMutationContext
+  >({
+    mutationFn: async ({ nextIsFavorite }) => {
+      if (!nextIsFavorite) {
         return unfavoriteDocument(document.id);
       }
 
       return favoriteDocument(document.id);
     },
+    onMutate: async ({ nextIsFavorite }) => {
+      await Promise.all([
+        queryClient.cancelQueries({
+          queryKey: favoriteKeys.status(document.id),
+        }),
+        queryClient.cancelQueries({
+          queryKey: favoriteKeys.workspaceList(workspaceSlug),
+        }),
+        queryClient.cancelQueries({
+          queryKey: documentKeys.detail(document.id),
+        }),
+        queryClient.cancelQueries({
+          queryKey: documentKeys.lists(workspaceSlug),
+        }),
+      ]);
+
+      const previousFavoriteStatus = queryClient.getQueryData<FavoriteStatus>(
+        favoriteKeys.status(document.id),
+      );
+      const previousWorkspaceFavorites = queryClient.getQueryData<FavoriteDocument[]>(
+        favoriteKeys.workspaceList(workspaceSlug),
+      );
+      const previousDocument = queryClient.getQueryData<Document>(
+        documentKeys.detail(document.id),
+      );
+      const previousDocumentLists = queryClient.getQueriesData<
+        WorkspaceDocumentNavigation | DocumentNavigationPage
+      >({
+        queryKey: documentKeys.lists(workspaceSlug),
+      });
+
+      queryClient.setQueryData<FavoriteStatus>(favoriteKeys.status(document.id), {
+        document_id: document.id,
+        is_favorite: nextIsFavorite,
+      });
+      queryClient.setQueryData<Document>(
+        documentKeys.detail(document.id),
+        (currentDocument) => currentDocument
+          ? {
+            ...currentDocument,
+            is_favorite: nextIsFavorite,
+          }
+          : currentDocument,
+      );
+      updateCachedNavigationFavoriteStatus(
+        queryClient,
+        workspaceSlug,
+        document.id,
+        nextIsFavorite,
+      );
+      updateWorkspaceFavoritesCache(
+        queryClient,
+        workspaceSlug,
+        document,
+        nextIsFavorite,
+      );
+
+      return {
+        previousDocument,
+        previousDocumentLists,
+        previousFavoriteStatus,
+        previousWorkspaceFavorites,
+      };
+    },
+    onError: (_error, _variables, context) => {
+      context?.previousDocumentLists.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+
+      if (context?.previousFavoriteStatus) {
+        queryClient.setQueryData(
+          favoriteKeys.status(document.id),
+          context.previousFavoriteStatus,
+        );
+      }
+
+      if (context?.previousDocument) {
+        queryClient.setQueryData(
+          documentKeys.detail(document.id),
+          context.previousDocument,
+        );
+      }
+
+      if (context?.previousWorkspaceFavorites) {
+        queryClient.setQueryData(
+          favoriteKeys.workspaceList(workspaceSlug),
+          context.previousWorkspaceFavorites,
+        );
+      }
+
+      toast('Could not update favorites');
+    },
     onSuccess: async (status) => {
       queryClient.setQueryData(favoriteKeys.status(document.id), status);
+      queryClient.setQueryData<Document>(
+        documentKeys.detail(document.id),
+        (currentDocument) => currentDocument
+          ? {
+            ...currentDocument,
+            is_favorite: status.is_favorite,
+          }
+          : currentDocument,
+      );
       updateCachedNavigationFavoriteStatus(
         queryClient,
         workspaceSlug,
         document.id,
         status.is_favorite,
       );
-      await queryClient.invalidateQueries({
-        queryKey: favoriteKeys.workspaceList(workspaceSlug),
-      });
+      updateWorkspaceFavoritesCache(queryClient, workspaceSlug, document, status.is_favorite);
       toast(
         status.is_favorite ? 'Added to favorites' : 'Removed from favorites',
       );
+    },
+    onSettled: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: favoriteKeys.status(document.id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: favoriteKeys.workspaceList(workspaceSlug),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.detail(document.id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.lists(workspaceSlug),
+        }),
+      ]);
     },
   });
 
@@ -334,7 +510,9 @@ export function useDocumentTreeNodeActions({
   };
 
   const handleToggleFavorite = () => {
-    void favoriteMutation.mutateAsync();
+    void favoriteMutation.mutateAsync({
+      nextIsFavorite: !document.is_favorite,
+    });
   };
 
   const handleArchive = () => {

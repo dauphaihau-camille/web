@@ -17,7 +17,11 @@ import {
   type WorkspaceDocumentNavigation,
 } from '@shared/domains/document';
 import { workspaceRoutes } from '@shared/domains/workspace';
-import { favoriteKeys, type FavoriteDocument } from '@/domains/favorite';
+import {
+  favoriteKeys,
+  type FavoriteDocument,
+  type FavoriteStatus,
+} from '@/domains/favorite';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import type * as DocumentTreeNodeActionHelpers from './document-tree-node-action-helpers';
 
@@ -28,6 +32,8 @@ const pushMock = vi.fn();
 const toastMock = vi.fn();
 const archiveDocumentMock = vi.fn();
 const createDocumentMock = vi.fn();
+const favoriteDocumentMock = vi.fn();
+const unfavoriteDocumentMock = vi.fn();
 const documentDetailQueryOptionsMock = vi.fn();
 const resolveArchiveDestinationMock = vi.fn();
 
@@ -52,6 +58,16 @@ vi.mock('@shared/domains/document', async () => {
     archiveDocument: archiveDocumentMock,
     createDocument: createDocumentMock,
     documentDetailQueryOptions: documentDetailQueryOptionsMock,
+  };
+});
+
+vi.mock('@/domains/favorite', async () => {
+  const actual = await vi.importActual('@/domains/favorite');
+
+  return {
+    ...actual,
+    favoriteDocument: favoriteDocumentMock,
+    unfavoriteDocument: unfavoriteDocumentMock,
   };
 });
 
@@ -122,6 +138,19 @@ const childDocumentFixture: Document = {
   updated_at: '2026-01-03T00:00:00.000Z',
 };
 
+const favoriteFixture: FavoriteDocument = {
+  document_id: documentFixture.id,
+  public_id: documentFixture.public_id,
+  workspace_id: documentFixture.workspace_id,
+  teamspace_id: documentFixture.teamspace_id,
+  parent_document_id: documentFixture.parent_document_id,
+  title: documentFixture.title,
+  sort_key: documentFixture.sort_key,
+  has_children: false,
+  has_content: false,
+  favorited_at: '2026-01-01T00:00:00.000Z',
+};
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -161,6 +190,8 @@ describe('useDocumentTreeNodeActions integration', () => {
     toastMock.mockReset();
     archiveDocumentMock.mockReset();
     createDocumentMock.mockReset();
+    favoriteDocumentMock.mockReset();
+    unfavoriteDocumentMock.mockReset();
     documentDetailQueryOptionsMock.mockReset();
     resolveArchiveDestinationMock.mockReset();
     useDocumentTreeExpansionStore.setState({
@@ -330,20 +361,7 @@ describe('useDocumentTreeNodeActions integration', () => {
     );
     queryClient.setQueryData<FavoriteDocument[]>(
       favoriteKeys.workspaceList('acme'),
-      [
-        {
-          document_id: documentFixture.id,
-          public_id: documentFixture.public_id,
-          workspace_id: documentFixture.workspace_id,
-          teamspace_id: documentFixture.teamspace_id,
-          parent_document_id: documentFixture.parent_document_id,
-          title: documentFixture.title,
-          sort_key: documentFixture.sort_key,
-          has_children: false,
-          has_content: false,
-          favorited_at: '2026-01-01T00:00:00.000Z',
-        },
-      ],
+      [favoriteFixture],
     );
 
     const { result } = renderHook(
@@ -383,6 +401,132 @@ describe('useDocumentTreeNodeActions integration', () => {
           childDocumentFixture.title,
         ),
       );
+    });
+  });
+
+  it('optimistically adds a document to favorites before the request resolves', async () => {
+    let resolveFavoriteRequest: ((value: FavoriteStatus) => void) | undefined;
+    favoriteDocumentMock.mockImplementation(
+      () =>
+        new Promise<FavoriteStatus>((resolve) => {
+          resolveFavoriteRequest = resolve;
+        }),
+    );
+
+    const { Wrapper, queryClient } = createWrapper();
+    queryClient.setQueryData(documentKeys.detail(documentFixture.id), documentFixture);
+    queryClient.setQueryData(
+      documentKeys.rootList('acme', 10),
+      createNavigation([{
+        ...documentNodeFixture,
+        is_favorite: false,
+      }]),
+    );
+    queryClient.setQueryData<FavoriteDocument[]>(
+      favoriteKeys.workspaceList('acme'),
+      [],
+    );
+
+    const { result } = renderHook(
+      () =>
+        useDocumentTreeNodeActions({
+          document: {
+            ...documentNodeFixture,
+            is_favorite: false,
+          },
+          isActive: true,
+          workspaceSlug: 'acme',
+        }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.handleToggleFavorite();
+    });
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData<FavoriteDocument[]>(
+          favoriteKeys.workspaceList('acme'),
+        ),
+      ).toEqual([
+        expect.objectContaining({
+          document_id: documentFixture.id,
+        }),
+      ]);
+      expect(
+        queryClient.getQueryData<WorkspaceDocumentNavigation>(
+          documentKeys.rootList('acme', 10),
+        )?.private_documents.items[0],
+      ).toEqual(expect.objectContaining({
+        id: documentFixture.id,
+        is_favorite: true,
+      }));
+    });
+
+    if (!resolveFavoriteRequest) {
+      throw new Error('Favorite request did not start');
+    }
+
+    resolveFavoriteRequest({
+      document_id: documentFixture.id,
+      is_favorite: true,
+    });
+
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith('Added to favorites');
+    });
+  });
+
+  it('rolls back favorite caches when the optimistic request fails', async () => {
+    favoriteDocumentMock.mockRejectedValue(new Error('favorite failed'));
+
+    const { Wrapper, queryClient } = createWrapper();
+    queryClient.setQueryData(documentKeys.detail(documentFixture.id), documentFixture);
+    queryClient.setQueryData(
+      documentKeys.rootList('acme', 10),
+      createNavigation([{
+        ...documentNodeFixture,
+        is_favorite: false,
+      }]),
+    );
+    queryClient.setQueryData<FavoriteDocument[]>(
+      favoriteKeys.workspaceList('acme'),
+      [],
+    );
+
+    const { result } = renderHook(
+      () =>
+        useDocumentTreeNodeActions({
+          document: {
+            ...documentNodeFixture,
+            is_favorite: false,
+          },
+          isActive: true,
+          workspaceSlug: 'acme',
+        }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.handleToggleFavorite();
+    });
+
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith('Could not update favorites');
+      expect(
+        queryClient.getQueryData<FavoriteDocument[]>(
+          favoriteKeys.workspaceList('acme'),
+        ),
+      ).toEqual([]);
+      expect(
+        queryClient.getQueryData<WorkspaceDocumentNavigation>(
+          documentKeys.rootList('acme', 10),
+        )?.private_documents.items[0],
+      ).toEqual(expect.objectContaining({
+        id: documentFixture.id,
+        is_favorite: false,
+      }));
     });
   });
 });
