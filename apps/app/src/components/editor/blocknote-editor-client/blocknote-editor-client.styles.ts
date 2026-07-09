@@ -122,4 +122,12 @@ export const blockNoteEditorClientStyles = `
   .editor-blocknote-client [data-test="createLink"] {
     display: none !important;
   }
+
+  .editor-blocknote-client .bn-formatting-toolbar:empty {
+    display: none !important;
+  }
+
+  .editor-blocknote-client [data-floating-ui-focusable]:has(> .bn-formatting-toolbar:empty) {
+    display: none !important;
+  }
 `;
