@@ -2,14 +2,13 @@
 
 import {
   AddBlockButton,
-  DragHandleButton,
   SideMenu,
   type SideMenuProps,
 } from '@blocknote/react';
 
 import type { BlockNoteDocumentOperations } from '../blocknote-editor.types';
 
-import { DragHandleMenu } from './drag-handle-menu/drag-handle-menu';
+import { EditorDragHandleButton } from './drag-handle-button';
 
 type SideMenuComponentProps = SideMenuProps & {
   documentOperations?: BlockNoteDocumentOperations;
@@ -18,14 +17,10 @@ type SideMenuComponentProps = SideMenuProps & {
 export function EditorSideMenu({
   documentOperations,
 }: SideMenuComponentProps) {
-  const dragHandleMenu = () => (
-    <DragHandleMenu documentOperations={documentOperations} />
-  );
-
   return (
     <SideMenu>
       <AddBlockButton />
-      <DragHandleButton dragHandleMenu={dragHandleMenu} />
+      <EditorDragHandleButton documentOperations={documentOperations} />
     </SideMenu>
   );
 }

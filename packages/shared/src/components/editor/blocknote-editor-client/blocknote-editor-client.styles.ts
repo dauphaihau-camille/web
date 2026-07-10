@@ -1,4 +1,13 @@
 export const blockNoteEditorClientBaseStyles = `
+  .editor-blocknote-client {
+    --editor-block-selection-background: var(--color-border);
+    --editor-block-selection-overlay: color-mix(
+      in oklab,
+      var(--color-foreground) 8%,
+      transparent
+    );
+  }
+
   .editor-blocknote-client .bn-editor,
   .editor-blocknote-client .tiptap {
     background-color: transparent !important;
@@ -10,16 +19,92 @@ export const blockNoteEditorClientBaseStyles = `
   }
 
   .editor-blocknote-client
-    .bn-block-content:not([data-content-type="subpage"])
+    .bn-block-content:not([data-content-type="subpage"]):not([data-text-color])
     > .bn-inline-content {
     padding-left: 11px;
     color: var(--color-foreground) !important;
   }
 
   .editor-blocknote-client
+    .bn-block-content:not([data-content-type="subpage"])[data-text-color]
+    > .bn-inline-content {
+    padding-left: 11px;
+    color: inherit !important;
+  }
+
+  .editor-blocknote-client
+    .bn-block:has(> .bn-block-content[data-background-color]) {
+    border-radius: 0.375rem;
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color] {
+    border-radius: 0.375rem;
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color="gray"] {
+    --editor-block-background-color: var(--bn-colors-highlights-gray-background);
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color="brown"] {
+    --editor-block-background-color: var(--bn-colors-highlights-brown-background);
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color="red"] {
+    --editor-block-background-color: var(--bn-colors-highlights-red-background);
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color="orange"] {
+    --editor-block-background-color: var(--bn-colors-highlights-orange-background);
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color="yellow"] {
+    --editor-block-background-color: var(--bn-colors-highlights-yellow-background);
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color="green"] {
+    --editor-block-background-color: var(--bn-colors-highlights-green-background);
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color="blue"] {
+    --editor-block-background-color: var(--bn-colors-highlights-blue-background);
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color="purple"] {
+    --editor-block-background-color: var(--bn-colors-highlights-purple-background);
+  }
+
+  .editor-blocknote-client .bn-block-content[data-background-color="pink"] {
+    --editor-block-background-color: var(--bn-colors-highlights-pink-background);
+  }
+
+  .editor-blocknote-client
+    .bn-block-content[data-drag-handle-menu-open],
+  .editor-blocknote-client
+    .bn-react-node-view-renderer[data-drag-handle-menu-open]
+    > .bn-block-content {
+    border-radius: 0.375rem;
+    background-color: var(--editor-block-selection-background) !important;
+  }
+
+  .editor-blocknote-client
+    .bn-block-content[data-background-color][data-drag-handle-menu-open],
+  .editor-blocknote-client
+    .bn-react-node-view-renderer[data-drag-handle-menu-open]
+    > .bn-block-content[data-background-color] {
+    background-color: var(--editor-block-background-color) !important;
+    box-shadow:
+      inset 0 0 0 9999px var(--editor-block-selection-overlay),
+      0 0 0 4px var(--editor-block-selection-background);
+  }
+
+  .editor-blocknote-client
     .bn-block-content:not([data-content-type="subpage"]):has(.ProseMirror-trailingBreak:only-child)::after {
     color: var(--color-muted-foreground);
     margin-left: 1px;
+  }
+
+  .editor-blocknote-client .bn-side-menu {
+    transform: translateX(-0.5rem);
   }
 
   .bn-side-menu .bn-button {

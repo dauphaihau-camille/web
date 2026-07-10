@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import type { Block, BlockNoteEditor } from '@blocknote/core';
 import { SideMenuExtension } from '@blocknote/core/extensions';
 import {
@@ -15,6 +16,7 @@ import { PaletteIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 import type { BlockNoteDocumentOperations } from '../../blocknote-editor.types';
+import { dragHandleMenuSelectionExtension } from '../drag-handle-menu-selection-extension';
 import {
   getCurrentBlockLabel,
   type EditorBlock,
@@ -55,7 +57,7 @@ export function DragHandleMenu({
     typeof currentBlock.props.documentId === 'string'
       ? currentBlock.props.documentId
       : null;
-  const blocksToRemove = selectedBlocks.some((block) => block.id === hoveredBlock.id)
+  const blocksToActOn = selectedBlocks.some((block) => block.id === hoveredBlock.id)
     ? selectedBlocks
     : [hoveredBlock];
   const isArchivingSubdocument =
@@ -64,8 +66,9 @@ export function DragHandleMenu({
     && documentOperations.archivingSubdocumentId === subdocumentId;
   const handleDelete = () => {
     sideMenu.unfreezeMenu();
-    editor.removeBlocks(blocksToRemove);
+    editor.removeBlocks(blocksToActOn);
   };
+
   const handleArchiveSubdocument = () => {
     if (
       isArchivingSubdocument
@@ -75,11 +78,11 @@ export function DragHandleMenu({
       return;
     }
 
-    const blockSnapshots = blocksToRemove.map((block) => cloneBlock(block as Block));
-    const insertionPoint = findInsertionPoint(editor.document as Block[], blocksToRemove as Block[]);
+    const blockSnapshots = blocksToActOn.map((block) => cloneBlock(block as Block));
+    const insertionPoint = findInsertionPoint(editor.document as Block[], blocksToActOn as Block[]);
 
     sideMenu.unfreezeMenu();
-    editor.removeBlocks(blocksToRemove);
+    editor.removeBlocks(blocksToActOn);
 
     void documentOperations.onArchiveSubdocument(subdocumentId).catch(() => {
       restoreBlocks(editor, blockSnapshots, insertionPoint);
@@ -89,6 +92,7 @@ export function DragHandleMenu({
 
   return (
     <Components.Generic.Menu.Dropdown className="bn-menu-dropdown bn-drag-handle-menu drag-handle-menu">
+      <ActiveBlockHighlight blockId={hoveredBlock.id} />
       <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground">
         {currentBlockLabel}
       </div>
@@ -110,9 +114,34 @@ export function DragHandleMenu({
         : null}
       {isDocumentBlock
         ? null
-        : <NormalBlockMenu onDelete={handleDelete} />}
+        : (
+          <NormalBlockMenu
+            blocks={blocksToActOn as Block[]}
+            onDelete={handleDelete}
+          />
+        )}
     </Components.Generic.Menu.Dropdown>
   );
+}
+
+function ActiveBlockHighlight({
+  blockId,
+}: {
+  blockId: string;
+}) {
+  const dragHandleMenuSelection = useExtension(
+    dragHandleMenuSelectionExtension,
+  );
+
+  useEffect(() => {
+    dragHandleMenuSelection.setSelectedBlock(blockId);
+
+    return () => {
+      dragHandleMenuSelection.setSelectedBlock(null);
+    };
+  }, [blockId, dragHandleMenuSelection]);
+
+  return null;
 }
 
 function cloneBlock(block: Block): Block {

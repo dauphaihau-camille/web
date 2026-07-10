@@ -27,6 +27,7 @@ import { useTheme } from 'next-themes';
 
 import { cn } from '../../../lib/utils';
 import type { BlockNoteEditorProps } from '../blocknote-editor.types';
+import { dragHandleMenuSelectionExtension } from './drag-handle-menu-selection-extension';
 import { EditorSideMenu } from './side-menu';
 import type { SharedSlashMenuProps } from './slash-menu';
 
@@ -114,7 +115,10 @@ export function createBlockNoteEditorClient({
     const editor = useCreateBlockNote({
       schema,
       initialContent: normalizedContent as never[],
-      extensions: [editorKeyboardExtension],
+      extensions: [
+        editorKeyboardExtension,
+        dragHandleMenuSelectionExtension(),
+      ],
     }, []);
 
     const { run: scheduleSave, cancel: cancelScheduledSave } = useDebounceFn(

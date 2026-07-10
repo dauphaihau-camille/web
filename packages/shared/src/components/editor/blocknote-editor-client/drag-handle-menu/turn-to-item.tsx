@@ -6,27 +6,27 @@ import {
   useBlockNoteEditor,
   useComponentsContext,
   useDictionary,
-  useEditorState,
 } from '@blocknote/react';
 import { ArrowRightLeftIcon, CheckIcon } from 'lucide-react';
 
 import type { EditorBlock } from './editor-block';
 
-export function TurnToItem() {
+type TurnToItemProps = {
+  blocks: Block[];
+};
+
+export function TurnToItem({
+  blocks,
+}: TurnToItemProps) {
   const Components = useComponentsContext();
   const editor = useBlockNoteEditor();
   const dictionary = useDictionary();
-  const selectedBlocks = useEditorState({
-    editor,
-    selector: ({ editor: currentEditor }) =>
-      currentEditor.getSelection()?.blocks ?? [currentEditor.getTextCursorPosition().block],
-  });
 
-  if (!Components || !editor.isEditable || selectedBlocks.length === 0) {
+  if (!Components || !editor.isEditable || blocks.length === 0) {
     return null;
   }
 
-  const firstSelectedBlock = selectedBlocks[0] as EditorBlock;
+  const firstSelectedBlock = blocks[0] as EditorBlock;
   const supportedItems = blockTypeSelectItems(dictionary).filter((item) =>
     editorHasBlockWithType(
       editor,
@@ -79,7 +79,7 @@ export function TurnToItem() {
               onClick={() => {
                 editor.focus();
                 editor.transact(() => {
-                  for (const block of selectedBlocks as Block[]) {
+                  for (const block of blocks) {
                     editor.updateBlock(block, {
                       type: item.type as never,
                       props: item.props as never,
