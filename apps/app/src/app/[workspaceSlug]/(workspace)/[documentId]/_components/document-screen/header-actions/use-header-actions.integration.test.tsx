@@ -3,7 +3,13 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import type { ReactNode } from 'react';
 
-import { documentKeys, type Document, useDocumentQuery } from '@/domains/document';
+import {
+  documentKeys,
+  type Document,
+  type WorkspaceDocumentNavigation,
+  useDocumentQuery,
+} from '@/domains/document';
+import { workspaceRoutes } from '@/domains/workspace';
 import { mswServer } from '@shared/test/msw/server';
 
 import { useHeaderActions } from './use-header-actions';
@@ -109,6 +115,84 @@ describe('useHeaderActions integration', () => {
     await waitFor(() => {
       expect(result.current.favoriteStatus?.is_favorite).toBe(true);
       expect(result.current.isFavoriting).toBe(false);
+    });
+  });
+
+  it('updates archive status optimistically before the mutation resolves', async () => {
+    let resolveArchiveRequest: (() => void) | null = null;
+
+    mswServer.use(
+      http.get(favoriteStatusUrlPattern, () =>
+        HttpResponse.json({
+          document_id: documentFixture.id,
+          is_favorite: false,
+        })),
+      http.get(publishStatusUrlPattern, () => HttpResponse.json({})),
+      http.post(/\/documents\/doc-1\/archive\/?$/, async () => {
+        await new Promise<void>((resolve) => {
+          resolveArchiveRequest = resolve;
+        });
+
+        return HttpResponse.json({
+          ...documentFixture,
+          archived_at: '2026-01-02T00:00:00.000Z',
+        });
+      }),
+    );
+
+    const { Wrapper, queryClient } = createWrapper();
+    queryClient.setQueryData(documentKeys.detail(documentFixture.id), documentFixture);
+    queryClient.setQueryData<WorkspaceDocumentNavigation>(
+      documentKeys.rootList('acme', 10),
+      {
+        private_documents: {
+          items: [{
+            id: documentFixture.id,
+            public_id: documentFixture.public_id,
+            title: documentFixture.title,
+            teamspace_id: documentFixture.teamspace_id,
+            parent_document_id: documentFixture.parent_document_id,
+            sort_key: documentFixture.sort_key,
+            has_children: false,
+            has_content: false,
+            is_favorite: false,
+          }],
+          next_cursor: undefined,
+        },
+        teamspaces: [],
+      },
+    );
+
+    const { result } = renderHook(
+      () => ({
+        documentQuery: useDocumentQuery(documentFixture.id, {
+          initialData: documentFixture,
+          refetchOnMount: false,
+        }),
+        headerActions: useHeaderActions({ document: documentFixture, workspaceSlug: 'acme' }),
+      }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.headerActions.archiveCurrentDocument();
+    });
+
+    await waitFor(() => {
+      expect(result.current.documentQuery.data?.archived_at).toBeTruthy();
+      expect(result.current.headerActions.isArchiving).toBe(true);
+      expect(replaceMock).toHaveBeenCalledWith(workspaceRoutes.detail('acme'));
+    });
+
+    const archiveRequestResolver: () => void = resolveArchiveRequest ?? (() => {
+      throw new Error('Archive request did not start');
+    });
+
+    archiveRequestResolver();
+
+    await waitFor(() => {
+      expect(result.current.documentQuery.data?.archived_at).toBe('2026-01-02T00:00:00.000Z');
+      expect(result.current.headerActions.isArchiving).toBe(false);
     });
   });
 

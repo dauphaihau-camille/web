@@ -6,6 +6,8 @@ import { renderWithProviders } from '@shared/test/render';
 
 import { ShareButton } from './share-button';
 
+const marketingHost = 'http://localhost:4001';
+
 describe('ShareButton integration', () => {
   beforeEach(() => {
     window.history.replaceState({}, '', '/acme/doc-1');
@@ -61,9 +63,9 @@ describe('ShareButton integration', () => {
 
     await userEvent.setup().click(screen.getByRole('button', { name: 'Share' }));
 
-    expect(await screen.findByDisplayValue(
-      `${window.location.origin}/share/published-doc`,
-    )).toBeInTheDocument();
+    expect(
+      await screen.findByDisplayValue(`${marketingHost}/share/published-doc`),
+    ).toBeInTheDocument();
 
     await userEvent.setup().click(screen.getByRole('button', { name: 'Copy link' }));
     await userEvent.setup().click(screen.getByRole('button', { name: 'Unpublish' }));

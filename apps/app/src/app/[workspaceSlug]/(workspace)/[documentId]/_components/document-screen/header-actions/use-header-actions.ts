@@ -11,6 +11,7 @@ import {
   documentKeys,
   permanentlyDeleteDocument,
   type DocumentNavigationNode,
+  type DocumentNavigationPage,
   type WorkspaceDocumentNavigation,
   duplicateDocument as duplicateDocumentRequest,
   restoreDocument,
@@ -32,6 +33,10 @@ import {
 import { workspaceRoutes } from '@/domains/workspace';
 import { removeCachedNavigationDocument } from '@/domains/document/cache/document-query-cache';
 
+import { buildPublishedDocumentUrl } from './header-actions.utils';
+
+const ARCHIVE_TOAST_ID = 'document-screen-archive';
+
 type UseHeaderActionsOptions = {
   workspaceSlug: string;
   document: Document;
@@ -44,6 +49,23 @@ type FavoriteMutationContext = {
 
 type RestoreMutationContext = {
   previousDocument?: Document;
+};
+
+type ArchiveMutationContext = {
+  previousDocument?: Document;
+  previousDocumentLists: Array<
+    readonly [
+      readonly unknown[],
+      WorkspaceDocumentNavigation | DocumentNavigationPage | undefined,
+    ]
+  >;
+  previousWorkspaceFavorites?: FavoriteDocument[];
+};
+
+type ArchiveMutationVariables = {
+  nextRoute?: string;
+  previousRoute?: string;
+  version: number;
 };
 
 export function useHeaderActions({
@@ -76,12 +98,105 @@ export function useHeaderActions({
     },
   });
 
-  const archiveDocumentMutation = useMutation({
-    mutationFn: () => archiveDocument(document.id, document.version),
+  const archiveDocumentMutation = useMutation<
+    Document,
+    Error,
+    ArchiveMutationVariables,
+    ArchiveMutationContext
+  >({
+    mutationFn: ({ version }) => archiveDocument(document.id, version),
+    onMutate: async ({ nextRoute, version }): Promise<ArchiveMutationContext> => {
+      await Promise.all([
+        queryClient.cancelQueries({
+          queryKey: documentKeys.detail(document.id),
+        }),
+        queryClient.cancelQueries({
+          queryKey: documentKeys.lists(workspaceSlug),
+        }),
+        queryClient.cancelQueries({
+          queryKey: favoriteKeys.workspaceList(workspaceSlug),
+        }),
+      ]);
+
+      const previousDocumentLists = queryClient.getQueriesData<
+        WorkspaceDocumentNavigation | DocumentNavigationPage
+      >({
+        queryKey: documentKeys.lists(workspaceSlug),
+      });
+      const previousDocument = queryClient.getQueryData<Document>(
+        documentKeys.detail(document.id),
+      );
+      const previousWorkspaceFavorites = queryClient.getQueryData<FavoriteDocument[]>(
+        favoriteKeys.workspaceList(workspaceSlug),
+      );
+
+      queryClient.setQueryData<Document>(
+        documentKeys.detail(document.id),
+        (currentDocument) => currentDocument
+          ? {
+            ...currentDocument,
+            archived_at: currentDocument.archived_at ?? new Date().toISOString(),
+            version,
+          }
+          : currentDocument,
+      );
+      removeCachedNavigationDocument(queryClient, workspaceSlug, document.id);
+      queryClient.setQueryData<FavoriteDocument[] | undefined>(
+        favoriteKeys.workspaceList(workspaceSlug),
+        (currentFavorites) =>
+          currentFavorites?.filter((favorite) => favorite.document_id !== document.id),
+      );
+
+      if (nextRoute) {
+        router.replace(nextRoute);
+      }
+
+      toast('Moved to trash', {
+        id: `${ARCHIVE_TOAST_ID}-${document.id}`,
+      });
+
+      return {
+        previousDocument,
+        previousDocumentLists,
+        previousWorkspaceFavorites,
+      };
+    },
+    onError: (_error, variables, context) => {
+      context?.previousDocumentLists.forEach(([queryKey, data]) => {
+        queryClient.setQueryData(queryKey, data);
+      });
+
+      if (context?.previousDocument) {
+        queryClient.setQueryData(
+          documentKeys.detail(document.id),
+          context.previousDocument,
+        );
+      }
+
+      if (context?.previousWorkspaceFavorites) {
+        queryClient.setQueryData(
+          favoriteKeys.workspaceList(workspaceSlug),
+          context.previousWorkspaceFavorites,
+        );
+      }
+
+      if (variables.previousRoute) {
+        router.replace(variables.previousRoute);
+      }
+
+      toast('Could not move to trash', {
+        id: `${ARCHIVE_TOAST_ID}-${document.id}`,
+      });
+    },
     onSuccess: (archivedDocument) => {
       queryClient.setQueryData(documentKeys.detail(document.id), archivedDocument);
       removeCachedNavigationDocument(queryClient, workspaceSlug, document.id);
-      void Promise.all([
+    },
+    onSettled: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: documentKeys.detail(document.id),
+        }),
         queryClient.invalidateQueries({
           queryKey: documentKeys.lists(workspaceSlug),
         }),
@@ -89,7 +204,6 @@ export function useHeaderActions({
           queryKey: favoriteKeys.workspaceList(workspaceSlug),
         }),
       ]);
-      toast('Moved to trash');
     },
   });
 
@@ -318,23 +432,38 @@ export function useHeaderActions({
 
   const archiveCurrentDocument = () => {
     void (async () => {
+      const latestDocument = await queryClient.ensureQueryData(
+        documentDetailQueryOptions(document.id),
+      );
       const nextDocument = await resolveArchiveDestination({
-        document,
+        document: latestDocument,
         queryClient,
         workspaceSlug,
       });
 
-      await archiveDocumentMutation.mutateAsync();
-
-      router.replace(
+      const nextRoute =
         nextDocument
           ? workspaceRoutes.document(
             workspaceSlug,
             nextDocument.public_id,
             nextDocument.title,
           )
-          : workspaceRoutes.detail(workspaceSlug),
-      );
+          : workspaceRoutes.detail(workspaceSlug);
+      const previousRoute =
+        typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search}${window.location.hash}`
+          : undefined;
+
+      try {
+        await archiveDocumentMutation.mutateAsync({
+          nextRoute,
+          previousRoute,
+          version: latestDocument.version,
+        });
+      }
+      catch {
+        return;
+      }
     })();
   };
 
@@ -379,7 +508,7 @@ export function useHeaderActions({
       return;
     }
 
-    await navigator.clipboard.writeText(`${window.location.origin}${status.public_path}`);
+    await navigator.clipboard.writeText(buildPublishedDocumentUrl(status.public_path));
     toast('Copied published link to clipboard');
   };
 

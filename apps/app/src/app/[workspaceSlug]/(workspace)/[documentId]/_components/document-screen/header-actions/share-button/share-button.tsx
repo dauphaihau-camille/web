@@ -24,6 +24,7 @@ import {
 } from '@shared/components/ui/tooltip';
 import { cn } from '@shared/lib/utils';
 
+import { buildPublishedDocumentUrl } from '../header-actions.utils';
 import { PublishTabContent } from './publish-tab-content';
 import type { ShareButtonProps } from './types';
 
@@ -43,10 +44,8 @@ export function ShareButton({
   onUnpublish,
 }: ShareButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const publicUrl =
-    typeof window !== 'undefined' && publishedPath
-      ? `${window.location.origin}${publishedPath}`
-      : '';
+
+  const publicUrl = buildPublishedDocumentUrl(publishedPath);
 
   useEffect(() => {
     const handleOpenShare = () => {

@@ -1,3 +1,5 @@
+import { publicEnv } from '@shared/lib/public-env';
+
 export function formatRelativeTime(value: string) {
   const targetDate = new Date(value);
   const diffInSeconds = Math.round((targetDate.getTime() - Date.now()) / 1000);
@@ -33,4 +35,12 @@ export function buildDuplicateTitle(title: string) {
   }
 
   return `${match[1]} (${Number(match[2]) + 1})`;
+}
+
+export function buildPublishedDocumentUrl(path?: string) {
+  if (!path) {
+    return '';
+  }
+
+  return new URL(path, publicEnv.marketingHost).toString();
 }
