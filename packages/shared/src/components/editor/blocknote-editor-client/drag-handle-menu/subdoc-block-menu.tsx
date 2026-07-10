@@ -66,6 +66,7 @@ export function SubdocBlockMenu({
         <MenuRow
           icon={<Trash2Icon className="size-4" />}
           label={isArchivingSubdocument ? 'Moving to Trash...' : 'Move to Trash'}
+          shortcut="Del"
         />
       </Components.Generic.Menu.Item>
     </>

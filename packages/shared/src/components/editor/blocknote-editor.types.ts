@@ -3,7 +3,7 @@ export type BlockNoteDocumentOperations = {
   archivingSubdocumentId?: string | null;
   isDuplicating: boolean;
   onArchive: () => void;
-  onArchiveSubdocument?: (documentId: string) => Promise<void>;
+  onArchiveSubdocument?: (documentId: string, content?: unknown[]) => Promise<void>;
   onCopyLink: () => void | Promise<void>;
   onDuplicate: (documentId?: string) => void;
 };

@@ -87,10 +87,21 @@ export const createSubdocCommandResultSchema = z.object({
   child_document: documentSchema,
 });
 
+export const archiveSubdocCommandResultSchema = z.object({
+  parent_document: documentSchema,
+  archived_child_document: documentSchema,
+});
+
 export const createSubdocCommandSchema = z.object({
   anchor_block_id: z.string().min(1).optional(),
   slash_command_text: z.string().min(1).optional(),
   version: z.number().int().positive().optional(),
+  content: z.array(z.unknown()).optional(),
+});
+
+export const archiveSubdocCommandSchema = z.object({
+  subdocument_id: z.string().min(1),
+  version: z.number().int().positive(),
   content: z.array(z.unknown()).optional(),
 });
 

@@ -1,13 +1,12 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import {
-  archiveDocument,
+  archiveSubdocCommand,
   createSubdocCommand,
-  documentDetailQueryOptions,
   documentKeys,
   setRecentWorkspaceDocumentId,
   type Document,
@@ -40,6 +39,7 @@ export function useDocumentScreenOperations({
 }: UseDocumentScreenOperationsOptions) {
   const queryClient = useQueryClient();
   const documentId = document.id;
+  const shouldSkipContentSaveRef = useRef(false);
 
   const syncDocumentContentCache = (nextDocument: Document) => {
     queryClient.setQueryData<Document>(documentKeys.detail(documentId), nextDocument);
@@ -81,9 +81,13 @@ export function useDocumentScreenOperations({
     },
   });
 
-  const queueContentSave = useLatestWinsSaveQueue<Document['content'], Record<string, never>>({
+  const { awaitIdle: awaitContentSaveIdle, enqueue: queueContentSave } = useLatestWinsSaveQueue<Document['content'], Record<string, never>>({
     initialMeta: {},
     onFlush: async (nextContent) => {
+      if (shouldSkipContentSaveRef.current) {
+        return;
+      }
+
       const latestDocument =
         queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
 
@@ -137,15 +141,79 @@ export function useDocumentScreenOperations({
     },
   });
 
+  type ArchiveSubdocumentMutationContext = {
+    previousListEntries: Array<readonly [ReadonlyArray<unknown>, unknown]>;
+    previousParentDocument?: Document;
+    previousSubdocument?: Document;
+    toastId: string;
+  };
+
   const archiveSubdocumentMutation = useMutation({
-    mutationFn: async (subdocumentId: string) => {
-      const subdocument = await queryClient.ensureQueryData(
-        documentDetailQueryOptions(subdocumentId),
+    mutationFn: async ({
+      subdocumentId,
+      content,
+    }: {
+      subdocumentId: string;
+      content?: unknown[];
+    }) => {
+      const latestDocument =
+        queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
+
+      return archiveSubdocCommand(documentId, {
+        subdocument_id: subdocumentId,
+        version: latestDocument.version,
+        content,
+      });
+    },
+    onMutate: async ({
+      subdocumentId,
+      content,
+    }): Promise<ArchiveSubdocumentMutationContext> => {
+      const toastId = `archive-subdoc:${subdocumentId}`;
+
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: documentKeys.detail(documentId) }),
+        queryClient.cancelQueries({ queryKey: documentKeys.detail(subdocumentId) }),
+        queryClient.cancelQueries({ queryKey: documentKeys.lists(workspaceSlug) }),
+      ]);
+
+      const previousParentDocument =
+        queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
+
+      const previousSubdocument = queryClient.getQueryData<Document>(
+        documentKeys.detail(subdocumentId),
+      );
+      const previousListEntries = queryClient.getQueriesData({
+        queryKey: documentKeys.lists(workspaceSlug),
+      });
+
+      if (content !== undefined) {
+        syncDocumentContentCache({
+          ...previousParentDocument,
+          content,
+        });
+      }
+
+      removeCachedNavigationDocument(
+        queryClient,
+        workspaceSlug,
+        subdocumentId,
       );
 
-      return archiveDocument(subdocumentId, subdocument.version);
+      toast('Moved to trash', { id: toastId });
+
+      return {
+        previousListEntries,
+        previousParentDocument,
+        previousSubdocument,
+        toastId,
+      };
     },
-    onSuccess: async (archivedSubdocument) => {
+    onSuccess: async ({
+      archived_child_document: archivedSubdocument,
+      parent_document: parentDocument,
+    }) => {
+      syncDocumentContentCache(parentDocument);
       queryClient.setQueryData(
         documentKeys.detail(archivedSubdocument.id),
         archivedSubdocument,
@@ -160,7 +228,26 @@ export function useDocumentScreenOperations({
         queryKey: documentKeys.lists(workspaceSlug),
       });
 
-      toast('Moved to trash');
+    },
+    onError: (_error, variables, context) => {
+      if (context?.previousParentDocument) {
+        syncDocumentContentCache(context.previousParentDocument);
+      }
+
+      if (context?.previousSubdocument) {
+        queryClient.setQueryData(
+          documentKeys.detail(variables.subdocumentId),
+          context.previousSubdocument,
+        );
+      }
+
+      for (const [queryKey, data] of context?.previousListEntries ?? []) {
+        queryClient.setQueryData(queryKey, data);
+      }
+
+      toast('Failed to move doc to trash', {
+        id: context?.toastId,
+      });
     },
   });
 
@@ -173,13 +260,21 @@ export function useDocumentScreenOperations({
     return result.child_document;
   };
 
-  const archiveSubdocument = async (subdocumentId: string) => {
-    await archiveSubdocumentMutation.mutateAsync(subdocumentId);
+  const archiveSubdocument = async (subdocumentId: string, content?: unknown[]) => {
+    shouldSkipContentSaveRef.current = true;
+
+    try {
+      await awaitContentSaveIdle();
+      await archiveSubdocumentMutation.mutateAsync({ subdocumentId, content });
+    }
+    finally {
+      shouldSkipContentSaveRef.current = false;
+    }
   };
 
   return {
     archiveSubdocument,
-    archivingSubdocumentId: archiveSubdocumentMutation.variables ?? null,
+    archivingSubdocumentId: archiveSubdocumentMutation.variables?.subdocumentId ?? null,
     createSubdocument,
     queueContentSave,
   };

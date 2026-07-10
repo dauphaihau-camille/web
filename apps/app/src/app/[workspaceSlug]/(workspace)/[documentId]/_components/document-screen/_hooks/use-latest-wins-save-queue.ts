@@ -14,10 +14,12 @@ export function useLatestWinsSaveQueue<TValue, TMeta extends object>({
   const onFlushRef = useRef(onFlush);
   const queueStateRef = useRef<{
     inFlight: boolean;
+    idleResolvers: Array<() => void>;
     pendingValue: TValue | null;
     pendingMeta: TMeta;
   }>({
     inFlight: false,
+    idleResolvers: [],
     pendingValue: null,
     pendingMeta: initialMeta,
   });
@@ -46,6 +48,9 @@ export function useLatestWinsSaveQueue<TValue, TMeta extends object>({
     }
     finally {
       state.inFlight = false;
+      const idleResolvers = [...state.idleResolvers];
+      state.idleResolvers = [];
+      idleResolvers.forEach((resolve) => resolve());
     }
   }, [initialMeta]);
 
@@ -61,5 +66,20 @@ export function useLatestWinsSaveQueue<TValue, TMeta extends object>({
     return flush();
   }, [flush]);
 
-  return enqueue;
+  const awaitIdle = useCallback(async () => {
+    const state = queueStateRef.current;
+
+    if (!state.inFlight) {
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      state.idleResolvers.push(resolve);
+    });
+  }, []);
+
+  return {
+    awaitIdle,
+    enqueue,
+  };
 }

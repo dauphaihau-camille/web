@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { Block, BlockNoteEditor } from '@blocknote/core';
+import type { Block } from '@blocknote/core';
 import { SideMenuExtension } from '@blocknote/core/extensions';
 import {
   BlockColorsItem,
@@ -13,7 +13,6 @@ import {
   useEditorState,
 } from '@blocknote/react';
 import { PaletteIcon } from 'lucide-react';
-import { toast } from 'sonner';
 
 import type { BlockNoteDocumentOperations } from '../../blocknote-editor.types';
 import { dragHandleMenuSelectionExtension } from '../drag-handle-menu-selection-extension';
@@ -36,38 +35,103 @@ export function DragHandleMenu({
   const editor = useBlockNoteEditor();
   const dictionary = useDictionary();
   const sideMenu = useExtension(SideMenuExtension);
+
   const hoveredBlock = useExtensionState(SideMenuExtension, {
     editor,
     selector: (state) => state?.block,
   });
+
   const selectedBlocks = useEditorState({
     editor,
     selector: ({ editor: currentEditor }) =>
       currentEditor.getSelection()?.blocks ?? [currentEditor.getTextCursorPosition().block],
   });
+  const canRenderMenu = Boolean(
+    Components
+    && documentOperations
+    && hoveredBlock
+    && selectedBlocks.length > 0,
+  );
 
-  if (!Components || !documentOperations || !hoveredBlock || selectedBlocks.length === 0) {
-    return null;
-  }
+  const currentBlock = canRenderMenu ? hoveredBlock as EditorBlock : null;
+  const currentBlockLabel = currentBlock
+    ? getCurrentBlockLabel(currentBlock, dictionary)
+    : '';
+  const isDocumentBlock = currentBlock?.type === 'subpage';
 
-  const currentBlock = hoveredBlock as EditorBlock;
-  const currentBlockLabel = getCurrentBlockLabel(currentBlock, dictionary);
-  const isDocumentBlock = currentBlock.type === 'subpage';
   const subdocumentId =
-    typeof currentBlock.props.documentId === 'string'
+    currentBlock && typeof currentBlock.props.documentId === 'string'
       ? currentBlock.props.documentId
       : null;
-  const blocksToActOn = selectedBlocks.some((block) => block.id === hoveredBlock.id)
-    ? selectedBlocks
-    : [hoveredBlock];
-  const isArchivingSubdocument =
+
+  const blocksToActOn = currentBlock
+    ? (
+      selectedBlocks.some((block) => block.id === currentBlock.id)
+        ? selectedBlocks
+        : [currentBlock]
+    )
+    : [];
+
+  const isArchivingSubdocument = Boolean(
     isDocumentBlock
     && subdocumentId !== null
-    && documentOperations.archivingSubdocumentId === subdocumentId;
-  const handleDelete = () => {
-    sideMenu.unfreezeMenu();
-    editor.removeBlocks(blocksToActOn);
-  };
+    && documentOperations?.archivingSubdocumentId === subdocumentId,
+  );
+
+  useEffect(() => {
+    if (!canRenderMenu) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Delete' && event.key !== 'Backspace') {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (isDocumentBlock) {
+        if (
+          isArchivingSubdocument
+          || !subdocumentId
+          || !documentOperations?.onArchiveSubdocument
+        ) {
+          return;
+        }
+
+        sideMenu.unfreezeMenu();
+        const nextContent = removeBlocksFromContent(
+          editor.document as Block[],
+          new Set(blocksToActOn.map((block) => block.id)),
+        );
+
+        void documentOperations.onArchiveSubdocument(subdocumentId, nextContent).catch(() => {});
+        return;
+      }
+
+      sideMenu.unfreezeMenu();
+      editor.removeBlocks(blocksToActOn);
+    };
+
+    document.addEventListener('keydown', handleKeyDown, true);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, [
+    blocksToActOn,
+    canRenderMenu,
+    documentOperations,
+    editor,
+    isArchivingSubdocument,
+    isDocumentBlock,
+    sideMenu,
+    subdocumentId,
+  ]);
+
+  if (!canRenderMenu || !Components || !documentOperations || !currentBlock) {
+    return null;
+  }
 
   const handleArchiveSubdocument = () => {
     if (
@@ -78,16 +142,18 @@ export function DragHandleMenu({
       return;
     }
 
-    const blockSnapshots = blocksToActOn.map((block) => cloneBlock(block as Block));
-    const insertionPoint = findInsertionPoint(editor.document as Block[], blocksToActOn as Block[]);
+    sideMenu.unfreezeMenu();
+    const nextContent = removeBlocksFromContent(
+      editor.document as Block[],
+      new Set(blocksToActOn.map((block) => block.id)),
+    );
 
+    void documentOperations.onArchiveSubdocument(subdocumentId, nextContent).catch(() => {});
+  };
+
+  const handleDelete = () => {
     sideMenu.unfreezeMenu();
     editor.removeBlocks(blocksToActOn);
-
-    void documentOperations.onArchiveSubdocument(subdocumentId).catch(() => {
-      restoreBlocks(editor, blockSnapshots, insertionPoint);
-      toast('Failed to move doc to trash');
-    });
   };
 
   return (
@@ -144,56 +210,27 @@ function ActiveBlockHighlight({
   return null;
 }
 
-function cloneBlock(block: Block): Block {
-  return {
-    ...block,
-    props: { ...block.props },
-    content: Array.isArray(block.content) ? JSON.parse(JSON.stringify(block.content)) : block.content,
-    children: block.children.map((child) => cloneBlock(child as Block)),
-  } as Block;
-}
-
-function flattenBlocks(blocks: Block[]): Block[] {
-  return blocks.flatMap((block) => [
-    block,
-    ...flattenBlocks((block.children ?? []) as Block[]),
-  ]);
-}
-
-function findInsertionPoint(documentBlocks: Block[], blocksToRemove: Block[]) {
-  const flattenedBlocks = flattenBlocks(documentBlocks);
-  const removedIds = new Set(blocksToRemove.map((block) => block.id));
-  const firstRemovedIndex = flattenedBlocks.findIndex((block) => removedIds.has(block.id));
-  const previousBlock =
-    firstRemovedIndex <= 0
-      ? null
-      : [...flattenedBlocks.slice(0, firstRemovedIndex)]
-        .reverse()
-        .find((block) => !removedIds.has(block.id)) ?? null;
-  const nextBlock =
-    firstRemovedIndex === -1
-      ? null
-      : flattenedBlocks
-        .slice(firstRemovedIndex + 1)
-        .find((block) => !removedIds.has(block.id)) ?? null;
-
-  return {
-    nextBlock,
-    previousBlock,
-  };
-}
-
-function restoreBlocks(
-  editor: BlockNoteEditor,
+function removeBlocksFromContent(
   blocks: Block[],
-  insertionPoint: ReturnType<typeof findInsertionPoint>,
-) {
-  if (insertionPoint.previousBlock) {
-    editor.insertBlocks(blocks as never[], insertionPoint.previousBlock, 'after');
-    return;
-  }
+  blockIdsToRemove: Set<string>,
+): Block[] {
+  return blocks.flatMap((block) => {
+    if (blockIdsToRemove.has(block.id)) {
+      return [];
+    }
 
-  if (insertionPoint.nextBlock) {
-    editor.insertBlocks(blocks as never[], insertionPoint.nextBlock, 'before');
-  }
+    const nextChildren = removeBlocksFromContent(
+      (block.children ?? []) as Block[],
+      blockIdsToRemove,
+    );
+
+    if (nextChildren === block.children) {
+      return [block];
+    }
+
+    return [{
+      ...block,
+      children: nextChildren,
+    } as Block];
+  });
 }

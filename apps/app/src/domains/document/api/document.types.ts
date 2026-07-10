@@ -3,6 +3,8 @@ import type { z } from 'zod';
 import type {
   archivedDocumentListItemSchema,
   archivedDocumentListPageSchema,
+  archiveSubdocCommandResultSchema,
+  archiveSubdocCommandSchema,
   createDocumentSchema,
   createSubdocCommandResultSchema,
   createSubdocCommandSchema,
@@ -32,5 +34,7 @@ export type WorkspaceDocumentNavigation = z.infer<typeof workspaceDocumentNaviga
 export type CreateDocumentInput = z.infer<typeof createDocumentSchema>;
 export type CreateSubdocCommandInput = z.infer<typeof createSubdocCommandSchema>;
 export type CreateSubdocCommandResult = z.infer<typeof createSubdocCommandResultSchema>;
+export type ArchiveSubdocCommandInput = z.infer<typeof archiveSubdocCommandSchema>;
+export type ArchiveSubdocCommandResult = z.infer<typeof archiveSubdocCommandResultSchema>;
 export type UpdateDocumentInput = z.infer<typeof updateDocumentSchema>;
 export type MoveDocumentInput = z.infer<typeof moveDocumentSchema>;

@@ -145,9 +145,14 @@ export function createBlockNoteEditorClient({
         return;
       }
 
+      // External content updates (for example command responses) supersede any
+      // debounced local save that was queued against the previous version.
+      cancelScheduledSave();
+      setIsSaving(false);
+      setSaveError(null);
       lastSerializedContentRef.current = nextSerializedContent;
       editor.replaceBlocks(editor.document, normalizedContent as never[]);
-    }, [normalizedContent, editor]);
+    }, [cancelScheduledSave, normalizedContent, editor]);
 
     useEffect(() => {
       return () => {

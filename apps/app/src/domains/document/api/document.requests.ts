@@ -4,6 +4,8 @@ import {
 
 import {
   archivedDocumentListPageSchema,
+  archiveSubdocCommandResultSchema,
+  archiveSubdocCommandSchema,
   createDocumentSchema,
   createSubdocCommandSchema,
   createSubdocCommandResultSchema,
@@ -13,6 +15,8 @@ import {
 } from './document.schemas';
 import type {
   ArchivedDocumentListPage,
+  ArchiveSubdocCommandInput,
+  ArchiveSubdocCommandResult,
   CreateDocumentInput,
   CreateSubdocCommandInput,
   CreateSubdocCommandResult,
@@ -109,6 +113,19 @@ export async function createSubdocCommand(
   );
 
   return createSubdocCommandResultSchema.parse(response);
+}
+
+export async function archiveSubdocCommand(
+  documentId: DocumentId,
+  input: ArchiveSubdocCommandInput,
+): Promise<ArchiveSubdocCommandResult> {
+  const payload = archiveSubdocCommandSchema.parse(input);
+  const response = await apiPost<unknown, ArchiveSubdocCommandInput>(
+    `documents/${documentId}/commands/archive-subdoc`,
+    payload,
+  );
+
+  return archiveSubdocCommandResultSchema.parse(response);
 }
 
 export async function duplicateDocument(documentId: DocumentId): Promise<Document> {
