@@ -2,6 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { HTTPError } from 'ky';
 import { useRouter } from 'next/navigation';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 
@@ -80,6 +81,13 @@ export function WorkspaceSettingsPanel({
       router.replace(workspaceRoutes.settings(updatedWorkspace.slug));
     },
     onError: (error) => {
+      if (isWorkspaceDomainConflict(error)) {
+        form.setError('slug', {
+          message: 'Domain not available',
+        });
+        return;
+      }
+
       form.setError('root', {
         message:
           error instanceof Error
@@ -225,7 +233,9 @@ export function WorkspaceSettingsPanel({
               <Button
                 size="lg"
                 disabled={
-                  updateWorkspaceMutation.isPending || form.formState.isSubmitting
+                  updateWorkspaceMutation.isPending
+                  || form.formState.isSubmitting
+                  || !form.formState.isDirty
                 }
                 type="submit"
               >
@@ -244,4 +254,18 @@ export function WorkspaceSettingsPanel({
       </form>
     </section>
   );
+}
+
+function isWorkspaceDomainConflict(error: unknown) {
+  if (!(error instanceof HTTPError) || error.response.status !== 409) {
+    return false;
+  }
+
+  const data = error.data;
+
+  return typeof data === 'object'
+    && data !== null
+    && 'message' in data
+    && typeof data.message === 'string'
+    && data.message.toLowerCase().startsWith('workspace domain');
 }
