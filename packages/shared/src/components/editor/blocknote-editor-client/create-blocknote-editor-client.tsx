@@ -15,7 +15,6 @@ import {
 } from '@blocknote/core/extensions';
 import {
   getDefaultReactSlashMenuItems,
-  SideMenuController,
   SuggestionMenuController,
   useCreateBlockNote,
   type DefaultReactSuggestionItem,
@@ -28,7 +27,7 @@ import { useTheme } from 'next-themes';
 import { cn } from '../../../lib/utils';
 import type { BlockNoteEditorProps } from '../blocknote-editor.types';
 import { dragHandleMenuSelectionExtension } from './drag-handle-menu-selection-extension';
-import { EditorSideMenu } from './side-menu';
+import { EditorSideMenuController } from './side-menu-controller';
 import type { SharedSlashMenuProps } from './slash-menu';
 
 const editorKeyboardExtension = createExtension({
@@ -324,10 +323,8 @@ export function createBlockNoteEditorClient({
           {isEditable
             ? (
               <>
-                <SideMenuController
-                  sideMenu={() => (
-                    <EditorSideMenu documentOperations={documentOperations} />
-                  )}
+                <EditorSideMenuController
+                  documentOperations={documentOperations}
                 />
                 <SuggestionMenuController
                   triggerCharacter="/"
