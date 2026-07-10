@@ -9,14 +9,14 @@ import {
   vi,
 } from 'vitest';
 
-import type * as DocumentDomain from '@shared/domains/document';
+import type * as DocumentDomain from '@/domains/document';
 import {
   documentKeys,
   type Document,
   type DocumentNavigationNode,
   type WorkspaceDocumentNavigation,
-} from '@shared/domains/document';
-import { workspaceRoutes } from '@shared/domains/workspace';
+} from '@/domains/document';
+import { workspaceRoutes } from '@/domains/workspace';
 import {
   favoriteKeys,
   type FavoriteDocument,
@@ -48,9 +48,9 @@ vi.mock('sonner', () => ({
   toast: toastMock,
 }));
 
-vi.mock('@shared/domains/document', async () => {
+vi.mock('@/domains/document', async () => {
   const actual = await vi.importActual<typeof DocumentDomain>(
-    '@shared/domains/document',
+    '@/domains/document',
   );
 
   return {

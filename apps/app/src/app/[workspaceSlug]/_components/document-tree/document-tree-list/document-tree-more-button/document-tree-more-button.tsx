@@ -9,9 +9,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@shared/components/ui/popover';
-import { ScrollFade } from '@shared/components/ui/scroll-fade';
+import { ScrollFade } from '@/components/ui/scroll-fade';
 import { SidebarMenuItem } from '@/components/ui/sidebar';
-import { workspaceRoutes } from '@shared/domains/workspace';
+import { workspaceRoutes } from '@/domains/workspace';
 
 import { useDocumentTreeMore } from './use-document-tree-more';
 

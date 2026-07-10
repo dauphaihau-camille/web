@@ -23,24 +23,25 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@shared/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import LoadingFullPage from '@shared/components/loading-full-page';
-import {
-  authKeys,
-  authRoutes,
-  logout,
-  useCurrentUserQuery,
-} from '@shared/domains/auth';
 import {
   myWorkspaceListQueryOptions,
   workspaceKeys,
   useWorkspaceQuery,
   workspaceRoutes,
-} from '@shared/domains/workspace';
+} from '@/domains/workspace';
 import { cn } from '@shared/lib/utils';
+import { Skeleton } from '@shared/components/ui/skeleton';
+import {
+  authKeys,
+  authRoutes,
+  logout,
+  useCurrentUserQuery,
+} from '@/domains/auth';
+
 import { CreateWorkspaceDialog } from './create-workspace-dialog';
 import { LogoutConfirmDialog } from './logout-confirm-dialog';
-import { Skeleton } from '@shared/components/ui/skeleton';
 
 export function WorkspaceUserDropdown({
   workspaceSlug,

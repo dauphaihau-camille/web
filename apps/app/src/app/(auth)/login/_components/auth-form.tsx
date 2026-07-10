@@ -11,12 +11,12 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@shared/components/ui/field';
+} from '@/components/ui/field';
 import { Input } from '@shared/components/ui/input';
 import { Separator } from '@shared/components/ui/separator';
-import { authRoutes } from '@shared/domains/auth';
 
-import { GitHubIcon, GoogleIcon } from '@shared/components/brand-icons';
+import { GitHubIcon, GoogleIcon } from './social-icons';
+import { authRoutes } from '@/domains/auth';
 import { useLoginForm, type AuthFormMode } from '../_hooks/use-login-form';
 
 const authCopy = {

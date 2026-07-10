@@ -11,7 +11,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@shared/components/ui/field';
+} from '@/components/ui/field';
 import {
   InputGroup,
   InputGroupAddon,
@@ -26,8 +26,8 @@ import {
   type Workspace,
   workspaceKeys,
   workspaceRoutes,
-} from '@shared/domains/workspace';
-import { suggestWorkspaceDomain } from '@shared/domains/workspace/api/workspace-domain';
+  suggestWorkspaceDomain,
+} from '@/domains/workspace';
 
 export function WorkspaceSettingsPanel({
   workspace,

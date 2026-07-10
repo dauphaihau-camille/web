@@ -10,7 +10,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import {
   type DocumentNavigationNode,
   workspaceDocumentRootQueryOptions,
-} from '@shared/domains/document';
+} from '@/domains/document';
 
 export function useDocumentTreeMore({
   initialCursor,

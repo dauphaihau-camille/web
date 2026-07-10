@@ -15,7 +15,7 @@ import {
   type DocumentNavigationPage,
   type DocumentNavigationNode,
   type WorkspaceDocumentNavigation,
-} from '@shared/domains/document';
+} from '@/domains/document';
 import {
   favoriteDocument,
   favoriteKeys,
@@ -24,7 +24,7 @@ import {
   unfavoriteDocument,
 } from '@/domains/favorite';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
-import { workspaceRoutes } from '@shared/domains/workspace';
+import { workspaceRoutes } from '@/domains/workspace';
 import {
   insertCreatedSubdocIntoCachedChildren,
   markCachedNavigationNodeHasChildren,

@@ -1,16 +1,16 @@
 import { notFound, redirect } from 'next/navigation';
 
-import { authRoutes } from '@shared/domains/auth/auth-routes';
-import { requireCurrentUserServer } from '@shared/domains/auth/api/auth.server.requests';
 import {
   getDocumentServer,
   isServerRequestError,
-} from '@shared/domains/document/api/document.server.requests';
+} from '@/domains/document/api/document.server.requests';
 import {
   isDocumentRouteId,
   parseDocumentRouteSegment,
   workspaceRoutes,
-} from '@shared/domains/workspace';
+} from '@/domains/workspace';
+import { authRoutes } from '@/domains/auth/auth-routes';
+import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
 
 import { DocumentRouteScreen } from './_components/document-route-screen';
 

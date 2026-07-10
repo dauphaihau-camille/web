@@ -17,13 +17,13 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@shared/components/ui/dropdown-menu';
+} from '@/components/ui/dropdown-menu';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
-import type { DocumentNavigationNode } from '@shared/domains/document';
+import type { DocumentNavigationNode } from '@/domains/document';
 import { LoadingIcon } from '@shared/components/loading-icon';
 import { cn } from '@shared/lib/utils';
 

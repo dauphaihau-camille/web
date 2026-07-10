@@ -3,7 +3,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import type { ReactNode } from 'react';
 
-import { documentKeys, type Document, useDocumentQuery } from '@shared/domains/document';
+import { documentKeys, type Document, useDocumentQuery } from '@/domains/document';
 import { mswServer } from '@shared/test/msw/server';
 
 import { useHeaderActions } from './use-header-actions';

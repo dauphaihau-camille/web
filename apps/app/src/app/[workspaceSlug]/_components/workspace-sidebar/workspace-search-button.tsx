@@ -25,14 +25,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@shared/components/ui/empty';
-import { Kbd } from '@shared/components/ui/kbd';
+import { Kbd } from '@/components/ui/kbd';
 import {
   SidebarMenuBadge,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
 import { Skeleton } from '@shared/components/ui/skeleton';
 import { useWorkspaceSearchDocumentsQuery } from '@/domains/search';
-import { workspaceRoutes } from '@shared/domains/workspace';
+import { workspaceRoutes } from '@/domains/workspace';
 import { cn } from '@shared/lib/utils';
 
 import { useWorkspaceShortcuts } from '../../_hooks/use-workspace-shortcuts';

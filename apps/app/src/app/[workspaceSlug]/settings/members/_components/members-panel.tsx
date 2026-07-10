@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from '@shared/components/ui/dialog';
 import { Input } from '@shared/components/ui/input';
-import { Label } from '@shared/components/ui/label';
+import { Label } from '@/components/ui/label';
 import {
   Table,
   TableBody,
@@ -27,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@shared/components/ui/table';
+} from '@/components/ui/table';
 import {
   addWorkspaceMember,
   removeWorkspaceMember,
@@ -37,7 +37,7 @@ import {
   type Workspace,
   type WorkspaceMember,
   type WorkspaceRole,
-} from '@shared/domains/workspace';
+} from '@/domains/workspace';
 
 const roleOptions: WorkspaceRole[] = ['owner', 'admin', 'member'];
 

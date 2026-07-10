@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
+import { hasMeaningfulContent } from '@shared/components/editor/has-meaningful-content';
 import {
   archiveDocument,
   documentDetailQueryOptions,
@@ -17,7 +17,7 @@ import {
   workspaceDocumentChildrenQueryOptions,
   workspaceDocumentRootQueryOptions,
   type Document,
-} from '@shared/domains/document';
+} from '@/domains/document';
 import {
   favoriteDocument as addFavoriteDocument,
   favoriteKeys,
@@ -29,7 +29,7 @@ import {
   publishDocument,
   unpublishDocument,
 } from '@shared/domains/publish';
-import { workspaceRoutes } from '@shared/domains/workspace';
+import { workspaceRoutes } from '@/domains/workspace';
 import { removeCachedNavigationDocument } from '@/domains/document/cache/document-query-cache';
 
 type UseHeaderActionsOptions = {

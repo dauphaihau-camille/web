@@ -13,11 +13,11 @@ import {
 import {
   type DocumentNavigationNode,
   useWorkspaceDocumentChildrenQuery,
-} from '@shared/domains/document';
+} from '@/domains/document';
 import {
   parseDocumentRouteSegment,
   workspaceRoutes,
-} from '@shared/domains/workspace';
+} from '@/domains/workspace';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
 

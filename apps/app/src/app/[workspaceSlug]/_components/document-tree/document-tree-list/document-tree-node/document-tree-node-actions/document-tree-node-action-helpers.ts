@@ -7,7 +7,7 @@ import {
   type WorkspaceDocumentNavigation,
   workspaceDocumentChildrenQueryOptions,
   workspaceDocumentRootQueryOptions,
-} from '@shared/domains/document';
+} from '@/domains/document';
 
 function orderDocuments(items: DocumentNavigationNode[]) {
   return [...items].sort((left, right) => right.sort_key - left.sort_key);

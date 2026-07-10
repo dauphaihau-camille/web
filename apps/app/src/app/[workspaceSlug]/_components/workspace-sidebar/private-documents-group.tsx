@@ -4,7 +4,7 @@ import { PlusIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
+import { hasMeaningfulContent } from '@shared/components/editor/has-meaningful-content';
 import { LoadingIcon } from '@shared/components/loading-icon';
 import { Button } from '@shared/components/ui/button';
 import {
@@ -18,8 +18,8 @@ import {
   type Document,
   type DocumentNavigationNode,
   type WorkspaceDocumentNavigation,
-} from '@shared/domains/document';
-import { workspaceRoutes } from '@shared/domains/workspace';
+} from '@/domains/document';
+import { workspaceRoutes } from '@/domains/workspace';
 
 import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
 import { DocumentTree } from '../document-tree/document-tree';

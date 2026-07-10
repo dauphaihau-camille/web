@@ -7,9 +7,9 @@ import {
 import type {
   DocumentNavigationNode,
   WorkspaceDocumentNavigation,
-} from '@shared/domains/document';
+} from '@/domains/document';
 
-vi.mock('@shared/domains/document', () => ({
+vi.mock('@/domains/document', () => ({
   documentDetailQueryOptions: vi.fn(),
   workspaceDocumentChildrenQueryOptions: vi.fn(),
   workspaceDocumentRootQueryOptions: vi.fn(),

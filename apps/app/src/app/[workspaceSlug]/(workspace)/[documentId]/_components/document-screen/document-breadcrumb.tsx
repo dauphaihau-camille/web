@@ -5,8 +5,8 @@ import { Fragment } from 'react';
 
 import type {
   Document,
-} from '@shared/domains/document';
-import { workspaceRoutes } from '@shared/domains/workspace';
+} from '@/domains/document';
+import { workspaceRoutes } from '@/domains/workspace';
 import {
   Breadcrumb,
   BreadcrumbItem,

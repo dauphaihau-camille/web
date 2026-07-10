@@ -9,12 +9,12 @@ import {
   vi,
 } from 'vitest';
 
-import type * as DocumentDomain from '@shared/domains/document';
+import type * as DocumentDomain from '@/domains/document';
 import {
   documentKeys,
   type ArchivedDocumentListPage,
   type Document,
-} from '@shared/domains/document';
+} from '@/domains/document';
 
 import { useWorkspaceTrash } from './use-workspace-trash';
 
@@ -34,9 +34,9 @@ vi.mock('sonner', () => ({
   toast: toastMock,
 }));
 
-vi.mock('@shared/domains/document', async () => {
+vi.mock('@/domains/document', async () => {
   const actual = await vi.importActual<typeof DocumentDomain>(
-    '@shared/domains/document',
+    '@/domains/document',
   );
 
   return {

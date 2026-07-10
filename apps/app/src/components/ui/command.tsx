@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
+import { CheckIcon, SearchIcon } from 'lucide-react';
 
 import { cn } from '@shared/lib/utils';
 import {
@@ -15,7 +16,6 @@ import {
   InputGroup,
   InputGroupAddon,
 } from '@shared/components/ui/input-group';
-import { SearchIcon, CheckIcon } from 'lucide-react';
 
 function Command({
   className,
@@ -42,12 +42,12 @@ function CommandDialog({
   commandProps,
   ...props
 }: Omit<React.ComponentProps<typeof Dialog>, 'children'> & {
-  title?: string
-  description?: string
-  className?: string
-  showCloseButton?: boolean
-  commandProps?: React.ComponentProps<typeof CommandPrimitive>
-  children: React.ReactNode
+  title?: string;
+  description?: string;
+  className?: string;
+  showCloseButton?: boolean;
+  commandProps?: React.ComponentProps<typeof CommandPrimitive>;
+  children: React.ReactNode;
 }) {
   return (
     <Dialog {...props}>
@@ -193,11 +193,11 @@ function CommandShortcut({
 export {
   Command,
   CommandDialog,
-  CommandInput,
-  CommandList,
   CommandEmpty,
   CommandGroup,
+  CommandInput,
   CommandItem,
-  CommandShortcut,
+  CommandList,
   CommandSeparator,
+  CommandShortcut,
 };

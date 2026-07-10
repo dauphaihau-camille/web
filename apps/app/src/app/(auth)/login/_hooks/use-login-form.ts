@@ -8,18 +8,18 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import {
+  myWorkspaceListQueryOptions,
+  workspaceKeys,
+  workspaceRoutes,
+} from '@/domains/workspace';
+import {
   authKeys,
   authRoutes,
   currentUserQueryOptions,
   getPostLoginRedirectTarget,
   startEmailAuth,
   verifyEmailAuth,
-} from '@shared/domains/auth';
-import {
-  myWorkspaceListQueryOptions,
-  workspaceKeys,
-  workspaceRoutes,
-} from '@shared/domains/workspace';
+} from '@/domains/auth';
 
 import {
   requestEmailCodeFormSchema,

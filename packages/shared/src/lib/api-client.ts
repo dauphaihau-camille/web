@@ -1,11 +1,11 @@
 import { queryOptions, type QueryKey, type UseQueryOptions } from '@tanstack/react-query';
 import ky, { type Input, type Options } from 'ky';
 
-import { authRoutes } from '../domains/auth/auth-routes';
 import { publicEnv } from './public-env';
 
 const apiBaseUrl = publicEnv.apiBaseUrl;
 const AUTH_RETRY_HEADER = 'x-auth-refresh-retry';
+let onUnauthorized: (() => void) | null = null;
 
 type ApiRequestOptions = Omit<Options, 'prefix'>;
 
@@ -42,21 +42,10 @@ async function refreshAccessToken() {
   });
 }
 
-function redirectToLogin() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const redirectTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  const loginUrl = authRoutes.isAuthPath(window.location.pathname)
-    ? window.location.pathname
-    : authRoutes.login(redirectTo);
-
-  if (window.location.pathname === loginUrl && !window.location.search && !window.location.hash) {
-    return;
-  }
-
-  window.location.replace(loginUrl);
+export function configureApiClient(options: {
+  onUnauthorized?: (() => void) | null;
+}) {
+  onUnauthorized = options.onUnauthorized ?? null;
 }
 
 export const apiClient = ky.create({
@@ -83,7 +72,7 @@ export const apiClient = ky.create({
         const refreshResponse = await refreshAccessToken();
 
         if (!refreshResponse.ok) {
-          redirectToLogin();
+          onUnauthorized?.();
           return response;
         }
 

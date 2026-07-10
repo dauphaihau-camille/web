@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
-import type { Document } from '@shared/domains/document';
+import type { Document } from '@/domains/document';
 import { cn } from '@shared/lib/utils';
 
 import { DocOperations } from './doc-operations/doc-operations';

@@ -3,13 +3,14 @@
 import { useState } from 'react';
 
 import {
-  CreateWorkspaceForm,
-  CreateWorkspaceRedirectDialog,
-} from '@shared/domains/workspace/components';
-import {
   Dialog,
   DialogContent,
 } from '@shared/components/ui/dialog';
+
+import {
+  CreateWorkspaceForm,
+  CreateWorkspaceRedirectDialog,
+} from '@/domains/workspace/components';
 
 type CreateWorkspaceDialogProps = {
   open: boolean;

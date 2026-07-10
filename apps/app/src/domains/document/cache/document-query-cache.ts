@@ -2,14 +2,14 @@
 
 import type { QueryClient } from '@tanstack/react-query';
 
-import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
+import { hasMeaningfulContent } from '@shared/components/editor/has-meaningful-content';
 import {
   documentKeys,
   type Document,
   type DocumentNavigationNode,
   type DocumentNavigationPage,
   type WorkspaceDocumentNavigation,
-} from '@shared/domains/document';
+} from '@/domains/document';
 
 export type UpdatedReferencedSubdocDocument = {
   content: unknown[];

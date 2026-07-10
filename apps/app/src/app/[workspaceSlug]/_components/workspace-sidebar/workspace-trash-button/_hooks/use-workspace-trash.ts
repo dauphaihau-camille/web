@@ -12,7 +12,7 @@ import {
   permanentlyDeleteDocument,
   restoreDocument,
   workspaceArchivedDocumentListQueryOptions,
-} from '@shared/domains/document';
+} from '@/domains/document';
 
 const ARCHIVED_DOCUMENT_PAGE_SIZE = 50;
 

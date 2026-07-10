@@ -1,11 +1,11 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type * as WorkspaceDomain from '@shared/domains/workspace';
-import type { CreateWorkspaceInput, Workspace } from '@shared/domains/workspace';
+import type * as WorkspaceDomain from '@/domains/workspace';
+import type { CreateWorkspaceInput, Workspace } from '@/domains/workspace';
 import { renderWithProviders } from '@shared/test/render';
 
-import { CreateWorkspaceForm } from '@shared/domains/workspace/components/create-workspace-form';
+import { CreateWorkspaceForm } from './create-workspace-form';
 
 const { pushMock, createWorkspaceMock } = vi.hoisted(() => ({
   pushMock: vi.fn<(path: string) => void>(),
@@ -18,9 +18,9 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-vi.mock('@shared/domains/workspace', async () => {
+vi.mock('@/domains/workspace', async () => {
   const actual = await vi.importActual<typeof WorkspaceDomain>(
-    '@shared/domains/workspace',
+    '@/domains/workspace',
   );
 
   return {

@@ -1,7 +1,7 @@
 'use client';
 
-import type { Document } from '@shared/domains/document';
-import { BlockNoteEditorLoader } from '@/components/editor/blocknote-editor-loader';
+import { createBlockNoteEditorLoader } from '@shared/components/editor/create-blocknote-editor-loader';
+import type { Document } from '@/domains/document';
 import { Input } from '@shared/components/ui/input';
 
 import { DocumentBreadcrumb } from './document-breadcrumb';
@@ -12,6 +12,10 @@ import { PublishedDocumentBar } from './published-document-bar';
 import { useDocumentScreenOperations } from './_hooks/use-document-screen-operations';
 import { useDocumentTitle } from './_hooks/use-document-title';
 import { useDocumentChromeVisibility } from './_hooks/use-document-chrome-visibility';
+
+const BlockNoteEditorLoader = createBlockNoteEditorLoader(
+  () => import('./editor/blocknote-editor-client/blocknote-editor-client'),
+);
 
 export function DocumentScreen({
   document,

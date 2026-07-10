@@ -1,10 +1,10 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-import { authRoutes } from '@shared/domains/auth/auth-routes';
-import { getPostLoginRedirectTarget } from '@shared/domains/auth/lib/post-login-redirect';
 import { publicEnv } from '@shared/lib/public-env';
 import { workspaceRoutes } from '@shared/domains/workspace/workspace-routes';
+import { authRoutes } from '@/domains/auth/auth-routes';
+import { getPostLoginRedirectTarget } from '@/domains/auth/lib/post-login-redirect';
 
 const ACCESS_COOKIE_NAME = 'accessToken';
 const REFRESH_COOKIE_NAME = 'refreshToken';

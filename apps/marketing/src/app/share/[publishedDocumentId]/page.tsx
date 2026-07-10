@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Fragment } from 'react';
 
-import { BlockNoteEditorLoader } from '@/components/editor/blocknote-editor-loader';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,6 +12,7 @@ import {
 } from '@shared/components/ui/breadcrumb';
 import { buttonVariants } from '@shared/components/ui/button';
 import { getPublicDocumentServer } from '@shared/domains/publish/api/publish.server.requests';
+import { BlockNoteEditorLoader } from './_components/editor/blocknote-editor-loader';
 import { getAppSignupUrl } from '@/lib/app-url';
 import { cn } from '@shared/lib/utils';
 

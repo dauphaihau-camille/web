@@ -1,6 +1,6 @@
 'use client';
 
-import { type Document, useDocumentQuery } from '@shared/domains/document';
+import { type Document, useDocumentQuery } from '@/domains/document';
 
 import { DocumentScreen } from './document-screen/document-screen';
 

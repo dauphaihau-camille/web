@@ -1,6 +1,6 @@
 'use client';
 
-import { useWorkspaceDocumentRootQuery } from '@shared/domains/document';
+import { useWorkspaceDocumentRootQuery } from '@/domains/document';
 
 import {
   DocumentTreeLoading,

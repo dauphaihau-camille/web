@@ -12,8 +12,8 @@ import {
   setRecentWorkspaceDocumentId,
   type Document,
   updateDocument,
-} from '@shared/domains/document';
-import { hasMeaningfulContent } from '@/components/editor/has-meaningful-content';
+} from '@/domains/document';
+import { hasMeaningfulContent } from '@shared/components/editor/has-meaningful-content';
 import {
   insertCreatedSubdocIntoCachedChildren,
   markCachedNavigationNodeHasChildren,

@@ -8,12 +8,12 @@ import {
   documentKeys,
   type Document,
   updateDocument,
-} from '@shared/domains/document';
+} from '@/domains/document';
 import {
   updateCachedNavigationTitle,
   updateCachedReferencedSubdocTitles,
 } from '@/domains/document/cache/document-query-cache';
-import { workspaceRoutes } from '@shared/domains/workspace';
+import { workspaceRoutes } from '@/domains/workspace';
 import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
 
 import { useLatestWinsSaveQueue } from './use-latest-wins-save-queue';

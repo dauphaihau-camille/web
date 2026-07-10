@@ -1,13 +1,13 @@
 import { redirect } from 'next/navigation';
 
-import { requireCurrentUserServer } from '@shared/domains/auth/api/auth.server.requests';
 import {
   createDocumentServer,
   getDocumentServer,
   getWorkspaceDefaultDocumentServer,
-} from '@shared/domains/document/api/document.server.requests';
-import { getRecentWorkspaceDocumentIdServer } from '@shared/domains/document/recent-document.server';
-import { workspaceRoutes } from '@shared/domains/workspace';
+} from '@/domains/document/api/document.server.requests';
+import { getRecentWorkspaceDocumentIdServer } from '@/domains/document/recent-document.server';
+import { workspaceRoutes } from '@/domains/workspace';
+import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
 
 export default async function WorkspacePage({
   params,

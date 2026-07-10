@@ -4,7 +4,7 @@ import {
   SidebarInset,
   SidebarProvider,
 } from '@/components/ui/sidebar';
-import { ScrollFade } from '@shared/components/ui/scroll-fade';
+import { ScrollFade } from '@/components/ui/scroll-fade';
 
 import { WorkspaceSidebar } from './workspace-sidebar/workspace-sidebar';
 
