@@ -202,7 +202,7 @@ describe('useHeaderActions integration', () => {
       content: [
         {
           id: 'block-1',
-          type: 'subpage',
+          type: 'subdoc',
           props: {
             documentId: 'doc-2',
           },
@@ -233,7 +233,7 @@ describe('useHeaderActions integration', () => {
             ...parentDocument.content,
             {
               id: 'block-2',
-              type: 'subpage',
+              type: 'subdoc',
               props: {
                 documentId: duplicatedSubdocument.id,
               },

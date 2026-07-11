@@ -61,10 +61,10 @@ describe('dragHandleMenuSelectionExtension', () => {
     ).toBeNull();
   });
 
-  it('decorates the React node-view wrapper for a subpage block', () => {
-    const subpage = createReactBlockSpec(
+  it('decorates the React node-view wrapper for a subdoc block', () => {
+    const subdoc = createReactBlockSpec(
       {
-        type: 'subpage',
+        type: 'subdoc',
         propSchema: {},
         content: 'none',
       },
@@ -75,34 +75,34 @@ describe('dragHandleMenuSelectionExtension', () => {
     const schema = BlockNoteSchema.create({
       blockSpecs: {
         ...defaultBlockSpecs,
-        subpage: subpage(),
+        subdoc: subdoc(),
       },
     });
-    const subpageEditor = BlockNoteEditor.create({
+    const subdocEditor = BlockNoteEditor.create({
       schema,
       initialContent: [
-        { id: 'subpage-block', type: 'subpage' },
+        { id: 'subdoc-block', type: 'subdoc' },
       ],
       extensions: [dragHandleMenuSelectionExtension()],
     });
-    subpageEditor.mount(document.createElement('div'));
+    subdocEditor.mount(document.createElement('div'));
 
-    const selectionExtension = subpageEditor.getExtension(
+    const selectionExtension = subdocEditor.getExtension(
       dragHandleMenuSelectionExtension,
     );
 
-    selectionExtension?.setSelectedBlock('subpage-block');
+    selectionExtension?.setSelectedBlock('subdoc-block');
 
-    const decoratedRenderer = subpageEditor.domElement?.querySelector(
+    const decoratedRenderer = subdocEditor.domElement?.querySelector(
       '.bn-react-node-view-renderer[data-drag-handle-menu-open]',
     );
 
     expect(
       decoratedRenderer?.querySelector(
-        '.bn-block-content[data-content-type="subpage"]',
+        '.bn-block-content[data-content-type="subdoc"]',
       ),
     ).not.toBeNull();
 
-    subpageEditor.unmount();
+    subdocEditor.unmount();
   });
 });

@@ -227,7 +227,7 @@ export function updateCachedReferencedSubdocTitles(
       let nextBlock = block;
 
       if (
-        block.type === 'subpage'
+        block.type === 'subdoc'
         && block.props
         && typeof block.props === 'object'
         && !Array.isArray(block.props)

@@ -57,7 +57,7 @@ export function DragHandleMenu({
   const currentBlockLabel = currentBlock
     ? getCurrentBlockLabel(currentBlock, dictionary)
     : '';
-  const isDocumentBlock = currentBlock?.type === 'subpage';
+  const isDocumentBlock = currentBlock?.type === 'subdoc';
 
   const subdocumentId =
     currentBlock && typeof currentBlock.props.documentId === 'string'

@@ -4,7 +4,7 @@ import { blockTypeSelectItems } from '@blocknote/react';
 type DragHandleDictionary = Parameters<typeof blockTypeSelectItems>[0];
 
 export type EditorBlock = {
-  type: Block['type'] | 'subpage';
+  type: Block['type'] | 'subdoc';
   props: Record<string, unknown>;
 };
 
@@ -12,7 +12,7 @@ export function getCurrentBlockLabel(
   block: EditorBlock,
   dictionary: DragHandleDictionary,
 ) {
-  if (block.type === 'subpage') {
+  if (block.type === 'subdoc') {
     return 'Document';
   }
 

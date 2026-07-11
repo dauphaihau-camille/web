@@ -32,8 +32,8 @@ const parentDocument: Document = {
   content_format: 'blocknote_v1',
   content: [
     {
-      id: 'subpage-block',
-      type: 'subpage',
+      id: 'subdoc-block',
+      type: 'subdoc',
       props: {
         documentId: 'child-1',
         title: 'Account Health Review',
@@ -66,8 +66,8 @@ describe('updateCachedReferencedSubdocTitles', () => {
         version: parentDocument.version,
         content: [
           {
-            id: 'subpage-block',
-            type: 'subpage',
+            id: 'subdoc-block',
+            type: 'subdoc',
             props: {
               documentId: 'child-1',
               title: 'Account Health Revieww',

@@ -28,7 +28,7 @@ type CreateSubdocBlockOptions = {
 };
 
 const subdocBlockConfig = {
-  type: 'subpage' as const,
+  type: 'subdoc' as const,
   propSchema: {
     documentId: {
       default: '',

@@ -209,7 +209,7 @@ describe('EditorSideMenuController', () => {
   });
 
   it('archives the hovered document block when Delete is pressed with the drag-handle menu open', () => {
-    hoveredBlock.type = 'subpage';
+    hoveredBlock.type = 'subdoc';
     hoveredBlock.props = { documentId: 'subdoc-1' };
 
     render(

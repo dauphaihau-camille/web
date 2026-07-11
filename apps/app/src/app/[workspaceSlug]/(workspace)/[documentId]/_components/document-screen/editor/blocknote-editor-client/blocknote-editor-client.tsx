@@ -80,7 +80,7 @@ export const BlockNoteEditorClient = createBlockNoteEditorClient({
       JSON.stringify(editor.document as unknown[]),
     ) as unknown[];
     const optimisticSubdocBlock = {
-      type: 'subpage' as const,
+      type: 'subdoc' as const,
       props: {
         documentId: `pending-${anchorBlockId}`,
         publicId: '',

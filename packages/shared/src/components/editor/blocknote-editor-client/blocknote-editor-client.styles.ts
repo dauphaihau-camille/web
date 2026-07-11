@@ -19,14 +19,14 @@ export const blockNoteEditorClientBaseStyles = `
   }
 
   .editor-blocknote-client
-    .bn-block-content:not([data-content-type="subpage"]):not([data-text-color])
+    .bn-block-content:not([data-content-type="subdoc"]):not([data-text-color])
     > .bn-inline-content {
     padding-left: 11px;
     color: var(--color-foreground) !important;
   }
 
   .editor-blocknote-client
-    .bn-block-content:not([data-content-type="subpage"])[data-text-color]
+    .bn-block-content:not([data-content-type="subdoc"])[data-text-color]
     > .bn-inline-content {
     padding-left: 11px;
     color: inherit !important;
@@ -98,7 +98,7 @@ export const blockNoteEditorClientBaseStyles = `
   }
 
   .editor-blocknote-client
-    .bn-block-content:not([data-content-type="subpage"]):has(.ProseMirror-trailingBreak:only-child)::after {
+    .bn-block-content:not([data-content-type="subdoc"]):has(.ProseMirror-trailingBreak:only-child)::after {
     color: var(--color-muted-foreground);
     margin-left: 1px;
   }

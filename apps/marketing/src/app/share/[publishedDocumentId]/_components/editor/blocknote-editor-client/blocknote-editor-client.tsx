@@ -26,7 +26,7 @@ export const BlockNoteEditorClient = createBlockNoteEditorClient({
   }) => {
     void createSubdoc().then((subdoc) => {
       insertOrUpdateBlockForSlashMenu(editor, {
-        type: 'subpage' as const,
+        type: 'subdoc' as const,
         props: {
           documentId: subdoc.id,
           publicId: subdoc.public_id,
