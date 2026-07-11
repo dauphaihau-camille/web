@@ -22,7 +22,7 @@ import {
 
 import { useLatestWinsSaveQueue } from './use-latest-wins-save-queue';
 
-type UseDocumentScreenOperationsOptions = {
+type UseDocumentEditorActionsOptions = {
   document: Document;
   workspaceSlug: string;
 };
@@ -33,10 +33,10 @@ type CreateSubdocumentInput = {
   content?: unknown[];
 };
 
-export function useDocumentScreenOperations({
+export function useDocumentEditorActions({
   document,
   workspaceSlug,
-}: UseDocumentScreenOperationsOptions) {
+}: UseDocumentEditorActionsOptions) {
   const queryClient = useQueryClient();
   const documentId = document.id;
   const shouldSkipContentSaveRef = useRef(false);
@@ -81,7 +81,10 @@ export function useDocumentScreenOperations({
     },
   });
 
-  const { awaitIdle: awaitContentSaveIdle, enqueue: queueContentSave } = useLatestWinsSaveQueue<Document['content'], Record<string, never>>({
+  const {
+    awaitIdle: awaitContentSaveIdle,
+    enqueue: queueContentSave, 
+  } = useLatestWinsSaveQueue<Document['content'], Record<string, never>>({
     initialMeta: {},
     onFlush: async (nextContent) => {
       if (shouldSkipContentSaveRef.current) {

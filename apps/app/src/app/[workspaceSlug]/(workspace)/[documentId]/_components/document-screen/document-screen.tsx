@@ -9,7 +9,7 @@ import { DocumentToolbar } from './document-toolbar/document-toolbar';
 import { useDocumentToolbar } from './document-toolbar/use-document-toolbar';
 import { ArchivedDocumentBar } from './archived-document-bar';
 import { PublishedDocumentBar } from './published-document-bar';
-import { useDocumentScreenOperations } from './_hooks/use-document-screen-operations';
+import { useDocumentEditorActions } from './_hooks/use-document-editor-actions';
 import { useDocumentTitle } from './_hooks/use-document-title';
 import { useDocumentChromeVisibility } from './_hooks/use-document-chrome-visibility';
 
@@ -31,7 +31,8 @@ export function DocumentScreen({
   } = useDocumentChromeVisibility();
 
   const documentId = document.id;
-  const documentOperations = useDocumentScreenOperations({
+
+  const documentEditorActions = useDocumentEditorActions({
     document,
     workspaceSlug,
   });
@@ -57,8 +58,7 @@ export function DocumentScreen({
   );
   const isArchived = Boolean(document.archived_at);
   const publishedBarOffset = isArchived ? 48 : 0;
-  const fixedHeaderOffset =
-    (isPublished ? 48 : 0) + (isArchived ? 48 : 0);
+  const fixedHeaderOffset = (isPublished ? 48 : 0) + (isArchived ? 48 : 0);
 
   return (
     <section className="space-y-6" onPointerMove={revealChrome}>
@@ -126,16 +126,16 @@ export function DocumentScreen({
           content={document.content}
           documentOperations={{
             isArchiving: documentToolbar.isArchiving,
-            archivingSubdocumentId: documentOperations.archivingSubdocumentId,
+            archivingSubdocumentId: documentEditorActions.archivingSubdocumentId,
             isDuplicating: documentToolbar.isDuplicating,
             onArchive: documentToolbar.archiveCurrentDocument,
-            onArchiveSubdocument: documentOperations.archiveSubdocument,
+            onArchiveSubdocument: documentEditorActions.archiveSubdocument,
             onCopyLink: documentToolbar.copyLink,
             onDuplicate: documentToolbar.duplicateDocument,
           }}
           onStartContentChangeAction={hideChrome}
-          onContentChangeAction={documentOperations.queueContentSave}
-          onCreateSubdocAction={documentOperations.createSubdocument}
+          onContentChangeAction={documentEditorActions.queueContentSave}
+          onCreateSubdocAction={documentEditorActions.createSubdocument}
         />
       </div>
     </section>
