@@ -97,6 +97,63 @@ function markCachedFavoriteDocumentHasChildren(
   );
 }
 
+function applyFavoriteCacheState(
+  queryClient: ReturnType<typeof useQueryClient>,
+  workspaceSlug: string,
+  document: DocumentNavigationNode,
+  isFavorite: boolean,
+) {
+  queryClient.setQueryData<FavoriteStatus>(favoriteKeys.status(document.id), {
+    document_id: document.id,
+    is_favorite: isFavorite,
+  });
+  queryClient.setQueryData<Document>(
+    documentKeys.detail(document.id),
+    (currentDocument) => currentDocument
+      ? {
+        ...currentDocument,
+        is_favorite: isFavorite,
+      }
+      : currentDocument,
+  );
+  updateCachedNavigationFavoriteStatus(
+    queryClient,
+    workspaceSlug,
+    document.id,
+    isFavorite,
+  );
+  updateWorkspaceFavoritesCache(
+    queryClient,
+    workspaceSlug,
+    document,
+    isFavorite,
+  );
+}
+
+function applyArchiveCacheState(
+  queryClient: ReturnType<typeof useQueryClient>,
+  workspaceSlug: string,
+  documentId: string,
+  version: number,
+) {
+  queryClient.setQueryData<Document>(
+    documentKeys.detail(documentId),
+    (currentDocument) => currentDocument
+      ? {
+        ...currentDocument,
+        archived_at: currentDocument.archived_at ?? new Date().toISOString(),
+        version,
+      }
+      : currentDocument,
+  );
+  removeCachedNavigationDocument(queryClient, workspaceSlug, documentId);
+  queryClient.setQueryData<FavoriteDocument[]>(
+    favoriteKeys.workspaceList(workspaceSlug),
+    (currentFavorites) =>
+      currentFavorites?.filter((item) => item.document_id !== documentId),
+  );
+}
+
 type ArchiveMutationVariables = {
   previousRoute?: string;
   version: number;
@@ -258,26 +315,7 @@ export function useDocumentTreeNodeActions({
         queryKey: documentKeys.lists(workspaceSlug),
       });
 
-      queryClient.setQueryData<FavoriteStatus>(favoriteKeys.status(document.id), {
-        document_id: document.id,
-        is_favorite: nextIsFavorite,
-      });
-      queryClient.setQueryData<Document>(
-        documentKeys.detail(document.id),
-        (currentDocument) => currentDocument
-          ? {
-            ...currentDocument,
-            is_favorite: nextIsFavorite,
-          }
-          : currentDocument,
-      );
-      updateCachedNavigationFavoriteStatus(
-        queryClient,
-        workspaceSlug,
-        document.id,
-        nextIsFavorite,
-      );
-      updateWorkspaceFavoritesCache(
+      applyFavoriteCacheState(
         queryClient,
         workspaceSlug,
         document,
@@ -320,23 +358,12 @@ export function useDocumentTreeNodeActions({
       toast('Could not update favorites');
     },
     onSuccess: async (status) => {
-      queryClient.setQueryData(favoriteKeys.status(document.id), status);
-      queryClient.setQueryData<Document>(
-        documentKeys.detail(document.id),
-        (currentDocument) => currentDocument
-          ? {
-            ...currentDocument,
-            is_favorite: status.is_favorite,
-          }
-          : currentDocument,
-      );
-      updateCachedNavigationFavoriteStatus(
+      applyFavoriteCacheState(
         queryClient,
         workspaceSlug,
-        document.id,
+        document,
         status.is_favorite,
       );
-      updateWorkspaceFavoritesCache(queryClient, workspaceSlug, document, status.is_favorite);
       toast(
         status.is_favorite ? 'Added to favorites' : 'Removed from favorites',
       );
@@ -396,24 +423,7 @@ export function useDocumentTreeNodeActions({
       const previousExpandedDocumentIds =
         expandedByWorkspace[workspaceSlug] ?? [];
 
-      queryClient.setQueryData<Document>(
-        documentKeys.detail(document.id),
-        (currentDocument) => currentDocument
-          ? {
-            ...currentDocument,
-            archived_at: currentDocument.archived_at ?? new Date().toISOString(),
-            version,
-          }
-          : currentDocument,
-      );
-
-      removeCachedNavigationDocument(queryClient, workspaceSlug, document.id);
-
-      queryClient.setQueryData<FavoriteDocument[]>(
-        favoriteKeys.workspaceList(workspaceSlug),
-        (currentFavorites) =>
-          currentFavorites?.filter((item) => item.document_id !== document.id),
-      );
+      applyArchiveCacheState(queryClient, workspaceSlug, document.id, version);
 
       setExpandedDocumentIds(
         workspaceSlug,
