@@ -1,72 +1,50 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { hasMeaningfulContent } from '@shared/components/editor/has-meaningful-content';
 import {
-  archiveDocument,
   documentDetailQueryOptions,
   documentKeys,
   permanentlyDeleteDocument,
-  type DocumentNavigationNode,
-  type DocumentNavigationPage,
-  type WorkspaceDocumentNavigation,
-  duplicateDocument as duplicateDocumentRequest,
   restoreDocument,
-  workspaceDocumentChildrenQueryOptions,
-  workspaceDocumentRootQueryOptions,
   type Document,
 } from '@/domains/document';
-import {
-  favoriteDocument as addFavoriteDocument,
-  favoriteKeys,
-  type FavoriteDocument,
-  type FavoriteStatus,
-  unfavoriteDocument,
-} from '@/domains/favorite';
 import {
   publishDocument,
   unpublishDocument,
 } from '@shared/domains/publish';
 import { workspaceRoutes } from '@/domains/workspace';
-import { removeCachedNavigationDocument } from '@/domains/document/cache/document-query-cache';
+import { useRouter } from 'next/navigation';
+import type { FavoriteDocument } from '@/domains/favorite';
+import { useDocumentActions } from '@/domains/document/hooks/use-document-actions';
 
 import { buildPublishedDocumentUrl } from './header-actions.utils';
-
-const ARCHIVE_TOAST_ID = 'document-screen-archive';
 
 type UseHeaderActionsOptions = {
   workspaceSlug: string;
   document: Document;
 };
 
-type FavoriteMutationContext = {
-  previousFavoriteStatus?: FavoriteStatus;
-  previousWorkspaceFavorites?: FavoriteDocument[];
-};
-
 type RestoreMutationContext = {
   previousDocument?: Document;
 };
 
-type ArchiveMutationContext = {
-  previousDocument?: Document;
-  previousDocumentLists: Array<
-    readonly [
-      readonly unknown[],
-      WorkspaceDocumentNavigation | DocumentNavigationPage | undefined,
-    ]
-  >;
-  previousWorkspaceFavorites?: FavoriteDocument[];
-};
-
-type ArchiveMutationVariables = {
-  nextRoute?: string;
-  previousRoute?: string;
-  version: number;
-};
+function createOptimisticFavoriteDocument(document: Document): FavoriteDocument {
+  return {
+    document_id: document.id,
+    favorited_at: new Date().toISOString(),
+    has_children: false,
+    has_content: hasMeaningfulContent(document.content),
+    parent_document_id: document.parent_document_id,
+    public_id: document.public_id,
+    sort_key: document.sort_key,
+    teamspace_id: document.teamspace_id,
+    title: document.title,
+    workspace_id: document.workspace_id,
+  };
+}
 
 export function useHeaderActions({
   workspaceSlug,
@@ -75,239 +53,29 @@ export function useHeaderActions({
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const duplicateDocumentMutation = useMutation({
-    mutationFn: async (targetDocumentId: string) => duplicateDocumentRequest(targetDocumentId),
-    onSuccess: async (duplicatedDocument, targetDocumentId) => {
-      queryClient.setQueryData(
-        documentKeys.detail(duplicatedDocument.id),
-        duplicatedDocument,
-      );
-      if (duplicatedDocument.parent_document_id) {
-        await queryClient.invalidateQueries({
-          queryKey: documentKeys.detail(duplicatedDocument.parent_document_id),
-        });
-      }
-      if (targetDocumentId !== document.id) {
-        await queryClient.invalidateQueries({
-          queryKey: documentKeys.detail(targetDocumentId),
-        });
-      }
-      await queryClient.invalidateQueries({
-        queryKey: documentKeys.lists(workspaceSlug),
-      });
-    },
-  });
-
-  const archiveDocumentMutation = useMutation<
-    Document,
-    Error,
-    ArchiveMutationVariables,
-    ArchiveMutationContext
-  >({
-    mutationFn: ({ version }) => archiveDocument(document.id, version),
-    onMutate: async ({ nextRoute, version }): Promise<ArchiveMutationContext> => {
-      await Promise.all([
-        queryClient.cancelQueries({
-          queryKey: documentKeys.detail(document.id),
-        }),
-        queryClient.cancelQueries({
-          queryKey: documentKeys.lists(workspaceSlug),
-        }),
-        queryClient.cancelQueries({
-          queryKey: favoriteKeys.workspaceList(workspaceSlug),
-        }),
-      ]);
-
-      const previousDocumentLists = queryClient.getQueriesData<
-        WorkspaceDocumentNavigation | DocumentNavigationPage
-      >({
-        queryKey: documentKeys.lists(workspaceSlug),
-      });
-      const previousDocument = queryClient.getQueryData<Document>(
-        documentKeys.detail(document.id),
-      );
-      const previousWorkspaceFavorites = queryClient.getQueryData<FavoriteDocument[]>(
-        favoriteKeys.workspaceList(workspaceSlug),
-      );
-
-      queryClient.setQueryData<Document>(
-        documentKeys.detail(document.id),
-        (currentDocument) => currentDocument
-          ? {
-            ...currentDocument,
-            archived_at: currentDocument.archived_at ?? new Date().toISOString(),
-            version,
-          }
-          : currentDocument,
-      );
-      removeCachedNavigationDocument(queryClient, workspaceSlug, document.id);
-      queryClient.setQueryData<FavoriteDocument[] | undefined>(
-        favoriteKeys.workspaceList(workspaceSlug),
-        (currentFavorites) =>
-          currentFavorites?.filter((favorite) => favorite.document_id !== document.id),
-      );
-
-      if (nextRoute) {
-        router.replace(nextRoute);
-      }
-
-      toast('Moved to trash', {
-        id: `${ARCHIVE_TOAST_ID}-${document.id}`,
-      });
-
-      return {
-        previousDocument,
-        previousDocumentLists,
-        previousWorkspaceFavorites,
-      };
-    },
-    onError: (_error, variables, context) => {
-      context?.previousDocumentLists.forEach(([queryKey, data]) => {
-        queryClient.setQueryData(queryKey, data);
-      });
-
-      if (context?.previousDocument) {
-        queryClient.setQueryData(
-          documentKeys.detail(document.id),
-          context.previousDocument,
-        );
-      }
-
-      if (context?.previousWorkspaceFavorites) {
-        queryClient.setQueryData(
-          favoriteKeys.workspaceList(workspaceSlug),
-          context.previousWorkspaceFavorites,
-        );
-      }
-
-      if (variables.previousRoute) {
-        router.replace(variables.previousRoute);
-      }
-
-      toast('Could not move to trash', {
-        id: `${ARCHIVE_TOAST_ID}-${document.id}`,
-      });
-    },
-    onSuccess: (archivedDocument) => {
-      queryClient.setQueryData(documentKeys.detail(document.id), archivedDocument);
-      removeCachedNavigationDocument(queryClient, workspaceSlug, document.id);
-    },
-    onSettled: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: documentKeys.detail(document.id),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: documentKeys.lists(workspaceSlug),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: favoriteKeys.workspaceList(workspaceSlug),
-        }),
-      ]);
-    },
-  });
-
-  const favoriteMutation = useMutation({
-    mutationFn: async ({ nextIsFavorite }: { nextIsFavorite: boolean }) => {
-      if (!nextIsFavorite) {
-        return unfavoriteDocument(document.id);
-      }
-
-      return addFavoriteDocument(document.id);
-    },
-    onMutate: async ({ nextIsFavorite }) => {
-      await queryClient.cancelQueries({
-        queryKey: favoriteKeys.status(document.id),
-      });
-      await queryClient.cancelQueries({
-        queryKey: favoriteKeys.workspaceList(workspaceSlug),
-      });
-
-      const previousFavoriteStatus = queryClient.getQueryData<FavoriteStatus>(
-        favoriteKeys.status(document.id),
-      );
-      const previousWorkspaceFavorites = queryClient.getQueryData<FavoriteDocument[]>(
-        favoriteKeys.workspaceList(workspaceSlug),
-      );
-
-      queryClient.setQueryData<FavoriteStatus>(
-        favoriteKeys.status(document.id),
-        {
-          document_id: document.id,
-          is_favorite: nextIsFavorite,
-        },
-      );
-      queryClient.setQueryData<Document>(
-        documentKeys.detail(document.id),
-        (currentDocument) => currentDocument
-          ? {
-            ...currentDocument,
-            is_favorite: nextIsFavorite,
-          }
-          : currentDocument,
-      );
-      updateWorkspaceFavoritesCache({
-        document,
-        isFavorite: nextIsFavorite,
-        queryClient,
+  const {
+    archiveDocumentMutation,
+    duplicateDocumentMutation,
+    favoriteMutation,
+    favoriteStatus,
+    handleArchive,
+    handleCopyLink,
+    handleDuplicate,
+    handleToggleFavorite,
+  } = useDocumentActions({
+    document,
+    workspaceSlug,
+    isActive: true,
+    buildDocumentHref: (targetDocument) =>
+      workspaceRoutes.document(
         workspaceSlug,
-      });
-
-      return {
-        previousFavoriteStatus,
-        previousWorkspaceFavorites,
-      } satisfies FavoriteMutationContext;
-    },
-    onError: (_error, _variables, context) => {
-      if (context?.previousFavoriteStatus) {
-        queryClient.setQueryData(
-          favoriteKeys.status(document.id),
-          context.previousFavoriteStatus,
-        );
-      }
-      queryClient.setQueryData<Document>(
-        documentKeys.detail(document.id),
-        (currentDocument) => currentDocument
-          ? {
-            ...currentDocument,
-            is_favorite: context?.previousFavoriteStatus?.is_favorite ?? currentDocument.is_favorite,
-          }
-          : currentDocument,
-      );
-
-      if (context?.previousWorkspaceFavorites) {
-        queryClient.setQueryData(
-          favoriteKeys.workspaceList(workspaceSlug),
-          context.previousWorkspaceFavorites,
-        );
-      }
-
-      toast('Could not update favorites');
-    },
-    onSuccess: (status) => {
-      queryClient.setQueryData(favoriteKeys.status(document.id), status);
-      queryClient.setQueryData<Document>(
-        documentKeys.detail(document.id),
-        (currentDocument) => currentDocument
-          ? {
-            ...currentDocument,
-            is_favorite: status.is_favorite,
-          }
-          : currentDocument,
-      );
-      updateWorkspaceFavoritesCache({
-        document,
-        isFavorite: status.is_favorite,
-        queryClient,
-        workspaceSlug,
-      });
-      toast(status.is_favorite ? 'Added to favorites' : 'Removed from favorites');
-    },
-    onSettled: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: favoriteKeys.workspaceList(workspaceSlug),
-      });
-    },
+        targetDocument.public_id,
+        targetDocument.title,
+      ),
+    createOptimisticFavoriteDocument: () =>
+      createOptimisticFavoriteDocument(document),
+    getCopyLinkUrl: () =>
+      typeof window === 'undefined' ? undefined : window.location.href,
   });
 
   const publishMutation = useMutation({
@@ -417,79 +185,6 @@ export function useHeaderActions({
     },
   });
 
-  const copyLink = async () => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    await navigator.clipboard.writeText(window.location.href);
-    toast('Copied page link to clipboard');
-  };
-
-  const duplicateDocument = (targetDocumentId?: string) => {
-    void duplicateDocumentMutation.mutateAsync(targetDocumentId ?? document.id);
-  };
-
-  const archiveCurrentDocument = () => {
-    void (async () => {
-      const latestDocument = await queryClient.ensureQueryData(
-        documentDetailQueryOptions(document.id),
-      );
-      const nextDocument = await resolveArchiveDestination({
-        document: latestDocument,
-        queryClient,
-        workspaceSlug,
-      });
-
-      const nextRoute =
-        nextDocument
-          ? workspaceRoutes.document(
-            workspaceSlug,
-            nextDocument.public_id,
-            nextDocument.title,
-          )
-          : workspaceRoutes.detail(workspaceSlug);
-      const previousRoute =
-        typeof window !== 'undefined'
-          ? `${window.location.pathname}${window.location.search}${window.location.hash}`
-          : undefined;
-
-      try {
-        await archiveDocumentMutation.mutateAsync({
-          nextRoute,
-          previousRoute,
-          version: latestDocument.version,
-        });
-      }
-      catch {
-        return;
-      }
-    })();
-  };
-
-  const toggleFavorite = () => {
-    const currentStatus =
-      queryClient.getQueryData<FavoriteStatus>(favoriteKeys.status(document.id)) ??
-      {
-        document_id: document.id,
-        is_favorite: Boolean(document.is_favorite),
-      };
-
-    void favoriteMutation.mutateAsync({
-      nextIsFavorite: !currentStatus?.is_favorite,
-    });
-  };
-
-  const favoriteStatus = favoriteMutation.isPending
-    ? {
-      document_id: document.id,
-      is_favorite: favoriteMutation.variables.nextIsFavorite,
-    }
-    : {
-      document_id: document.id,
-      is_favorite: Boolean(document.is_favorite),
-    };
-
   const copyPublishedLink = async () => {
     if (typeof window === 'undefined') {
       return;
@@ -508,7 +203,9 @@ export function useHeaderActions({
       return;
     }
 
-    await navigator.clipboard.writeText(buildPublishedDocumentUrl(status.public_path));
+    await navigator.clipboard.writeText(
+      buildPublishedDocumentUrl(status.public_path),
+    );
     toast('Copied published link to clipboard');
   };
 
@@ -529,10 +226,10 @@ export function useHeaderActions({
   };
 
   return {
-    archiveCurrentDocument,
-    copyLink,
+    archiveCurrentDocument: handleArchive,
+    copyLink: handleCopyLink,
     copyPublishedLink,
-    duplicateDocument,
+    duplicateDocument: handleDuplicate,
     favoriteStatus,
     isArchived: Boolean(document.archived_at),
     isFavoriting: favoriteMutation.isPending,
@@ -550,113 +247,7 @@ export function useHeaderActions({
     },
     publishCurrentDocument,
     restoreCurrentDocument,
-    toggleFavorite,
+    toggleFavorite: handleToggleFavorite,
     unpublishCurrentDocument,
-  };
-}
-
-function orderDocuments(items: DocumentNavigationNode[]) {
-  return [...items].sort((left, right) => right.sort_key - left.sort_key);
-}
-
-function getNearestDocument(
-  items: DocumentNavigationNode[],
-  currentDocumentId: string,
-) {
-  const orderedItems = orderDocuments(items);
-  const currentIndex = orderedItems.findIndex((item) => item.id === currentDocumentId);
-
-  if (currentIndex === -1) {
-    return orderedItems[0] ?? null;
-  }
-
-  return orderedItems[currentIndex - 1] ??
-    orderedItems[currentIndex + 1] ??
-    null;
-}
-
-async function resolveArchiveDestination({
-  document,
-  queryClient,
-  workspaceSlug,
-}: {
-  document: Document;
-  queryClient: QueryClient;
-  workspaceSlug: string;
-}) {
-  if (document.parent_document_id) {
-    const siblingPage = await queryClient.ensureQueryData(
-      workspaceDocumentChildrenQueryOptions(workspaceSlug, document.parent_document_id),
-    );
-    const siblingDocument = getNearestDocument(siblingPage.items, document.id);
-
-    if (siblingDocument) {
-      return siblingDocument;
-    }
-
-    return queryClient.ensureQueryData(documentDetailQueryOptions(document.parent_document_id));
-  }
-
-  const rootNavigation = await queryClient.ensureQueryData(
-    workspaceDocumentRootQueryOptions(workspaceSlug),
-  );
-  const rootItems = getRootNavigationItems(rootNavigation, document.teamspace_id);
-
-  return getNearestDocument(rootItems, document.id);
-}
-
-function getRootNavigationItems(
-  navigation: WorkspaceDocumentNavigation,
-  teamspaceId?: string,
-) {
-  if (!teamspaceId) {
-    return navigation.private_documents.items;
-  }
-
-  return navigation.teamspaces.find((teamspace) => teamspace.id === teamspaceId)?.documents.items ?? [];
-}
-
-function updateWorkspaceFavoritesCache({
-  document,
-  isFavorite,
-  queryClient,
-  workspaceSlug,
-}: {
-  document: Document;
-  isFavorite: boolean;
-  queryClient: QueryClient;
-  workspaceSlug: string;
-}) {
-  queryClient.setQueryData<FavoriteDocument[] | undefined>(
-    favoriteKeys.workspaceList(workspaceSlug),
-    (currentFavorites) => {
-      if (!currentFavorites) {
-        return currentFavorites;
-      }
-
-      if (!isFavorite) {
-        return currentFavorites.filter((favorite) => favorite.document_id !== document.id);
-      }
-
-      return [
-        createOptimisticFavoriteDocument(document),
-        ...currentFavorites.filter((favorite) => favorite.document_id !== document.id),
-      ];
-    },
-  );
-}
-
-function createOptimisticFavoriteDocument(document: Document): FavoriteDocument {
-  return {
-    document_id: document.id,
-    favorited_at: new Date().toISOString(),
-    has_children: false,
-    has_content: hasMeaningfulContent(document.content),
-    parent_document_id: document.parent_document_id,
-    public_id: document.public_id,
-    sort_key: document.sort_key,
-    teamspace_id: document.teamspace_id,
-    title: document.title,
-    workspace_id: document.workspace_id,
   };
 }
