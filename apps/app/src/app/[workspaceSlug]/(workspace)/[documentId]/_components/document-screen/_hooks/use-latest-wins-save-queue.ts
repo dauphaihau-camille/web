@@ -7,6 +7,16 @@ type LatestWinsSaveQueueOptions<TValue, TMeta extends object> = {
   onFlush: (value: TValue, meta: TMeta) => Promise<void>;
 };
 
+/**
+ * Coalescing save queue, not FIFO.
+ *
+ * While a save is in flight, new enqueues overwrite the single pending slot,
+ * so only the latest unsaved value is flushed next.
+ *
+ * Example:
+ * if "A" is saving and we enqueue "Ab" then "Abc",
+ * the hook saves "A" first, then only "Abc".
+ */
 export function useLatestWinsSaveQueue<TValue, TMeta extends object>({
   initialMeta,
   onFlush,

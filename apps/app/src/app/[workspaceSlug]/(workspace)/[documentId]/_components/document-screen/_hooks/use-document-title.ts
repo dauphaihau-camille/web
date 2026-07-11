@@ -98,7 +98,7 @@ export function useDocumentTitle({
     );
   };
 
-  const queueTitleSave = useLatestWinsSaveQueue<string, { finalize: boolean }>({
+  const { enqueue: queueTitleSave } = useLatestWinsSaveQueue<string, { finalize: boolean }>({
     initialMeta: { finalize: false },
     onFlush: async (nextTitle, meta) => {
       const latestDocument =
