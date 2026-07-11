@@ -89,13 +89,13 @@ export function DocumentToolbar({
         onRestore={restoreCurrentDocument}
         onUnpublish={unpublishCurrentDocument}
       />
-      <HeaderActionButton
+      <ToolbarActionButton
         ariaLabel="Copy link"
         icon={<LinkIcon className="size-4" />}
         onClick={copyLink}
         tooltip="Copy link"
       />
-      <HeaderActionButton
+      <ToolbarActionButton
         ariaLabel="Favorite document"
         icon={
           <StarIcon
@@ -126,7 +126,7 @@ export function DocumentToolbar({
   );
 }
 
-function HeaderActionButton({
+function ToolbarActionButton({
   ariaLabel,
   disabled = false,
   icon,

@@ -20,7 +20,7 @@ import { useRouter } from 'next/navigation';
 import type { FavoriteDocument } from '@/domains/favorite';
 import { useDocumentActions } from '@/domains/document/hooks/use-document-actions';
 
-import { buildPublishedDocumentUrl } from './header-actions.utils';
+import { buildPublishedDocumentUrl } from './document-toolbar.utils';
 
 type UseDocumentToolbarOptions = {
   workspaceSlug: string;

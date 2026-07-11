@@ -24,7 +24,7 @@ import {
 } from '@shared/components/ui/tooltip';
 import { cn } from '@shared/lib/utils';
 
-import { buildPublishedDocumentUrl } from '../header-actions.utils';
+import { buildPublishedDocumentUrl } from '../document-toolbar.utils';
 import { PublishTabContent } from './publish-tab-content';
 import type { ShareButtonProps } from './types';
 

@@ -57,8 +57,12 @@ export function DocumentScreen({
     documentToolbar.publishStatus?.published_document_id,
   );
   const isArchived = Boolean(document.archived_at);
-  const publishedBarOffset = isArchived ? 48 : 0;
-  const fixedHeaderOffset = (isPublished ? 48 : 0) + (isArchived ? 48 : 0);
+  const statusBarHeight = 48;
+  
+  const publishedBarOffset = isArchived ? statusBarHeight : 0;
+  const fixedHeaderOffset =
+    (isPublished ? statusBarHeight : 0) +
+    (isArchived ? statusBarHeight : 0);
 
   return (
     <section className="space-y-6" onPointerMove={revealChrome}>
