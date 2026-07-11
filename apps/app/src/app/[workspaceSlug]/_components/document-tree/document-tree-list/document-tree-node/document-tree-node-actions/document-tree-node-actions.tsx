@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import {
   CopyIcon,
   EllipsisIcon,
@@ -40,6 +41,8 @@ export function DocumentTreeNodeActions({
   isActive,
   workspaceSlug,
 }: DocumentTreeNodeActionsProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const {
     archiveDocumentMutation,
     createSubdocumentMutation,
@@ -51,8 +54,6 @@ export function DocumentTreeNodeActions({
     handleDuplicate,
     handleToggleFavorite,
     isFavorite,
-    isMenuOpen,
-    setIsMenuOpen,
   } = useDocumentTreeNodeActions({
     document,
     isActive,

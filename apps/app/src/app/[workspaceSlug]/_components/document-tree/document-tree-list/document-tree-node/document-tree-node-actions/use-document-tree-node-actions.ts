@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -12,9 +11,7 @@ import {
   documentKeys,
   duplicateDocument,
   type Document,
-  type DocumentNavigationPage,
   type DocumentNavigationNode,
-  type WorkspaceDocumentNavigation,
 } from '@/domains/document';
 import {
   favoriteDocument,
@@ -28,131 +25,25 @@ import { workspaceRoutes } from '@/domains/workspace';
 import {
   insertCreatedSubdocIntoCachedChildren,
   markCachedNavigationNodeHasChildren,
-  removeCachedNavigationDocument,
-  updateCachedNavigationFavoriteStatus,
 } from '@/domains/document/cache/document-query-cache';
 
 import { resolveArchiveDestination } from './document-tree-node-action-helpers';
+import {
+  applyArchiveCacheState,
+  applyFavoriteCacheState,
+  getDocumentListSnapshot,
+  markCachedFavoriteDocumentHasChildren,
+  restoreDocumentListSnapshot,
+  type DocumentListSnapshot,
+} from './document-tree-node-action-cache';
 
 const ARCHIVE_TOAST_ID = 'document-tree-archive';
 
-function createOptimisticFavoriteDocument(
-  document: DocumentNavigationNode,
-  workspaceSlug: string,
-): FavoriteDocument {
-  return {
-    document_id: document.id,
-    public_id: document.public_id,
-    workspace_id: workspaceSlug,
-    teamspace_id: document.teamspace_id,
-    parent_document_id: document.parent_document_id,
-    title: document.title,
-    sort_key: document.sort_key,
-    has_children: document.has_children,
-    has_content: document.has_content,
-    favorited_at: new Date().toISOString(),
-  };
-}
-
-function updateWorkspaceFavoritesCache(
-  queryClient: ReturnType<typeof useQueryClient>,
-  workspaceSlug: string,
-  document: DocumentNavigationNode,
-  isFavorite: boolean,
-) {
-  queryClient.setQueryData<FavoriteDocument[] | undefined>(
-    favoriteKeys.workspaceList(workspaceSlug),
-    (currentFavorites) => {
-      if (!currentFavorites) {
-        return currentFavorites;
-      }
-
-      if (!isFavorite) {
-        return currentFavorites.filter((favorite) => favorite.document_id !== document.id);
-      }
-
-      return [
-        createOptimisticFavoriteDocument(document, workspaceSlug),
-        ...currentFavorites.filter((favorite) => favorite.document_id !== document.id),
-      ];
-    },
-  );
-}
-
-function markCachedFavoriteDocumentHasChildren(
-  queryClient: ReturnType<typeof useQueryClient>,
-  workspaceSlug: string,
-  documentId: string,
-) {
-  queryClient.setQueryData<FavoriteDocument[] | undefined>(
-    favoriteKeys.workspaceList(workspaceSlug),
-    (currentFavorites) =>
-      currentFavorites?.map((favorite) =>
-        favorite.document_id === documentId
-          ? {
-            ...favorite,
-            has_children: true,
-          }
-          : favorite),
-  );
-}
-
-function applyFavoriteCacheState(
-  queryClient: ReturnType<typeof useQueryClient>,
-  workspaceSlug: string,
-  document: DocumentNavigationNode,
-  isFavorite: boolean,
-) {
-  queryClient.setQueryData<FavoriteStatus>(favoriteKeys.status(document.id), {
-    document_id: document.id,
-    is_favorite: isFavorite,
-  });
-  queryClient.setQueryData<Document>(
-    documentKeys.detail(document.id),
-    (currentDocument) => currentDocument
-      ? {
-        ...currentDocument,
-        is_favorite: isFavorite,
-      }
-      : currentDocument,
-  );
-  updateCachedNavigationFavoriteStatus(
-    queryClient,
-    workspaceSlug,
-    document.id,
-    isFavorite,
-  );
-  updateWorkspaceFavoritesCache(
-    queryClient,
-    workspaceSlug,
-    document,
-    isFavorite,
-  );
-}
-
-function applyArchiveCacheState(
-  queryClient: ReturnType<typeof useQueryClient>,
-  workspaceSlug: string,
-  documentId: string,
-  version: number,
-) {
-  queryClient.setQueryData<Document>(
-    documentKeys.detail(documentId),
-    (currentDocument) => currentDocument
-      ? {
-        ...currentDocument,
-        archived_at: currentDocument.archived_at ?? new Date().toISOString(),
-        version,
-      }
-      : currentDocument,
-  );
-  removeCachedNavigationDocument(queryClient, workspaceSlug, documentId);
-  queryClient.setQueryData<FavoriteDocument[]>(
-    favoriteKeys.workspaceList(workspaceSlug),
-    (currentFavorites) =>
-      currentFavorites?.filter((item) => item.document_id !== documentId),
-  );
-}
+type UseDocumentTreeNodeActionArgs = {
+  document: DocumentNavigationNode;
+  isActive: boolean;
+  workspaceSlug: string;
+};
 
 type ArchiveMutationVariables = {
   previousRoute?: string;
@@ -161,40 +52,24 @@ type ArchiveMutationVariables = {
 
 type ArchiveMutationContext = {
   previousDocument?: Document;
-  previousDocumentLists: Array<
-    readonly [
-      readonly unknown[],
-      WorkspaceDocumentNavigation | DocumentNavigationPage | undefined,
-    ]
-  >;
+  previousDocumentLists: DocumentListSnapshot;
   previousExpandedDocumentIds: string[];
   previousWorkspaceFavorites?: FavoriteDocument[];
 };
 
 type FavoriteMutationContext = {
   previousDocument?: Document;
-  previousDocumentLists: Array<
-    readonly [
-      readonly unknown[],
-      WorkspaceDocumentNavigation | DocumentNavigationPage | undefined,
-    ]
-  >;
+  previousDocumentLists: DocumentListSnapshot;
   previousFavoriteStatus?: FavoriteStatus;
   previousWorkspaceFavorites?: FavoriteDocument[];
 };
 
-export function useDocumentTreeNodeActions({
+function useCreateSubdocumentAction({
   document,
-  isActive,
   workspaceSlug,
-}: {
-  document: DocumentNavigationNode;
-  isActive: boolean;
-  workspaceSlug: string;
-}) {
+}: Omit<UseDocumentTreeNodeActionArgs, 'isActive'>) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const expandedByWorkspace = useDocumentTreeExpansionStore(
     (state) => state.expandedByWorkspace,
   );
@@ -202,7 +77,7 @@ export function useDocumentTreeNodeActions({
     (state) => state.setExpandedDocumentIds,
   );
 
-  const createSubdocumentMutation = useMutation({
+  const mutation = useMutation({
     mutationFn: () =>
       createDocument({
         workspace_id: workspaceSlug,
@@ -250,7 +125,21 @@ export function useDocumentTreeNodeActions({
     },
   });
 
-  const duplicateDocumentMutation = useMutation({
+  return {
+    createSubdocumentMutation: mutation,
+    handleCreateSubdocument: () => {
+      void mutation.mutateAsync();
+    },
+  };
+}
+
+function useDuplicateDocumentAction({
+  document,
+  workspaceSlug,
+}: Omit<UseDocumentTreeNodeActionArgs, 'isActive'>) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
     mutationFn: () => duplicateDocument(document.id),
     onSuccess: async (duplicatedDocument) => {
       queryClient.setQueryData(
@@ -271,7 +160,21 @@ export function useDocumentTreeNodeActions({
     },
   });
 
-  const favoriteMutation = useMutation<
+  return {
+    duplicateDocumentMutation: mutation,
+    handleDuplicate: () => {
+      void mutation.mutateAsync();
+    },
+  };
+}
+
+function useFavoriteDocumentAction({
+  document,
+  workspaceSlug,
+}: Omit<UseDocumentTreeNodeActionArgs, 'isActive'>) {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<
     FavoriteStatus,
     Error,
     { nextIsFavorite: boolean },
@@ -309,11 +212,10 @@ export function useDocumentTreeNodeActions({
       const previousDocument = queryClient.getQueryData<Document>(
         documentKeys.detail(document.id),
       );
-      const previousDocumentLists = queryClient.getQueriesData<
-        WorkspaceDocumentNavigation | DocumentNavigationPage
-      >({
-        queryKey: documentKeys.lists(workspaceSlug),
-      });
+      const previousDocumentLists = getDocumentListSnapshot(
+        queryClient,
+        workspaceSlug,
+      );
 
       applyFavoriteCacheState(
         queryClient,
@@ -330,9 +232,9 @@ export function useDocumentTreeNodeActions({
       };
     },
     onError: (_error, _variables, context) => {
-      context?.previousDocumentLists.forEach(([queryKey, data]) => {
-        queryClient.setQueryData(queryKey, data);
-      });
+      if (context) {
+        restoreDocumentListSnapshot(queryClient, context.previousDocumentLists);
+      }
 
       if (context?.previousFavoriteStatus) {
         queryClient.setQueryData(
@@ -386,7 +288,32 @@ export function useDocumentTreeNodeActions({
     },
   });
 
-  const archiveDocumentMutation = useMutation<
+  return {
+    favoriteMutation: mutation,
+    handleToggleFavorite: () => {
+      void mutation.mutateAsync({
+        nextIsFavorite: !document.is_favorite,
+      });
+    },
+    isFavorite: document.is_favorite,
+  };
+}
+
+function useArchiveDocumentAction({
+  document,
+  isActive,
+  workspaceSlug,
+}: UseDocumentTreeNodeActionArgs) {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const expandedByWorkspace = useDocumentTreeExpansionStore(
+    (state) => state.expandedByWorkspace,
+  );
+  const setExpandedDocumentIds = useDocumentTreeExpansionStore(
+    (state) => state.setExpandedDocumentIds,
+  );
+
+  const mutation = useMutation<
     Document,
     Error,
     ArchiveMutationVariables,
@@ -406,20 +333,16 @@ export function useDocumentTreeNodeActions({
         }),
       ]);
 
-      const previousDocumentLists = queryClient.getQueriesData<
-        WorkspaceDocumentNavigation | DocumentNavigationPage
-      >({
-        queryKey: documentKeys.lists(workspaceSlug),
-      });
-
+      const previousDocumentLists = getDocumentListSnapshot(
+        queryClient,
+        workspaceSlug,
+      );
       const previousDocument = queryClient.getQueryData<Document>(
         documentKeys.detail(document.id),
       );
-
       const previousWorkspaceFavorites = queryClient.getQueryData<
         FavoriteDocument[]
       >(favoriteKeys.workspaceList(workspaceSlug));
-
       const previousExpandedDocumentIds =
         expandedByWorkspace[workspaceSlug] ?? [];
 
@@ -442,9 +365,9 @@ export function useDocumentTreeNodeActions({
       };
     },
     onError: (_error, variables, context) => {
-      context?.previousDocumentLists.forEach(([queryKey, data]) => {
-        queryClient.setQueryData(queryKey, data);
-      });
+      if (context) {
+        restoreDocumentListSnapshot(queryClient, context.previousDocumentLists);
+      }
 
       if (context?.previousDocument) {
         queryClient.setQueryData(
@@ -496,35 +419,6 @@ export function useDocumentTreeNodeActions({
     },
   });
 
-  const handleCreateSubdocument = () => {
-    void createSubdocumentMutation.mutateAsync();
-  };
-
-  const handleDuplicate = () => {
-    void duplicateDocumentMutation.mutateAsync();
-  };
-
-  const handleCopyLink = async () => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    await navigator.clipboard.writeText(
-      `${window.location.origin}${workspaceRoutes.document(
-        workspaceSlug,
-        document.public_id,
-        document.title,
-      )}`,
-    );
-    toast('Copied page link to clipboard');
-  };
-
-  const handleToggleFavorite = () => {
-    void favoriteMutation.mutateAsync({
-      nextIsFavorite: !document.is_favorite,
-    });
-  };
-
   const handleArchive = () => {
     void (async () => {
       const documentDetail = await queryClient.ensureQueryData(
@@ -556,7 +450,7 @@ export function useDocumentTreeNodeActions({
       }
 
       try {
-        await archiveDocumentMutation.mutateAsync({
+        await mutation.mutateAsync({
           previousRoute,
           version: documentDetail.version,
         });
@@ -565,6 +459,63 @@ export function useDocumentTreeNodeActions({
         return;
       }
     })();
+  };
+
+  return {
+    archiveDocumentMutation: mutation,
+    handleArchive,
+  };
+}
+
+export function useDocumentTreeNodeActions({
+  document,
+  isActive,
+  workspaceSlug,
+}: UseDocumentTreeNodeActionArgs) {
+  const {
+    createSubdocumentMutation,
+    handleCreateSubdocument,
+  } = useCreateSubdocumentAction({
+    document,
+    workspaceSlug,
+  });
+  const {
+    duplicateDocumentMutation,
+    handleDuplicate,
+  } = useDuplicateDocumentAction({
+    document,
+    workspaceSlug,
+  });
+  const {
+    favoriteMutation,
+    handleToggleFavorite,
+    isFavorite,
+  } = useFavoriteDocumentAction({
+    document,
+    workspaceSlug,
+  });
+  const {
+    archiveDocumentMutation,
+    handleArchive,
+  } = useArchiveDocumentAction({
+    document,
+    isActive,
+    workspaceSlug,
+  });
+
+  const handleCopyLink = async () => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    await navigator.clipboard.writeText(
+      `${window.location.origin}${workspaceRoutes.document(
+        workspaceSlug,
+        document.public_id,
+        document.title,
+      )}`,
+    );
+    toast('Copied page link to clipboard');
   };
 
   return {
@@ -577,8 +528,6 @@ export function useDocumentTreeNodeActions({
     handleCreateSubdocument,
     handleDuplicate,
     handleToggleFavorite,
-    isFavorite: document.is_favorite,
-    isMenuOpen,
-    setIsMenuOpen,
+    isFavorite,
   };
 }
