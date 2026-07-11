@@ -15,7 +15,7 @@ import { DocOperations } from './doc-operations/doc-operations';
 import { RelativeTimeText } from './doc-operations/relative-time-text';
 import { ShareButton } from './share-button/share-button';
 
-type HeaderActionsProps = {
+type DocumentToolbarProps = {
   archiveCurrentDocument: () => void;
   copyLink: () => void | Promise<void>;
   copyPublishedLink: () => Promise<void>;
@@ -42,7 +42,7 @@ type HeaderActionsProps = {
   updatedAt: Document['updated_at'];
 };
 
-export function HeaderActions({
+export function DocumentToolbar({
   archiveCurrentDocument,
   copyLink,
   copyPublishedLink,
@@ -62,7 +62,7 @@ export function HeaderActions({
   toggleFavorite,
   unpublishCurrentDocument,
   updatedAt,
-}: HeaderActionsProps) {
+}: DocumentToolbarProps) {
   return (
     <div
       className={cn(

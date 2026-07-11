@@ -12,7 +12,7 @@ import {
 import { workspaceRoutes } from '@/domains/workspace';
 import { mswServer } from '@shared/test/msw/server';
 
-import { useHeaderActions } from './use-header-actions';
+import { useDocumentToolbar } from './use-document-toolbar';
 
 const favoriteStatusUrlPattern = /\/documents\/doc-1\/favorite\/?$/;
 const publishStatusUrlPattern = /\/documents\/doc-1\/publish\/?$/;
@@ -58,7 +58,7 @@ function createWrapper() {
   };
 }
 
-describe('useHeaderActions integration', () => {
+describe('useDocumentToolbar integration', () => {
   beforeEach(() => {
     replaceMock.mockReset();
   });
@@ -89,7 +89,7 @@ describe('useHeaderActions integration', () => {
 
     const { Wrapper } = createWrapper();
     const { result } = renderHook(
-      () => useHeaderActions({ document: documentFixture, workspaceSlug: 'acme' }),
+      () => useDocumentToolbar({ document: documentFixture, workspaceSlug: 'acme' }),
       { wrapper: Wrapper },
     );
 
@@ -169,18 +169,18 @@ describe('useHeaderActions integration', () => {
           initialData: documentFixture,
           refetchOnMount: false,
         }),
-        headerActions: useHeaderActions({ document: documentFixture, workspaceSlug: 'acme' }),
+        documentToolbar: useDocumentToolbar({ document: documentFixture, workspaceSlug: 'acme' }),
       }),
       { wrapper: Wrapper },
     );
 
     act(() => {
-      result.current.headerActions.archiveCurrentDocument();
+      result.current.documentToolbar.archiveCurrentDocument();
     });
 
     await waitFor(() => {
       expect(result.current.documentQuery.data?.archived_at).toBeTruthy();
-      expect(result.current.headerActions.isArchiving).toBe(true);
+      expect(result.current.documentToolbar.isArchiving).toBe(true);
       expect(replaceMock).toHaveBeenCalledWith(workspaceRoutes.detail('acme'));
     });
 
@@ -192,7 +192,7 @@ describe('useHeaderActions integration', () => {
 
     await waitFor(() => {
       expect(result.current.documentQuery.data?.archived_at).toBe('2026-01-02T00:00:00.000Z');
-      expect(result.current.headerActions.isArchiving).toBe(false);
+      expect(result.current.documentToolbar.isArchiving).toBe(false);
     });
   });
 
@@ -252,13 +252,13 @@ describe('useHeaderActions integration', () => {
           initialData: parentDocument,
           refetchOnMount: false,
         }),
-        headerActions: useHeaderActions({ document: parentDocument, workspaceSlug: 'acme' }),
+        documentToolbar: useDocumentToolbar({ document: parentDocument, workspaceSlug: 'acme' }),
       }),
       { wrapper: Wrapper },
     );
 
     act(() => {
-      result.current.headerActions.duplicateDocument('doc-2');
+      result.current.documentToolbar.duplicateDocument('doc-2');
     });
 
     await waitFor(() => {

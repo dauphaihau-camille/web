@@ -22,7 +22,7 @@ import { useDocumentActions } from '@/domains/document/hooks/use-document-action
 
 import { buildPublishedDocumentUrl } from './header-actions.utils';
 
-type UseHeaderActionsOptions = {
+type UseDocumentToolbarOptions = {
   workspaceSlug: string;
   document: Document;
 };
@@ -46,10 +46,10 @@ function createOptimisticFavoriteDocument(document: Document): FavoriteDocument 
   };
 }
 
-export function useHeaderActions({
+export function useDocumentToolbar({
   workspaceSlug,
   document,
-}: UseHeaderActionsOptions) {
+}: UseDocumentToolbarOptions) {
   const router = useRouter();
   const queryClient = useQueryClient();
 

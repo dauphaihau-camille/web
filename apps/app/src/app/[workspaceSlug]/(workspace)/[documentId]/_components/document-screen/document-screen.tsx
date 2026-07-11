@@ -5,8 +5,8 @@ import type { Document } from '@/domains/document';
 import { Input } from '@shared/components/ui/input';
 
 import { DocumentBreadcrumb } from './document-breadcrumb';
-import { HeaderActions } from './header-actions/header-actions';
-import { useHeaderActions } from './header-actions/use-header-actions';
+import { DocumentToolbar } from './document-toolbar/document-toolbar';
+import { useDocumentToolbar } from './document-toolbar/use-document-toolbar';
 import { ArchivedDocumentBar } from './archived-document-bar';
 import { PublishedDocumentBar } from './published-document-bar';
 import { useDocumentScreenOperations } from './_hooks/use-document-screen-operations';
@@ -36,7 +36,7 @@ export function DocumentScreen({
     workspaceSlug,
   });
 
-  const headerActions = useHeaderActions({
+  const documentToolbar = useDocumentToolbar({
     workspaceSlug,
     document,
   });
@@ -53,7 +53,7 @@ export function DocumentScreen({
   });
 
   const isPublished = Boolean(
-    headerActions.publishStatus?.published_document_id,
+    documentToolbar.publishStatus?.published_document_id,
   );
   const isArchived = Boolean(document.archived_at);
   const publishedBarOffset = isArchived ? 48 : 0;
@@ -63,7 +63,7 @@ export function DocumentScreen({
   return (
     <section className="space-y-6" onPointerMove={revealChrome}>
       <PublishedDocumentBar
-        publishedPath={headerActions.publishStatus?.public_path}
+        publishedPath={documentToolbar.publishStatus?.public_path}
         offsetTop={publishedBarOffset}
       />
       {document.archived_at
@@ -71,11 +71,11 @@ export function DocumentScreen({
           <ArchivedDocumentBar
             archivedAt={document.archived_at}
             archivedByName={document.archived_by_name}
-            isDeleting={headerActions.isPermanentlyDeleting}
-            isRestoring={headerActions.isRestoring}
+            isDeleting={documentToolbar.isPermanentlyDeleting}
+            isRestoring={documentToolbar.isRestoring}
             offsetTop={0}
-            onDelete={headerActions.permanentlyDeleteCurrentDocument}
-            onRestore={headerActions.restoreCurrentDocument}
+            onDelete={documentToolbar.permanentlyDeleteCurrentDocument}
+            onRestore={documentToolbar.restoreCurrentDocument}
           />
         )
         : null}
@@ -92,10 +92,10 @@ export function DocumentScreen({
             workspaceSlug={workspaceSlug}
           />
 
-          <HeaderActions
+          <DocumentToolbar
             isVisible={isChromeVisible}
             updatedAt={document.updated_at}
-            {...headerActions}
+            {...documentToolbar}
           />
         </div>
       </div>
@@ -125,13 +125,13 @@ export function DocumentScreen({
           workspaceSlug={workspaceSlug}
           content={document.content}
           documentOperations={{
-            isArchiving: headerActions.isArchiving,
+            isArchiving: documentToolbar.isArchiving,
             archivingSubdocumentId: documentOperations.archivingSubdocumentId,
-            isDuplicating: headerActions.isDuplicating,
-            onArchive: headerActions.archiveCurrentDocument,
+            isDuplicating: documentToolbar.isDuplicating,
+            onArchive: documentToolbar.archiveCurrentDocument,
             onArchiveSubdocument: documentOperations.archiveSubdocument,
-            onCopyLink: headerActions.copyLink,
-            onDuplicate: headerActions.duplicateDocument,
+            onCopyLink: documentToolbar.copyLink,
+            onDuplicate: documentToolbar.duplicateDocument,
           }}
           onStartContentChangeAction={hideChrome}
           onContentChangeAction={documentOperations.queueContentSave}

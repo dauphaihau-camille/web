@@ -7,7 +7,7 @@ import { PermanentlyDeleteDocumentDialog } from '@/domains/document/components/p
 import { buttonVariants } from '@shared/components/ui/button';
 import { cn } from '@shared/lib/utils';
 
-import { RelativeTimeText } from './header-actions/doc-operations/relative-time-text';
+import { RelativeTimeText } from './document-toolbar/doc-operations/relative-time-text';
 
 export function ArchivedDocumentBar({
   archivedAt,
