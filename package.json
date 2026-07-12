@@ -31,7 +31,7 @@
     "prepare": "husky",
     "typecheck": "turbo run typecheck",
     "build:all": "bun run build:app && bun run build:marketing",
-    "deploy:why": "bun scripts/netlify-ignore-build.ts",
+    "deploy:why": "node ./scripts/netlify-ignore-build.mjs",
     "typecheck:shared": "bun run --cwd packages/shared typecheck"
   },
   "lint-staged": {

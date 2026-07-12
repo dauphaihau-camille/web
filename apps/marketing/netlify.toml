@@ -1,6 +1,6 @@
 [build]
 command = "bun run --cwd apps/marketing build"
-ignore = "bun scripts/netlify-ignore-build.ts marketing"
+ignore = "node ./scripts/netlify-ignore-build.mjs marketing"
 publish = "/apps/marketing/.next"
 
 [build.environment]
