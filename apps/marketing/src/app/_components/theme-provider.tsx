@@ -6,7 +6,6 @@ function shouldForceLightTheme(pathname: string | null) {
   if (!pathname) {
     return false;
   }
-
   return pathname === '/' || pathname === '/login' || pathname === '/signup';
 }
 
