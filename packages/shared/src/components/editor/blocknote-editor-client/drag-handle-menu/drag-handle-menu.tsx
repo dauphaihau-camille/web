@@ -158,7 +158,7 @@ export function DragHandleMenu({
 
   return (
     <Components.Generic.Menu.Dropdown className="bn-menu-dropdown bn-drag-handle-menu drag-handle-menu">
-      <ActiveBlockHighlight blockId={hoveredBlock.id} />
+      <ActiveBlockHighlight blockId={currentBlock.id} />
       <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground">
         {currentBlockLabel}
       </div>

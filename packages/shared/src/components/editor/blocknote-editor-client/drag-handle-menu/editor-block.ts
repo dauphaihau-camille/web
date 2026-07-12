@@ -4,6 +4,7 @@ import { blockTypeSelectItems } from '@blocknote/react';
 type DragHandleDictionary = Parameters<typeof blockTypeSelectItems>[0];
 
 export type EditorBlock = {
+  id: Block['id'];
   type: Block['type'] | 'subdoc';
   props: Record<string, unknown>;
 };
