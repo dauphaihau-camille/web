@@ -16,6 +16,7 @@ export default async function proxy(request: NextRequest) {
   if (!isAuthenticatedRedirectPage(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
+
   const isAuthenticated = await hasAuthenticatedSession(request);
 
   if (!isAuthenticated) {
