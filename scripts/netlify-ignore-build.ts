@@ -58,8 +58,7 @@ function parseArgs(argv: string[]) {
 async function getTurboDryRun(packageName: string, base: string) {
   const filter = `${packageName}...[${base}]`;
   const command = [
-    'bunx',
-    '--bun',
+    'bun',
     'turbo',
     'run',
     'build',
@@ -110,6 +109,7 @@ async function main() {
   let dryRun: TurboDryRun;
 
   try {
+    console.log(`Checking Turbo affected graph for ${packageName} since ${base}.`);
     dryRun = await getTurboDryRun(packageName, base);
   }
   catch (error) {
