@@ -43,6 +43,7 @@ Frontend monorepo for `camille-v2`.
 - **Mocked API test harness** - MSW and a local mock API server support isolated frontend tests without requiring the backend for every scenario
 - **Playwright end-to-end coverage** - the product app includes e2e coverage for smoke, login, and workspace-entry flows
 - **Typecheck, lint, and monorepo build scripts** - the workspace exposes shared scripts for typechecking, linting, testing, and building both apps
+- **Turborepo task graph** - Turbo coordinates monorepo build and typecheck tasks across the product app, marketing app, and shared package dependency graph
 - **Netlify deployment configuration** - each Next.js app carries its own `netlify.toml`, with workspace notes in [`NETLIFY.md`](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/NETLIFY.md)
 
 ## Local setup
