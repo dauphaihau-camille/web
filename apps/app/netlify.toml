@@ -1,5 +1,6 @@
 [build]
 command = "bun run --cwd apps/app build"
+ignore = "bun scripts/netlify-ignore-build.ts app"
 publish = "/apps/app/.next"
 
 [build.environment]

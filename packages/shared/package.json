@@ -13,5 +13,9 @@
   "peerDependencies": {
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
+  },
+  "scripts": {
+    "build": "bun run typecheck",
+    "typecheck": "tsc --noEmit"
   }
 }
