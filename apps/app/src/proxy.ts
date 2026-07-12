@@ -9,7 +9,26 @@ import { getPostLoginRedirectTarget } from '@/domains/auth/lib/post-login-redire
 const ACCESS_COOKIE_NAME = 'accessToken';
 const REFRESH_COOKIE_NAME = 'refreshToken';
 const AUTH_API_PATH = '/auth/me';
+const AUTH_API_TIMEOUT_MS = 2500;
 const MARKETING_HOME_PATH = '/';
+
+export default async function proxy(request: NextRequest) {
+  if (!isAuthenticatedRedirectPage(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
+  const isAuthenticated = await hasAuthenticatedSession(request);
+
+  if (!isAuthenticated) {
+    return NextResponse.next();
+  }
+
+  return NextResponse.redirect(new URL(getAuthenticatedRedirectPath(request), request.url));
+}
+
+export const config = {
+  matcher: ['/', '/login', '/signup'],
+};
 
 function isAuthPage(pathname: string) {
   return authRoutes.isAuthPath(pathname);
@@ -49,6 +68,7 @@ async function hasAuthenticatedSession(request: NextRequest) {
         cookie: request.headers.get('cookie') ?? '',
       },
       cache: 'no-store',
+      signal: AbortSignal.timeout(AUTH_API_TIMEOUT_MS),
     });
 
     if (response.status === 401) {
@@ -58,24 +78,6 @@ async function hasAuthenticatedSession(request: NextRequest) {
     return response.ok;
   }
   catch {
-    return true;
+    return false;
   }
 }
-
-export default async function proxy(request: NextRequest) {
-  if (!isAuthenticatedRedirectPage(request.nextUrl.pathname)) {
-    return NextResponse.next();
-  }
-
-  const isAuthenticated = await hasAuthenticatedSession(request);
-
-  if (!isAuthenticated) {
-    return NextResponse.next();
-  }
-
-  return NextResponse.redirect(new URL(getAuthenticatedRedirectPath(request), request.url));
-}
-
-export const config = {
-  matcher: ['/', '/login', '/signup'],
-};
