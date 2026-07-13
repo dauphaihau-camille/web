@@ -3,11 +3,31 @@ import { publicEnv } from '@shared/lib/public-env';
 const LOGIN_PATH = '/login';
 const SIGNUP_PATH = '/signup';
 const OAUTH_POPUP_PATH = '/oauth/popup';
+const WAKE_PATH = '/wake';
+const LOGGED_OUT_SEARCH_PARAM = 'loggedOut';
 const apiBaseUrl = publicEnv.apiBaseUrl;
 
 export type OAuthProvider = 'google' | 'github';
 
 export const authRoutes = {
+  loginAfterLogout() {
+    const searchParams = new URLSearchParams({
+      [LOGGED_OUT_SEARCH_PARAM]: '1',
+    });
+
+    return `${LOGIN_PATH}?${searchParams.toString()}`;
+  },
+  wake(nextPath?: string | null) {
+    if (!nextPath) {
+      return WAKE_PATH;
+    }
+
+    const searchParams = new URLSearchParams({
+      next: nextPath,
+    });
+
+    return `${WAKE_PATH}?${searchParams.toString()}`;
+  },
   login(redirectTo?: string | null) {
     if (!redirectTo) {
       return LOGIN_PATH;
@@ -64,3 +84,18 @@ export const authRoutes = {
     return `${OAUTH_POPUP_PATH}?${searchParams.toString()}`;
   },
 } as const;
+
+export function hasLoggedOutSearchParam(searchParams: { get(name: string): string | null }) {
+  return searchParams.get(LOGGED_OUT_SEARCH_PARAM) === '1';
+}
+
+export function resolveWakeNextPath(
+  nextPath?: string | null,
+  fallbackPath = LOGIN_PATH,
+) {
+  if (!nextPath || !nextPath.startsWith('/') || nextPath.startsWith('//')) {
+    return fallbackPath;
+  }
+
+  return nextPath;
+}

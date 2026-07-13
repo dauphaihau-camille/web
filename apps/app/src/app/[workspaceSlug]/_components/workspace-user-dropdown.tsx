@@ -9,7 +9,7 @@ import {
   SettingsIcon,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { startTransition, useState } from 'react';
+import { useState } from 'react';
 
 import {
   DropdownMenu,
@@ -81,9 +81,7 @@ export function WorkspaceUserDropdown({
     queryClient.setQueryData(authKeys.currentUser(), null);
     queryClient.removeQueries({ queryKey: workspaceKeys.all });
     logoutMutation.mutate();
-    startTransition(() => {
-      router.replace(authRoutes.login());
-    });
+    window.location.replace(authRoutes.loginAfterLogout());
   }
 
   return (
