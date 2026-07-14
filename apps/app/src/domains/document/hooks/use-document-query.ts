@@ -7,7 +7,7 @@ import type { Document, DocumentId } from '../api/document.types';
 
 type UseDocumentQueryOptions = Pick<
   UseQueryOptions<Document>,
-  'initialData' | 'initialDataUpdatedAt' | 'refetchOnMount'
+  'enabled' | 'initialData' | 'initialDataUpdatedAt' | 'refetchOnMount'
 >;
 
 export function useDocumentQuery(documentId: DocumentId, options?: UseDocumentQueryOptions) {

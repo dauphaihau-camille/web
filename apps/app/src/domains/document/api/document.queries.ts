@@ -13,6 +13,7 @@ export function documentDetailQueryOptions(documentId: DocumentId) {
   return queryOptions({
     queryKey: documentKeys.detail(documentId),
     queryFn: () => getDocument(documentId),
+    staleTime: 30_000,
   });
 }
 

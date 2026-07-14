@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useQueryClient } from '@tanstack/react-query';
 import { ChevronRightIcon, FileIcon, FileTextIcon } from 'lucide-react';
 
 import {
@@ -11,6 +12,7 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import {
+  documentDetailQueryOptions,
   type DocumentNavigationNode,
   useWorkspaceDocumentChildrenQuery,
 } from '@/domains/document';
@@ -47,6 +49,7 @@ export function DocumentTreeNode({
   const hasChildren = document.has_children;
   const hasContent = document.has_content;
   const DocumentIcon = hasContent ? FileTextIcon : FileIcon;
+  const queryClient = useQueryClient();
   const activeDraftDocumentId = useDocumentTitleDraftStore(
     (state) => state.activeDocumentId,
   );
@@ -79,12 +82,26 @@ export function DocumentTreeNode({
       ? activeDraftTitle
       : document.title;
 
+  const prefetchDocumentRoute = () => {
+    void queryClient.prefetchQuery(
+      documentDetailQueryOptions(document.public_id),
+    );
+  };
+
   return (
     <SidebarMenuItem>
       <SidebarMenuSub className="mx-0 translate-x-0 border-l-0 px-0 py-0">
         <SidebarMenuSubItem>
           <SidebarMenuSubButton
-            render={<Link href={href} prefetch={false} />}
+            render={(
+              <Link
+                href={href}
+                prefetch={false}
+                onMouseEnter={prefetchDocumentRoute}
+                onFocus={prefetchDocumentRoute}
+                onTouchStart={prefetchDocumentRoute}
+              />
+            )}
             isActive={isActive}
             className="pr-14 group-hover/menu-sub-item:bg-sidebar-accent group-hover/menu-sub-item:text-sidebar-accent-foreground group-focus-within/menu-sub-item:bg-sidebar-accent group-focus-within/menu-sub-item:text-sidebar-accent-foreground"
           >
