@@ -36,7 +36,7 @@
   },
   "lint-staged": {
     "*.{js,mjs,cjs,jsx,ts,tsx}": [
-      "node ./node_modules/eslint/bin/eslint.js --fix"
+      "bunx eslint --fix"
     ]
   },
   "dependencies": {
