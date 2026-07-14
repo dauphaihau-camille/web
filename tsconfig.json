@@ -12,10 +12,7 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "isolatedModules": true,
-    "types": [
-      "bun"
-    ]
+    "isolatedModules": true
   },
   "include": [
     "scripts/**/*.ts",
