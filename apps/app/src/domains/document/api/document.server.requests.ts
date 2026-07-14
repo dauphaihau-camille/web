@@ -54,6 +54,7 @@ async function buildWorkspaceDefaultDocumentRequestError(response: Response) {
 }
 
 export async function getDocumentServer(documentId: DocumentId): Promise<Document> {
+  const startedAt = Date.now();
   logger.debug({ documentId }, 'Fetching document on the server');
 
   let response: Response;
@@ -76,6 +77,7 @@ export async function getDocumentServer(documentId: DocumentId): Promise<Documen
 
   logger.debug({
     documentId,
+    durationMs: Date.now() - startedAt,
     response: {
       id: document.id,
       publicId: document.public_id,
@@ -89,7 +91,7 @@ export async function getDocumentServer(documentId: DocumentId): Promise<Documen
     },
   }, 'Fetched document response summary on the server');
 
-  logger.info({ documentId }, 'Fetched document on the server');
+  logger.info({ documentId, durationMs: Date.now() - startedAt }, 'Fetched document on the server');
 
   return document;
 }

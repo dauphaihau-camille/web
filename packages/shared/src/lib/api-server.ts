@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cookies, headers } from 'next/headers';
 import { publicEnv } from './public-env';
+import { logger } from './server-logger';
 
 const apiBaseUrl = publicEnv.apiBaseUrl;
 
@@ -47,11 +48,40 @@ async function createServerHeaders(initialHeaders?: HeadersInit) {
 }
 
 export async function apiServerRequest(path: string, init?: RequestInit) {
-  return fetch(getApiUrl(path), {
-    ...init,
-    headers: await createServerHeaders(init?.headers),
-    cache: 'no-store',
-  });
+  const startedAt = Date.now();
+  const method = init?.method ?? 'GET';
+  const url = getApiUrl(path);
+
+  try {
+    const response = await fetch(url, {
+      ...init,
+      headers: await createServerHeaders(init?.headers),
+      cache: 'no-store',
+    });
+
+    logger.info({
+      apiRequest: {
+        method,
+        path,
+        status: response.status,
+        durationMs: Date.now() - startedAt,
+      },
+    }, 'Completed server API request');
+
+    return response;
+  }
+  catch (error) {
+    logger.error({
+      apiRequest: {
+        method,
+        path,
+        durationMs: Date.now() - startedAt,
+      },
+      error,
+    }, 'Server API request failed');
+
+    throw error;
+  }
 }
 
 export async function apiServerGet<TResponse>(path: string, init?: RequestInit) {
