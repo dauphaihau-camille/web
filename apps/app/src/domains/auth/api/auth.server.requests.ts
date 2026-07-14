@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { apiServerRequest } from '@shared/lib/api-server';
+import { logger } from '@shared/lib/server-logger';
 
 import { authRoutes } from '../auth-routes';
 import { currentUserApiSchema } from './auth.schemas';
@@ -43,7 +44,26 @@ export async function getCurrentUserServer(): Promise<CurrentUser | null> {
 }
 
 export async function requireCurrentUserServer(redirectTo: string): Promise<void> {
-  if (!(await hasCurrentUserSessionServer())) {
+  const startedAt = Date.now();
+  const hasSession = await hasCurrentUserSessionServer();
+
+  if (!hasSession) {
+    logger.warn({
+      authGuard: {
+        hasSession,
+        durationMs: Date.now() - startedAt,
+        redirectTo,
+      },
+    }, 'Missing current user session on the app server');
+
     redirect(authRoutes.login(redirectTo));
   }
+
+  logger.info({
+    authGuard: {
+      hasSession,
+      durationMs: Date.now() - startedAt,
+      redirectTo,
+    },
+  }, 'Completed current user session check on the app server');
 }
