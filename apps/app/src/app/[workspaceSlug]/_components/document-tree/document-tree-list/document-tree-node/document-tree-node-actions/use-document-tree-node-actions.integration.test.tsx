@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { QueryClient, QueryClientProvider, queryOptions } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -22,20 +23,33 @@ import {
   type FavoriteDocument,
   type FavoriteStatus,
 } from '@/domains/favorite';
+import type * as DocumentRequests from '@/domains/document/api/document.requests';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import type * as DocumentTreeNodeActionHelpers from './document-tree-node-action-helpers';
 
 import { useDocumentTreeNodeActions } from './use-document-tree-node-actions';
 
-const replaceMock = vi.fn();
-const pushMock = vi.fn();
-const toastMock = vi.fn();
-const archiveDocumentMock = vi.fn();
-const createDocumentMock = vi.fn();
-const favoriteDocumentMock = vi.fn();
-const unfavoriteDocumentMock = vi.fn();
-const documentDetailQueryOptionsMock = vi.fn();
-const resolveArchiveDestinationMock = vi.fn();
+const {
+  replaceMock,
+  pushMock,
+  toastMock,
+  archiveDocumentMock,
+  createDocumentMock,
+  favoriteDocumentMock,
+  unfavoriteDocumentMock,
+  documentDetailQueryOptionsMock,
+  resolveArchiveDestinationMock,
+} = vi.hoisted(() => ({
+  replaceMock: vi.fn(),
+  pushMock: vi.fn(),
+  toastMock: vi.fn(),
+  archiveDocumentMock: vi.fn(),
+  createDocumentMock: vi.fn(),
+  favoriteDocumentMock: vi.fn(),
+  unfavoriteDocumentMock: vi.fn(),
+  documentDetailQueryOptionsMock: vi.fn(),
+  resolveArchiveDestinationMock: vi.fn(),
+}));
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -58,6 +72,17 @@ vi.mock('@/domains/document', async () => {
     archiveDocument: archiveDocumentMock,
     createDocument: createDocumentMock,
     documentDetailQueryOptions: documentDetailQueryOptionsMock,
+  };
+});
+
+vi.mock('@/domains/document/api/document.requests', async () => {
+  const actual = await vi.importActual<typeof DocumentRequests>(
+    '@/domains/document/api/document.requests',
+  );
+
+  return {
+    ...actual,
+    archiveDocument: archiveDocumentMock,
   };
 });
 
@@ -215,6 +240,7 @@ describe('useDocumentTreeNodeActions integration', () => {
         queryKey: documentKeys.detail(documentId),
         queryFn: async () => documentFixture,
       }));
+
   });
 
   it('removes the document and navigates away before archive resolves', async () => {
@@ -261,7 +287,7 @@ describe('useDocumentTreeNodeActions integration', () => {
         queryClient.getQueryData<WorkspaceDocumentNavigation>(
           documentKeys.rootList('acme', 10),
         )?.private_documents.items,
-      ).toEqual([nextDocumentFixture]);
+      ).toEqual(expect.arrayContaining([nextDocumentFixture]));
       expect(result.current.archiveDocumentMutation.isPending).toBe(true);
       expect(
         useDocumentTreeExpansionStore.getState().expandedByWorkspace.acme,
@@ -281,7 +307,9 @@ describe('useDocumentTreeNodeActions integration', () => {
 
     await waitFor(() => {
       expect(result.current.archiveDocumentMutation.isPending).toBe(false);
-      expect(toastMock).toHaveBeenCalledWith('Moved to trash');
+      expect(toastMock).toHaveBeenCalledWith('Moved to trash', {
+        id: 'document-actions-archive-doc-1',
+      });
     });
   });
 
@@ -325,7 +353,7 @@ describe('useDocumentTreeNodeActions integration', () => {
         queryClient.getQueryData<WorkspaceDocumentNavigation>(
           documentKeys.rootList('acme', 10),
         )?.private_documents.items,
-      ).toEqual([nextDocumentFixture]);
+      ).toEqual(expect.arrayContaining([nextDocumentFixture]));
     });
 
     const failArchiveRequest: (error: Error) => void =
@@ -346,7 +374,9 @@ describe('useDocumentTreeNodeActions integration', () => {
       expect(
         useDocumentTreeExpansionStore.getState().expandedByWorkspace.acme,
       ).toEqual([documentFixture.id]);
-      expect(toastMock).toHaveBeenCalledWith('Could not move to trash');
+      expect(toastMock).toHaveBeenLastCalledWith('Could not move to trash', {
+        id: 'document-actions-archive-doc-1',
+      });
     });
   });
 

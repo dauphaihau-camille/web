@@ -385,6 +385,8 @@ export function useDocumentActions<
 
     void favoriteMutation.mutateAsync({
       nextIsFavorite: !currentStatus.is_favorite,
+    }).catch(() => {
+      // onError already restores caches and shows feedback
     });
   };
 

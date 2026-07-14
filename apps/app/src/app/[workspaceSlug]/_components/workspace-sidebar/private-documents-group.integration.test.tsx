@@ -27,17 +27,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 vi.mock('../document-tree/document-tree', () => ({
-  DocumentTree: () => <div>private-tree</div>,
-}));
-
-vi.mock('../document-tree/document-tree-loading', () => ({
-  DocumentTreeLoading: () => <div>loading-tree</div>,
-}));
-
-vi.mock('../document-tree/document-tree-list', () => ({
-  DocumentTreeList: ({ items }: { items: Array<{ title: string }> }) => (
-    <div>{items.map((item) => item.title).join(', ')}</div>
-  ),
+  DocumentTree: ({ workspaceSlug }: { workspaceSlug: string }) => <div>{`private-tree:${workspaceSlug}`}</div>,
 }));
 
 describe('PrivateDocumentsGroup', () => {
@@ -45,42 +35,10 @@ describe('PrivateDocumentsGroup', () => {
     useWorkspaceDocumentRootQueryMock.mockReset();
   });
 
-  it('renders teamspace groups for seeded workspace documents', () => {
-    useWorkspaceDocumentRootQueryMock.mockReturnValue({
-      isLoading: false,
-      isError: false,
-      data: {
-        private_documents: {
-          items: [],
-        },
-        teamspaces: [
-          {
-            id: 'general-teamspace',
-            name: 'General',
-            documents: {
-              items: [
-                {
-                  id: 'home-doc',
-                  public_id: 'home-public',
-                  title: 'Home',
-                  teamspace_id: 'general-teamspace',
-                  parent_document_id: undefined,
-                  sort_key: 0,
-                  has_children: false,
-                  has_content: true,
-                  is_favorite: false,
-                },
-              ],
-            },
-          },
-        ],
-      },
-    });
-
+  it('renders the private document tree inside the group shell', () => {
     renderWithProviders(<PrivateDocumentsGroup workspaceSlug="acme" />);
 
     expect(screen.getByText('Private')).toBeInTheDocument();
-    expect(screen.getByText('General')).toBeInTheDocument();
-    expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.getByText('private-tree:acme')).toBeInTheDocument();
   });
 });

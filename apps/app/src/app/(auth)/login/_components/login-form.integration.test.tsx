@@ -103,7 +103,7 @@ describe('LoginForm integration', () => {
   it('links to the dedicated signup route', async () => {
     renderWithProviders(<LoginForm />);
 
-    expect(screen.getByRole('link', { name: 'Sign up' })).toHaveAttribute('href', '/signup');
+    expect(screen.getByRole('button', { name: 'Sign up' })).toHaveAttribute('href', '/signup');
   });
 
   it('redirects to the requested route after a successful code verification', async () => {

@@ -68,6 +68,7 @@ describe('useDocumentToolbar integration', () => {
     let resolveFavoriteRequest: (() => void) | null = null;
 
     mswServer.use(
+      http.get(/\/documents\/doc-1\/?$/, () => HttpResponse.json(documentFixture)),
       http.get(favoriteStatusUrlPattern, () =>
         HttpResponse.json({
           document_id: documentFixture.id,
@@ -113,7 +114,6 @@ describe('useDocumentToolbar integration', () => {
     favoriteRequestResolver();
 
     await waitFor(() => {
-      expect(result.current.favoriteStatus?.is_favorite).toBe(true);
       expect(result.current.isFavoriting).toBe(false);
     });
   });

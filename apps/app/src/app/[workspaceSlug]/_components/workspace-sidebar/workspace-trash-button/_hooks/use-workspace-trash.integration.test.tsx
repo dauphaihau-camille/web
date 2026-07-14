@@ -18,10 +18,17 @@ import {
 
 import { useWorkspaceTrash } from './use-workspace-trash';
 
-const toastMock = vi.fn();
-const restoreDocumentMock = vi.fn();
-const permanentlyDeleteDocumentMock = vi.fn();
-const workspaceArchivedDocumentListQueryOptionsMock = vi.fn();
+const {
+  toastMock,
+  restoreDocumentMock,
+  permanentlyDeleteDocumentMock,
+  workspaceArchivedDocumentListQueryOptionsMock,
+} = vi.hoisted(() => ({
+  toastMock: vi.fn(),
+  restoreDocumentMock: vi.fn(),
+  permanentlyDeleteDocumentMock: vi.fn(),
+  workspaceArchivedDocumentListQueryOptionsMock: vi.fn(),
+}));
 
 vi.mock('ahooks', () => ({
   useDebounceFn: (fn: (value: string) => void) => ({
@@ -174,7 +181,7 @@ describe('useWorkspaceTrash integration', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.busyDocumentId).toBeUndefined();
+      expect(result.current.restoreMutation.isPending).toBe(false);
       expect(
         queryClient.getQueryData<Document>(documentKeys.detail(documentFixture.id)),
       ).toMatchObject({

@@ -13,7 +13,9 @@ const { useWorkspaceDocumentChildrenQueryMock } = vi.hoisted(() => ({
 }));
 
 vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: ComponentProps<'a'>) => (
+  default: ({
+    children, href, prefetch: _prefetch, ...props 
+  }: ComponentProps<'a'> & { prefetch?: boolean }) => (
     <a href={typeof href === 'string' ? href : '#'} {...props}>
       {children}
     </a>
@@ -31,7 +33,7 @@ vi.mock('@/domains/document', async () => {
   };
 });
 
-vi.mock('./document-tree-node-actions', () => ({
+vi.mock('./document-tree-node-actions/document-tree-node-actions', () => ({
   DocumentTreeNodeActions: () => null,
 }));
 
@@ -111,7 +113,7 @@ describe('DocumentTreeNode integration', () => {
       <DocumentTreeNode
         document={parentDocument}
         workspaceSlug="acme"
-        pathname="/acme"
+        pathname="/acme/pub-parent-1"
       />,
     );
 

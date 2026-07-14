@@ -91,7 +91,7 @@ describe('SignupForm integration', () => {
   it('links back to the login route', async () => {
     renderWithProviders(<SignupForm />);
 
-    expect(screen.getByRole('link', { name: 'Log in' })).toHaveAttribute('href', '/login');
+    expect(screen.getByRole('button', { name: 'Log in' })).toHaveAttribute('href', '/login');
   });
 
   it('submits signup intent and display name through email verification', async () => {
