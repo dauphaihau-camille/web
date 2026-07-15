@@ -20,6 +20,7 @@ import {
   startEmailAuth,
   verifyEmailAuth,
 } from '@/domains/auth';
+import { getLastActiveWorkspace } from '@/domains/workspace-preference';
 
 import {
   requestEmailCodeFormSchema,
@@ -78,6 +79,12 @@ export function useLoginForm(mode: AuthFormMode = 'login') {
 
     if (redirectTarget !== workspaceRoutes.entry()) {
       return redirectTarget;
+    }
+
+    const lastActiveWorkspace = await getLastActiveWorkspace();
+
+    if (lastActiveWorkspace) {
+      return workspaceRoutes.detail(lastActiveWorkspace.slug);
     }
 
     const workspaces = await queryClient.fetchQuery(myWorkspaceListQueryOptions());

@@ -2,12 +2,21 @@ import { redirect } from 'next/navigation';
 
 import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
 import { workspaceRoutes } from '@/domains/workspace';
-import { listMyWorkspacesServer } from '@/domains/workspace/api/workspace.server.requests';
+import {
+  getLastActiveWorkspaceServer,
+  listMyWorkspacesServer,
+} from '@/domains/workspace/api/workspace.server.requests';
 
 import { CreateWorkspaceFlow } from '@/domains/workspace/components';
 
 export default async function WorkspaceEntryPage() {
   await requireCurrentUserServer(workspaceRoutes.entry());
+
+  const lastActiveWorkspace = await getLastActiveWorkspaceServer();
+
+  if (lastActiveWorkspace) {
+    redirect(workspaceRoutes.detail(lastActiveWorkspace.slug));
+  }
 
   const workspaces = await listMyWorkspacesServer();
   const firstWorkspace = workspaces[0];

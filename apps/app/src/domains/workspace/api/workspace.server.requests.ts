@@ -19,6 +19,19 @@ export async function listMyWorkspacesServer(): Promise<Workspace[]> {
   return workspaceListSchema.parse(response);
 }
 
+export async function getLastActiveWorkspaceServer(): Promise<Workspace | null> {
+  const response = await apiServerRequest('me/workspaces/last-active');
+  const responseText = await response.text();
+
+  if (response.status === 204 || responseText.trim().length === 0) {
+    return null;
+  }
+
+  const payload = JSON.parse(responseText) as unknown;
+
+  return payload === null ? null : workspaceSchema.parse(payload);
+}
+
 export async function getWorkspaceServer(workspaceId: WorkspaceId): Promise<Workspace> {
   const response = await apiServerRequest(`workspaces/${workspaceId}`);
 

@@ -14,6 +14,7 @@ import { LoginForm } from './login-form';
 const authEmailStartUrlPattern = /\/auth\/email\/start\/?$/;
 const authEmailVerifyUrlPattern = /\/auth\/email\/verify\/?$/;
 const myWorkspacesUrlPattern = /\/me\/workspaces\/?$/;
+const lastActiveWorkspaceUrlPattern = /\/me\/workspaces\/last-active\/?$/;
 
 const {
   useSearchParamsGetMock,
@@ -69,11 +70,13 @@ describe('LoginForm integration', () => {
   let searchParams: URLSearchParams;
   let currentUserResult: CurrentUser | null;
   let workspaceListResult: Workspace[];
+  let lastActiveWorkspaceResult: Workspace | null;
 
   beforeEach(() => {
     searchParams = new URLSearchParams();
     currentUserResult = currentUserFixture;
     workspaceListResult = [workspaceFixture];
+    lastActiveWorkspaceResult = null;
 
     useSearchParamsGetMock.mockImplementation((key) => searchParams.get(key));
     currentUserQueryOptionsMock.mockReset();
@@ -85,7 +88,10 @@ describe('LoginForm integration', () => {
         queryFn: async () => currentUserResult,
       }));
 
-    mswServer.use(http.get(myWorkspacesUrlPattern, () => HttpResponse.json(workspaceListResult)));
+    mswServer.use(
+      http.get(myWorkspacesUrlPattern, () => HttpResponse.json(workspaceListResult)),
+      http.get(lastActiveWorkspaceUrlPattern, () => HttpResponse.json(lastActiveWorkspaceResult)),
+    );
   });
 
   it('validates the email before requesting a code', async () => {
@@ -182,6 +188,92 @@ describe('LoginForm integration', () => {
             id: currentUserFixture.id,
             email: currentUserFixture.email,
             display_name: null,
+            status: currentUserFixture.status,
+            session_id: currentUserFixture.sessionId,
+            roles: currentUserFixture.roles,
+            permissions: currentUserFixture.permissions,
+          },
+        })),
+    );
+
+    renderWithProviders(<LoginForm />);
+
+    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.input(await screen.findByPlaceholderText('123456'), {
+      target: { value: '123456' },
+    });
+    await user.click(screen.getByRole('button', { name: 'Verify code' }));
+
+    await waitFor(() => {
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/acme');
+    });
+  });
+
+  it('prefers the last active workspace when there is no explicit redirect target', async () => {
+    const user = userEvent.setup();
+
+    lastActiveWorkspaceResult = {
+      ...workspaceFixture,
+      id: 'workspace-2',
+      slug: 'beta',
+      name: 'Beta',
+    };
+
+    mswServer.use(
+      http.post(authEmailStartUrlPattern, () =>
+        HttpResponse.json({
+          challenge_id: 'challenge-1',
+          expires_in_seconds: 600,
+        })),
+      http.post(authEmailVerifyUrlPattern, () =>
+        HttpResponse.json({
+          access_token: 'access-token',
+          refresh_token: 'refresh-token',
+          user: {
+            id: currentUserFixture.id,
+            email: currentUserFixture.email,
+            display_name: currentUserFixture.displayName,
+            status: currentUserFixture.status,
+            session_id: currentUserFixture.sessionId,
+            roles: currentUserFixture.roles,
+            permissions: currentUserFixture.permissions,
+          },
+        })),
+    );
+
+    renderWithProviders(<LoginForm />);
+
+    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.input(await screen.findByPlaceholderText('123456'), {
+      target: { value: '123456' },
+    });
+    await user.click(screen.getByRole('button', { name: 'Verify code' }));
+
+    await waitFor(() => {
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/beta');
+    });
+  });
+
+  it('falls back to the first workspace when last-active returns an empty response body', async () => {
+    const user = userEvent.setup();
+
+    mswServer.use(
+      http.get(lastActiveWorkspaceUrlPattern, () => new HttpResponse(null, { status: 200 })),
+      http.post(authEmailStartUrlPattern, () =>
+        HttpResponse.json({
+          challenge_id: 'challenge-1',
+          expires_in_seconds: 600,
+        })),
+      http.post(authEmailVerifyUrlPattern, () =>
+        HttpResponse.json({
+          access_token: 'access-token',
+          refresh_token: 'refresh-token',
+          user: {
+            id: currentUserFixture.id,
+            email: currentUserFixture.email,
+            display_name: currentUserFixture.displayName,
             status: currentUserFixture.status,
             session_id: currentUserFixture.sessionId,
             roles: currentUserFixture.roles,

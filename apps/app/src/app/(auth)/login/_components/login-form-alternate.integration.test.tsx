@@ -14,6 +14,7 @@ import { LoginForm } from './login-form';
 const authEmailStartUrlPattern = /\/auth\/email\/start\/?$/;
 const authEmailVerifyUrlPattern = /\/auth\/email\/verify\/?$/;
 const myWorkspacesUrlPattern = /\/me\/workspaces\/?$/;
+const lastActiveWorkspaceUrlPattern = /\/me\/workspaces\/last-active\/?$/;
 
 const {
   useSearchParamsGetMock,
@@ -71,11 +72,13 @@ describe('LoginForm alternate flows', () => {
   let searchParams: URLSearchParams;
   let currentUserResult: CurrentUser | null;
   let workspaceListResult: Workspace[];
+  let lastActiveWorkspaceResult: Workspace | null;
 
   beforeEach(() => {
     searchParams = new URLSearchParams();
     currentUserResult = currentUserFixture;
     workspaceListResult = [workspaceFixture];
+    lastActiveWorkspaceResult = null;
 
     useSearchParamsGetMock.mockImplementation((key) => searchParams.get(key));
     currentUserQueryOptionsMock.mockReset();
@@ -93,7 +96,10 @@ describe('LoginForm alternate flows', () => {
         queryFn: async () => currentUserResult,
       }));
 
-    mswServer.use(http.get(myWorkspacesUrlPattern, () => HttpResponse.json(workspaceListResult)));
+    mswServer.use(
+      http.get(myWorkspacesUrlPattern, () => HttpResponse.json(workspaceListResult)),
+      http.get(lastActiveWorkspaceUrlPattern, () => HttpResponse.json(lastActiveWorkspaceResult)),
+    );
   });
 
   afterEach(() => {

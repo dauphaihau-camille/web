@@ -5,6 +5,9 @@ export const workspacePreferenceSchema = z.object({
   navigation: z.object({
     expanded_document_ids: z.array(z.string().min(1)),
   }),
+  activity: z.object({
+    last_active_at: z.string().datetime().nullable(),
+  }),
 });
 
 export const updateWorkspacePreferenceSchema = z.object({
