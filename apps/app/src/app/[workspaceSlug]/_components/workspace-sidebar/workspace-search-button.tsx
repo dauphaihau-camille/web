@@ -94,7 +94,7 @@ export function WorkspaceSearchButton({
         }}
         title="Search documents"
         description="Search by document title, document content, or reopen a recent document."
-        className="top-[10vh]! h-140! translate-y-0! w-140! max-w-140! border-sidebar-border bg-sidebar text-sidebar-foreground"
+        className="top-[10vh]! h-140! translate-y-0! w-140! max-w-140! border-sidebar-border bg-background text-sidebar-foreground"
         commandProps={{ shouldFilter: false }}
       >
         <CommandInput
