@@ -8,8 +8,8 @@ import type {
   FavoriteStatus,
 } from './favorite.types';
 
-export async function getWorkspaceFavorites(workspaceId: string): Promise<FavoriteDocument[]> {
-  const response = await apiGet<unknown>(`workspaces/${workspaceId}/favorites`);
+export async function getWorkspaceFavorites(workspaceSlug: string): Promise<FavoriteDocument[]> {
+  const response = await apiGet<unknown>(`workspaces/${workspaceSlug}/favorites`);
 
   return favoriteDocumentSchema.array().parse(response);
 }

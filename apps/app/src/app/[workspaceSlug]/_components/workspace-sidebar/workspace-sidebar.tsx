@@ -40,7 +40,7 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <FavoritesDocumentsGroup workspaceId={workspaceSlug} />
+        <FavoritesDocumentsGroup workspaceSlug={workspaceSlug} />
         <PrivateDocumentsGroup workspaceSlug={workspaceSlug} />
       </SidebarContent>
     </Sidebar>

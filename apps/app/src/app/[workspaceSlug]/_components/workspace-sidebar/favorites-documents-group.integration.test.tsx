@@ -49,7 +49,7 @@ describe('FavoritesDocumentsGroup', () => {
       ],
     });
 
-    render(<FavoritesDocumentsGroup workspaceId="acme" />);
+    render(<FavoritesDocumentsGroup workspaceSlug="acme" />);
 
     expect(screen.getByText('Favorites')).toBeInTheDocument();
     expect(screen.getByText('Parent favorite:children:content')).toBeInTheDocument();

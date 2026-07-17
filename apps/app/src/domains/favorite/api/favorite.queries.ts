@@ -5,10 +5,10 @@ import {
   getWorkspaceFavorites,
 } from './favorite.requests';
 
-export function workspaceFavoritesQueryOptions(workspaceId: string) {
+export function workspaceFavoritesQueryOptions(workspaceSlug: string) {
   return queryOptions({
-    queryKey: favoriteKeys.workspaceList(workspaceId),
-    queryFn: () => getWorkspaceFavorites(workspaceId),
+    queryKey: favoriteKeys.workspaceList(workspaceSlug),
+    queryFn: () => getWorkspaceFavorites(workspaceSlug),
   });
 }
 

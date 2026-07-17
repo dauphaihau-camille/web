@@ -3,6 +3,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { workspaceFavoritesQueryOptions } from '../api/favorite.queries';
 
-export function useWorkspaceFavoritesQuery(workspaceId: string) {
-  return useQuery(workspaceFavoritesQueryOptions(workspaceId));
+export function useWorkspaceFavoritesQuery(workspaceSlug: string) {
+  return useQuery(workspaceFavoritesQueryOptions(workspaceSlug));
 }

@@ -33,11 +33,11 @@ function toFavoriteDocumentNode(favorite: {
 }
 
 export function FavoritesDocumentsGroup({
-  workspaceId,
+  workspaceSlug,
 }: {
-  workspaceId: string;
+  workspaceSlug: string;
 }) {
-  const favoritesQuery = useWorkspaceFavoritesQuery(workspaceId);
+  const favoritesQuery = useWorkspaceFavoritesQuery(workspaceSlug);
   const favorites = favoritesQuery.data ?? [];
   const isEmptyFavoritesResponse =
     !favoritesQuery.isLoading
@@ -59,7 +59,7 @@ export function FavoritesDocumentsGroup({
       {!favoritesQuery.isLoading && !favoritesQuery.isError
         ? (
           <DocumentTreeList
-            workspaceSlug={workspaceId}
+            workspaceSlug={workspaceSlug}
             items={favorites.map(toFavoriteDocumentNode)}
             emptyMessage="No favorites yet."
           />
