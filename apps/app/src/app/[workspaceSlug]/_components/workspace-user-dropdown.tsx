@@ -28,7 +28,7 @@ import LoadingFullPage from '@shared/components/loading-full-page';
 import {
   myWorkspaceListQueryOptions,
   workspaceKeys,
-  useWorkspaceQuery,
+  type Workspace,
   workspaceRoutes,
 } from '@/domains/workspace';
 import { cn } from '@shared/lib/utils';
@@ -42,11 +42,14 @@ import {
 
 import { CreateWorkspaceDialog } from './create-workspace-dialog';
 import { LogoutConfirmDialog } from './logout-confirm-dialog';
+import { WorkspaceUserDropdownSkeleton } from './workspace-skeleton/workspace-user-dropdown-skeleton';
 
 export function WorkspaceUserDropdown({
   workspaceSlug,
+  workspace,
 }: {
   workspaceSlug: string;
+  workspace?: Workspace;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -55,13 +58,11 @@ export function WorkspaceUserDropdown({
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const currentUserQuery = useCurrentUserQuery();
-  const workspaceQuery = useWorkspaceQuery(workspaceSlug);
   const myWorkspacesQuery = useQuery({
     ...myWorkspaceListQueryOptions(),
     enabled: isOpen,
   });
   const currentUser = currentUserQuery.data;
-  const workspace = workspaceQuery.data;
   const workspaces = myWorkspacesQuery.data ?? [];
   const visibleWorkspaces = workspaces.slice(0, 3);
   const overflowWorkspaces = workspaces.slice(3);
@@ -84,40 +85,38 @@ export function WorkspaceUserDropdown({
     window.location.replace(authRoutes.loginAfterLogout());
   }
 
+  if (!workspace) {
+    return (
+      <>
+        {isLoggingOut ? <LoadingFullPage overlay /> : null}
+        <WorkspaceUserDropdownSkeleton />
+      </>
+    );
+  }
+
   return (
     <>
       {isLoggingOut ? <LoadingFullPage overlay /> : null}
+
       <DropdownMenu onOpenChange={setIsOpen}>
         <DropdownMenuTrigger
           className={cn(
             'flex w-full items-center gap-3 rounded-lg border border-transparent bg-transparent px-2 py-2 text-left outline-hidden transition-colors hover:bg-sidebar-accent/40 focus-visible:ring-2 focus-visible:ring-sidebar-ring',
           )}
         >
-          {workspace
-            ? (
-              <>
-                <div className="flex size-6 shrink-0 items-center justify-center rounded bg-sidebar-accent text-sidebar-accent-foreground">
-                  <span className="text-sm font-semibold">
-                    {workspaceInitial}
-                  </span>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[15px] font-medium text-sidebar-foreground">
-                    {workspace.name}
-                  </p>
-                </div>
-                <ChevronDownIcon className="size-4 text-sidebar-foreground/60" />
-              </>
-            )
-            : (
-              <>
-                <Skeleton className="size-6 shrink-0 rounded" />
-                <div className="min-w-0 flex-1">
-                  <Skeleton className="h-4 w-28" />
-                </div>
-                <ChevronDownIcon className="size-4 text-sidebar-foreground/60" />
-              </>
-            )}
+          <>
+            <div className="flex size-6 shrink-0 items-center justify-center rounded bg-sidebar-accent text-sidebar-accent-foreground">
+              <span className="text-sm font-semibold">
+                {workspaceInitial}
+              </span>
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[15px] font-medium text-sidebar-foreground">
+                {workspace.name}
+              </p>
+            </div>
+            <ChevronDownIcon className="size-4 text-sidebar-foreground/60" />
+          </>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="start" sideOffset={8}>

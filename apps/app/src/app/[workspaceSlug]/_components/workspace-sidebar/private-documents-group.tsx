@@ -11,6 +11,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
+import type { useWorkspaceDocumentRootQuery } from '@/domains/document';
 import {
   createDocument,
   documentKeys,
@@ -23,8 +24,10 @@ import { DocumentTree } from '../document-tree/document-tree';
 
 export function PrivateDocumentsGroup({
   workspaceSlug,
+  rootQuery,
 }: {
   workspaceSlug: string;
+  rootQuery?: ReturnType<typeof useWorkspaceDocumentRootQuery>;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -77,7 +80,7 @@ export function PrivateDocumentsGroup({
           </Tooltip>
         }
       >
-        <DocumentTree workspaceSlug={workspaceSlug} />
+        <DocumentTree workspaceSlug={workspaceSlug} rootQuery={rootQuery} />
       </CollapsibleSidebarGroup>
     </>
   );

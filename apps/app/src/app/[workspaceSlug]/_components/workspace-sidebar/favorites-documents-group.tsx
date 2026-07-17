@@ -5,7 +5,7 @@ import { HTTPError } from 'ky';
 import type { DocumentNavigationNode } from '@/domains/document';
 import { useWorkspaceFavoritesQuery } from '@/domains/favorite';
 
-import { DocumentTreeLoading } from '../document-tree/document-tree-loading';
+import { DocumentTreeSkeleton } from '../workspace-skeleton/document-tree-skeleton';
 import { DocumentTreeList } from '../document-tree/document-tree-list/document-tree-list';
 import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
 
@@ -34,10 +34,12 @@ function toFavoriteDocumentNode(favorite: {
 
 export function FavoritesDocumentsGroup({
   workspaceSlug,
+  favoritesQuery: favoritesQueryProp,
 }: {
   workspaceSlug: string;
+  favoritesQuery?: ReturnType<typeof useWorkspaceFavoritesQuery>;
 }) {
-  const favoritesQuery = useWorkspaceFavoritesQuery(workspaceSlug);
+  const favoritesQuery = favoritesQueryProp ?? useWorkspaceFavoritesQuery(workspaceSlug);
   const favorites = favoritesQuery.data ?? [];
   const isEmptyFavoritesResponse =
     !favoritesQuery.isLoading
@@ -52,7 +54,7 @@ export function FavoritesDocumentsGroup({
 
   return (
     <CollapsibleSidebarGroup label="Favorites">
-      {favoritesQuery.isLoading ? <DocumentTreeLoading /> : null}
+      {favoritesQuery.isLoading ? <DocumentTreeSkeleton /> : null}
       {favoritesQuery.isError
         ? <p className="px-2 py-1 text-xs text-muted-foreground">Favorites unavailable.</p>
         : null}

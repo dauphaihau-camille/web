@@ -1,0 +1,66 @@
+import type { CSSProperties } from 'react';
+
+import { Skeleton } from '@shared/components/ui/skeleton';
+
+import motionStyles from '../_styles/cascade-enter.module.css';
+
+export function DocumentScreenSkeleton({
+  animate = false,
+}: {
+  animate?: boolean;
+}) {
+  const headerClassName = `fixed inset-x-0 z-10 bg-background px-2 backdrop-blur md:left-(--sidebar-width) ${animate ? motionStyles.cascadeEnter : ''}`;
+  const contentClassName = `mx-auto max-w-2xl ${animate ? motionStyles.cascadeEnter : ''}`;
+
+  const headerStyle = {
+    top: '0px',
+    ...(animate ? { '--enter-delay': '0ms' } : {}),
+  } as CSSProperties;
+
+  const contentStyle = {
+    paddingTop: '110px',
+    ...(animate ? { '--enter-delay': '120ms' } : {}),
+  } as CSSProperties;
+
+  return (
+    <section className="space-y-6">
+      <div className={headerClassName} style={headerStyle}>
+        <div className="flex h-11 items-center justify-between gap-3">
+          <Skeleton className="h-6 w-28 rounded px-1.5 py-1" />
+
+          <div className="flex items-center gap-1.5">
+            <Skeleton className="hidden h-6 w-28 rounded md:block" />
+            <Skeleton className="size-7 rounded-md" />
+            <Skeleton className="size-7 rounded-md" />
+            <Skeleton className="size-7 rounded-md" />
+          </div>
+        </div>
+      </div>
+
+      <div className={contentClassName} style={contentStyle}>
+        <div className="space-y-3 px-[3.8rem]">
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-12 w-3/4 rounded-lg md:h-14" />
+          </div>
+        </div>
+
+        <div className="space-y-4 px-[3.8rem] pt-8">
+          {['91.6667%', '100%', '83.3333%', '75%', '100%', '66.6667%', '91.6667%', '58.3333%', '83.3333%'].map((width, index) => (
+            <Skeleton
+              key={`${width}-${index}`}
+              className={`h-5 ${animate ? motionStyles.cascadeEnter : ''}`}
+              style={
+                animate
+                  ? ({
+                    width,
+                    '--enter-delay': `${240 + (index * 70)}ms`,
+                  } as CSSProperties)
+                  : ({ width } as CSSProperties)
+              }
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

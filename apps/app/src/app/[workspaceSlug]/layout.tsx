@@ -5,6 +5,7 @@ import {
   workspaceDomainPattern,
 } from '@/domains/workspace';
 
+import { WorkspaceInitialLoadGate } from './_components/workspace-initial-load-gate';
 import { WorkspaceProvider } from './_components/workspace-provider';
 import { WorkspaceShortcutsProvider } from './_components/workspace-shortcuts-provider';
 
@@ -28,7 +29,7 @@ export default async function WorkspaceLayout({
   return (
     <WorkspaceProvider workspaceSlug={workspaceSlug}>
       <WorkspaceShortcutsProvider>
-        {children}
+        <WorkspaceInitialLoadGate>{children}</WorkspaceInitialLoadGate>
       </WorkspaceShortcutsProvider>
     </WorkspaceProvider>
   );

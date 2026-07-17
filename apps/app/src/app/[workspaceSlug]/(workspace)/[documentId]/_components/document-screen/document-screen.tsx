@@ -106,7 +106,7 @@ export function DocumentScreen({
 
       <div
         className="mx-auto max-w-2xl"
-        style={{ paddingTop: `${80 + fixedHeaderOffset}px` }}
+        style={{ paddingTop: `${110 + fixedHeaderOffset}px` }}
       >
         <div className="space-y-3 px-[3.8rem]">
           <div className="min-w-0 flex-1 space-y-2">

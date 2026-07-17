@@ -9,7 +9,12 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useWorkspaceDocumentRootQuery } from '@/domains/document';
+import { useWorkspaceFavoritesQuery } from '@/domains/favorite';
+import { useWorkspaceQuery } from '@/domains/workspace';
 
+import { WorkspaceSidebarActionsSkeleton } from '../workspace-skeleton/workspace-sidebar-actions-skeleton';
+import { WorkspaceSidebarTreeSkeleton } from '../workspace-skeleton/workspace-sidebar-tree-skeleton';
 import { WorkspaceUserDropdown } from '../workspace-user-dropdown';
 import { PrivateDocumentsGroup } from './private-documents-group';
 import { FavoritesDocumentsGroup } from './favorites-documents-group';
@@ -17,31 +22,70 @@ import { WorkspaceSearchButton } from './workspace-search-button';
 import { WorkspaceTrashButton } from './workspace-trash-button/workspace-trash-button';
 
 export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
+  const workspaceQuery = useWorkspaceQuery(workspaceSlug);
+  const favoritesQuery = useWorkspaceFavoritesQuery(workspaceSlug);
+  const rootQuery = useWorkspaceDocumentRootQuery(workspaceSlug);
+
+  const isInitialWorkspaceLoading =
+    !workspaceQuery.data
+    && (workspaceQuery.isPending || workspaceQuery.isLoading);
+
+  const isInitialTreeLoading =
+    !favoritesQuery.data
+    && !rootQuery.data
+    && (favoritesQuery.isPending || favoritesQuery.isLoading)
+    && (rootQuery.isPending || rootQuery.isLoading);
+
+  const isInitialSidebarLoading = isInitialWorkspaceLoading || isInitialTreeLoading;
+
   return (
     <Sidebar
       collapsible="none"
       className="h-auto min-h-svh self-stretch border-r border-sidebar-border bg-sidebar"
     >
       <SidebarHeader className="gap-3 p-1">
-        <WorkspaceUserDropdown workspaceSlug={workspaceSlug} />
+        <WorkspaceUserDropdown
+          workspaceSlug={workspaceSlug}
+          workspace={workspaceQuery.data}
+        />
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup className='pt-0'>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem className="font-semibold">
-                <WorkspaceSearchButton workspaceSlug={workspaceSlug} />
-              </SidebarMenuItem>
-              <SidebarMenuItem className="font-semibold">
-                <WorkspaceTrashButton workspaceSlug={workspaceSlug} />
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {isInitialWorkspaceLoading
+          ? (
+            <WorkspaceSidebarActionsSkeleton />
+          )
+          : (
+            <SidebarGroup className="pt-0">
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem className="font-semibold">
+                    <WorkspaceSearchButton workspaceSlug={workspaceSlug} />
+                  </SidebarMenuItem>
+                  <SidebarMenuItem className="font-semibold">
+                    <WorkspaceTrashButton workspaceSlug={workspaceSlug} />
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
 
-        <FavoritesDocumentsGroup workspaceSlug={workspaceSlug} />
-        <PrivateDocumentsGroup workspaceSlug={workspaceSlug} />
+        {isInitialSidebarLoading
+          ? (
+            <WorkspaceSidebarTreeSkeleton animate />
+          )
+          : (
+            <>
+              <FavoritesDocumentsGroup
+                workspaceSlug={workspaceSlug}
+                favoritesQuery={favoritesQuery}
+              />
+              <PrivateDocumentsGroup
+                workspaceSlug={workspaceSlug}
+                rootQuery={rootQuery}
+              />
+            </>
+          )}
       </SidebarContent>
     </Sidebar>
   );

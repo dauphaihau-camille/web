@@ -19,7 +19,7 @@ import { Button } from '@shared/components/ui/button';
 import { ServerCrashIcon } from 'lucide-react';
 
 import { DocumentScreen } from './document-screen/document-screen';
-import { DocumentScreenSkeleton } from './document-screen-skeleton';
+import { DocumentScreenSkeleton } from '../../../_components/workspace-skeleton/document-screen-skeleton';
 
 export function DocumentRouteScreen({
   documentId: documentRouteId,
@@ -55,7 +55,7 @@ export function DocumentRouteScreen({
   }, [document, queryClient]);
 
   if (!document && (routeDocumentQuery.isPending || canonicalDocumentQuery.isPending)) {
-    return <DocumentScreenSkeleton />;
+    return <DocumentScreenSkeleton animate />;
   }
 
   if (!document) {

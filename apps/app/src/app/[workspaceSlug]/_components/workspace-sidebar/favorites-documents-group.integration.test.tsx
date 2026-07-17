@@ -12,8 +12,8 @@ vi.mock('@/domains/favorite', () => {
   };
 });
 
-vi.mock('../document-tree/document-tree-loading', () => ({
-  DocumentTreeLoading: () => <div>loading-tree</div>,
+vi.mock('../workspace-skeleton/document-tree-skeleton', () => ({
+  DocumentTreeSkeleton: () => <div>loading-tree</div>,
 }));
 
 vi.mock('../document-tree/document-tree-list/document-tree-list', () => ({
