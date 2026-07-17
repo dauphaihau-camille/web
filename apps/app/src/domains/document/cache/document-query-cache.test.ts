@@ -3,7 +3,10 @@ import { QueryClient } from '@tanstack/react-query';
 import type { Document } from '@/domains/document';
 import { documentKeys } from '@/domains/document';
 
-import { updateCachedReferencedSubdocTitles } from './document-query-cache';
+import {
+  insertCreatedPrivateRootDocument,
+  updateCachedReferencedSubdocTitles,
+} from './document-query-cache';
 
 const childDocument: Document = {
   id: 'child-1',
@@ -87,6 +90,40 @@ describe('updateCachedReferencedSubdocTitles', () => {
           },
         },
       ],
+    });
+  });
+});
+
+describe('insertCreatedPrivateRootDocument', () => {
+  it('inserts into the unfiltered private root navigation cache', () => {
+    const queryClient = new QueryClient();
+    const rootQueryKey = documentKeys.rootList('acme', 50);
+
+    queryClient.setQueryData(
+      rootQueryKey,
+      {
+        private_documents: {
+          items: [],
+        },
+        teamspaces: [],
+      },
+    );
+
+    insertCreatedPrivateRootDocument(queryClient, 'acme', parentDocument);
+
+    expect(
+      queryClient.getQueryData(rootQueryKey),
+    ).toMatchObject({
+      private_documents: {
+        items: [
+          {
+            id: parentDocument.id,
+            public_id: parentDocument.public_id,
+            title: parentDocument.title,
+            has_content: true,
+          },
+        ],
+      },
     });
   });
 });

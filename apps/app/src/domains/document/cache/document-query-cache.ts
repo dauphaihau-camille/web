@@ -57,6 +57,28 @@ function updateWorkspaceNavigationItem(
   };
 }
 
+function buildDocumentNavigationNode(document: Document): DocumentNavigationNode {
+  return {
+    id: document.id,
+    public_id: document.public_id,
+    title: document.title,
+    teamspace_id: document.teamspace_id,
+    parent_document_id: document.parent_document_id,
+    sort_key: document.sort_key,
+    has_children: false,
+    has_content: hasMeaningfulContent(document.content),
+    is_favorite: false,
+  };
+}
+
+function isUnfilteredRootListKey(queryKey: readonly unknown[]) {
+  return (
+    queryKey.at(-4) === 'root'
+    && queryKey.at(-2) === null
+    && queryKey.at(-1) === null
+  );
+}
+
 export function updateCachedNavigationTitle(
   queryClient: QueryClient,
   workspaceSlug: string,
@@ -205,6 +227,38 @@ export function removeCachedNavigationDocument(
   );
 }
 
+export function insertCreatedPrivateRootDocument(
+  queryClient: QueryClient,
+  workspaceSlug: string,
+  document: Document,
+) {
+  const documentNode = buildDocumentNavigationNode(document);
+
+  for (const [
+    queryKey,
+    currentNavigation,
+  ] of queryClient.getQueriesData<WorkspaceDocumentNavigation>({
+      queryKey: [...documentKeys.lists(workspaceSlug), 'root'],
+    })) {
+    if (!currentNavigation || !isUnfilteredRootListKey(queryKey)) {
+      continue;
+    }
+
+    queryClient.setQueryData<WorkspaceDocumentNavigation>(queryKey, {
+      ...currentNavigation,
+      private_documents: {
+        ...currentNavigation.private_documents,
+        items: [documentNode, ...currentNavigation.private_documents.items]
+          .filter(
+            (item, index, items) =>
+              items.findIndex((candidate) => candidate.id === item.id) === index,
+          )
+          .sort((left, right) => left.sort_key - right.sort_key),
+      },
+    });
+  }
+}
+
 export function updateCachedReferencedSubdocTitles(
   queryClient: QueryClient,
   documentId: string,
@@ -301,17 +355,7 @@ export function insertCreatedSubdocIntoCachedChildren(
   parentDocumentId: string,
   childDocument: Document,
 ) {
-  const childNode: DocumentNavigationNode = {
-    id: childDocument.id,
-    public_id: childDocument.public_id,
-    title: childDocument.title,
-    teamspace_id: childDocument.teamspace_id,
-    parent_document_id: childDocument.parent_document_id,
-    sort_key: childDocument.sort_key,
-    has_children: false,
-    has_content: hasMeaningfulContent(childDocument.content),
-    is_favorite: false,
-  };
+  const childNode = buildDocumentNavigationNode(childDocument);
 
   queryClient.setQueriesData<DocumentNavigationPage>(
     {

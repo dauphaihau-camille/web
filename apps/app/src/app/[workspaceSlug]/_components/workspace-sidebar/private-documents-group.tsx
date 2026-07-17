@@ -4,7 +4,6 @@ import { PlusIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { hasMeaningfulContent } from '@shared/components/editor/has-meaningful-content';
 import { LoadingIcon } from '@shared/components/loading-icon';
 import { Button } from '@shared/components/ui/button';
 import {
@@ -15,71 +14,12 @@ import {
 import {
   createDocument,
   documentKeys,
-  type Document,
-  type DocumentNavigationNode,
-  type WorkspaceDocumentNavigation,
 } from '@/domains/document';
+import { insertCreatedPrivateRootDocument } from '@/domains/document/cache/document-query-cache';
 import { workspaceRoutes } from '@/domains/workspace';
 
 import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
 import { DocumentTree } from '../document-tree/document-tree';
-
-function buildDocumentNavigationNode(
-  document: Document,
-): DocumentNavigationNode {
-  return {
-    id: document.id,
-    public_id: document.public_id,
-    title: document.title,
-    teamspace_id: document.teamspace_id,
-    parent_document_id: document.parent_document_id,
-    sort_key: document.sort_key,
-    has_children: false,
-    has_content: hasMeaningfulContent(document.content),
-    is_favorite: false,
-  };
-}
-
-function isUnfilteredRootListKey(queryKey: readonly unknown[]) {
-  return (
-    queryKey.at(-4) === 'root'
-    && queryKey.at(-2) === null
-    && queryKey.at(-1) === null
-  );
-}
-
-function insertCreatedPrivateRootDocument(
-  queryClient: ReturnType<typeof useQueryClient>,
-  workspaceSlug: string,
-  document: Document,
-) {
-  const documentNode = buildDocumentNavigationNode(document);
-
-  for (const [
-    queryKey,
-    currentNavigation,
-  ] of queryClient.getQueriesData<WorkspaceDocumentNavigation>({
-      queryKey: [...documentKeys.lists(workspaceSlug), 'root'],
-    })) {
-    if (!currentNavigation || !isUnfilteredRootListKey(queryKey)) {
-      continue;
-    }
-
-    queryClient.setQueryData<WorkspaceDocumentNavigation>(queryKey, {
-      ...currentNavigation,
-      private_documents: {
-        ...currentNavigation.private_documents,
-        items: [documentNode, ...currentNavigation.private_documents.items]
-          .filter(
-            (item, index, items) =>
-              items.findIndex((candidate) => candidate.id === item.id) ===
-              index,
-          )
-          .sort((left, right) => left.sort_key - right.sort_key),
-      },
-    });
-  }
-}
 
 export function PrivateDocumentsGroup({
   workspaceSlug,
