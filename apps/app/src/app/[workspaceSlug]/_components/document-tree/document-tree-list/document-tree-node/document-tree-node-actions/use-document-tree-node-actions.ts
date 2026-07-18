@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
@@ -27,6 +26,34 @@ type UseDocumentTreeNodeActionArgs = {
   workspaceSlug: string;
 };
 
+function withParentBreadcrumb(
+  childDocument: Document,
+  parentDocument: Pick<Document, 'breadcrumb' | 'id' | 'public_id' | 'title'>,
+): Document {
+  return {
+    ...childDocument,
+    breadcrumb: [
+      ...(parentDocument.breadcrumb ?? []),
+      {
+        id: parentDocument.id,
+        public_id: parentDocument.public_id,
+        title: parentDocument.title,
+      },
+    ],
+  };
+}
+
+function mergeDocumentWithCachedDetail(
+  nextDocument: Document,
+  cachedDocument?: Document,
+): Document {
+  return {
+    ...(cachedDocument ?? {}),
+    ...nextDocument,
+    breadcrumb: nextDocument.breadcrumb ?? cachedDocument?.breadcrumb,
+  };
+}
+
 function createOptimisticFavoriteDocument(
   document: DocumentNavigationNode,
   workspaceSlug: string,
@@ -49,7 +76,6 @@ function useCreateSubdocumentAction({
   document,
   workspaceSlug,
 }: Omit<UseDocumentTreeNodeActionArgs, 'isActive'>) {
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const expandedByWorkspace = useDocumentTreeExpansionStore(
@@ -71,13 +97,38 @@ function useCreateSubdocumentAction({
       });
     },
     onSuccess: async ({ child_document: childDocument, parent_document: parentDocument }) => {
-      queryClient.setQueryData(
-        documentKeys.detail(childDocument.id),
+      const cachedParentDocument = queryClient.getQueryData<Document>(
+        documentKeys.detail(document.id),
+      );
+      const nextChildDocument = withParentBreadcrumb(
         childDocument,
+        cachedParentDocument ?? {
+          breadcrumb: undefined,
+          id: document.id,
+          public_id: document.public_id,
+          title: document.title,
+        },
+      );
+
+      queryClient.setQueryData(
+        documentKeys.detail(nextChildDocument.id),
+        nextChildDocument,
       );
       queryClient.setQueryData(
-        documentKeys.detail(parentDocument.id),
+        documentKeys.detail(nextChildDocument.public_id),
+        nextChildDocument,
+      );
+      const nextParentDocument = mergeDocumentWithCachedDetail(
         parentDocument,
+        cachedParentDocument,
+      );
+      queryClient.setQueryData(
+        documentKeys.detail(nextParentDocument.id),
+        nextParentDocument,
+      );
+      queryClient.setQueryData(
+        documentKeys.detail(nextParentDocument.public_id),
+        nextParentDocument,
       );
       markCachedNavigationNodeHasChildren(
         queryClient,
@@ -93,7 +144,7 @@ function useCreateSubdocumentAction({
         queryClient,
         workspaceSlug,
         document.id,
-        childDocument,
+        nextChildDocument,
       );
       setExpandedDocumentIds(workspaceSlug, [
         ...(expandedByWorkspace[workspaceSlug] ?? []),
@@ -105,13 +156,6 @@ function useCreateSubdocumentAction({
       await queryClient.invalidateQueries({
         queryKey: documentKeys.lists(workspaceSlug),
       });
-      router.push(
-        workspaceRoutes.document(
-          workspaceSlug,
-          childDocument.public_id,
-          childDocument.title,
-        ),
-      );
     },
   });
 
@@ -163,8 +207,7 @@ export function useDocumentTreeNodeActions({
         targetDocument.public_id,
         targetDocument.title,
       ),
-    createOptimisticFavoriteDocument: () =>
-      createOptimisticFavoriteDocument(document, workspaceSlug),
+    createOptimisticFavoriteDocument: () => createOptimisticFavoriteDocument(document, workspaceSlug),
     getCopyLinkUrl: () =>
       typeof window === 'undefined'
         ? undefined

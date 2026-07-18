@@ -33,6 +33,34 @@ type CreateSubdocumentInput = {
   content?: unknown[];
 };
 
+function withParentBreadcrumb(
+  childDocument: Document,
+  parentDocument: Document,
+): Document {
+  return {
+    ...childDocument,
+    breadcrumb: [
+      ...(parentDocument.breadcrumb ?? []),
+      {
+        id: parentDocument.id,
+        public_id: parentDocument.public_id,
+        title: parentDocument.title,
+      },
+    ],
+  };
+}
+
+function mergeDocumentWithCachedDetail(
+  nextDocument: Document,
+  cachedDocument?: Document,
+): Document {
+  return {
+    ...(cachedDocument ?? {}),
+    ...nextDocument,
+    breadcrumb: nextDocument.breadcrumb ?? cachedDocument?.breadcrumb,
+  };
+}
+
 export function useDocumentEditorActions({
   document,
   workspaceSlug,
@@ -42,12 +70,24 @@ export function useDocumentEditorActions({
   const shouldSkipContentSaveRef = useRef(false);
 
   const syncDocumentContentCache = (nextDocument: Document) => {
-    queryClient.setQueryData<Document>(documentKeys.detail(documentId), nextDocument);
+    const cachedDocument =
+      queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ??
+      queryClient.getQueryData<Document>(documentKeys.detail(document.public_id));
+    const mergedDocument = mergeDocumentWithCachedDetail(
+      nextDocument,
+      cachedDocument,
+    );
+
+    queryClient.setQueryData<Document>(documentKeys.detail(documentId), mergedDocument);
+    queryClient.setQueryData<Document>(
+      documentKeys.detail(mergedDocument.public_id),
+      mergedDocument,
+    );
     updateCachedNavigationContentStatus(
       queryClient,
       workspaceSlug,
       documentId,
-      hasMeaningfulContent(nextDocument.content),
+      hasMeaningfulContent(mergedDocument.content),
     );
   };
 
@@ -124,7 +164,18 @@ export function useDocumentEditorActions({
       });
     },
     onSuccess: async ({ child_document: childDocument, parent_document: parentDocument }) => {
-      queryClient.setQueryData(documentKeys.detail(childDocument.id), childDocument);
+      const latestParentDocument =
+        queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
+      const nextChildDocument = withParentBreadcrumb(
+        childDocument,
+        latestParentDocument,
+      );
+
+      queryClient.setQueryData(documentKeys.detail(nextChildDocument.id), nextChildDocument);
+      queryClient.setQueryData(
+        documentKeys.detail(nextChildDocument.public_id),
+        nextChildDocument,
+      );
       syncDocumentContentCache(parentDocument);
       markCachedNavigationNodeHasChildren(
         queryClient,
@@ -135,7 +186,7 @@ export function useDocumentEditorActions({
         queryClient,
         workspaceSlug,
         documentId,
-        childDocument,
+        nextChildDocument,
       );
 
       await queryClient.invalidateQueries({

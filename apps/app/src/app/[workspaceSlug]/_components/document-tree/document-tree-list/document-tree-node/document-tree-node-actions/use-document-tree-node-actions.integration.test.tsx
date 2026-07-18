@@ -121,6 +121,11 @@ const documentFixture: Document = {
   archived_at: undefined,
   created_at: '2026-01-01T00:00:00.000Z',
   updated_at: '2026-01-01T00:00:00.000Z',
+  breadcrumb: [{
+    id: 'ancestor-1',
+    public_id: 'public-ancestor-1',
+    title: 'Workspace Home',
+  }],
 };
 
 const documentNodeFixture: DocumentNavigationNode = {
@@ -434,6 +439,23 @@ describe('useDocumentTreeNodeActions integration', () => {
       ).toEqual(expect.objectContaining({
         id: documentFixture.id,
         version: 4,
+      }));
+      expect(
+        queryClient.getQueryData<Document>(documentKeys.detail(childDocumentFixture.public_id)),
+      ).toEqual(expect.objectContaining({
+        id: childDocumentFixture.id,
+        breadcrumb: [
+          {
+            id: 'ancestor-1',
+            public_id: 'public-ancestor-1',
+            title: 'Workspace Home',
+          },
+          {
+            id: documentFixture.id,
+            public_id: documentFixture.public_id,
+            title: documentFixture.title,
+          },
+        ],
       }));
       expect(
         queryClient.getQueryData<FavoriteDocument[]>(
