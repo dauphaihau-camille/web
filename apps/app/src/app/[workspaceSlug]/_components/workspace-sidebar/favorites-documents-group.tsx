@@ -39,7 +39,8 @@ export function FavoritesDocumentsGroup({
   workspaceSlug: string;
   favoritesQuery?: ReturnType<typeof useWorkspaceFavoritesQuery>;
 }) {
-  const favoritesQuery = favoritesQueryProp ?? useWorkspaceFavoritesQuery(workspaceSlug);
+  const localFavoritesQuery = useWorkspaceFavoritesQuery(workspaceSlug);
+  const favoritesQuery = favoritesQueryProp ?? localFavoritesQuery;
   const favorites = favoritesQuery.data ?? [];
   const isEmptyFavoritesResponse =
     !favoritesQuery.isLoading
