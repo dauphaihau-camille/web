@@ -24,6 +24,12 @@ export default defineConfig([
     rules: nextRules,
   },
   {
+    files: ['**/*.{test,spec}.{js,mjs,cjs,jsx,ts,tsx}'],
+    rules: {
+      'max-lines-per-function': 'off',
+    },
+  },
+  {
     rules: {
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/naming-convention': 'off',
