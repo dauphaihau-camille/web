@@ -1,25 +1,15 @@
 'use client';
 
-import { PlusIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-import { LoadingIcon } from '@shared/components/loading-icon';
-import { Button } from '@shared/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
 import type { useWorkspaceDocumentRootQuery } from '@/domains/document';
-import {
-  createRootDocument,
-  documentKeys,
-} from '@/domains/document';
-import { insertCreatedPrivateRootDocument } from '@/domains/document/cache/document-query-cache';
-import { workspaceRoutes } from '@/domains/workspace';
 
+import { CreateDocumentButton } from '../create-document-button';
 import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
+import { useCreateRootDocumentAction } from './use-create-root-document-action';
 import { DocumentTree } from '../document-tree/document-tree';
 
 export function PrivateDocumentsGroup({
@@ -29,44 +19,18 @@ export function PrivateDocumentsGroup({
   workspaceSlug: string;
   rootQuery?: ReturnType<typeof useWorkspaceDocumentRootQuery>;
 }) {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-
-  const createDocumentMutation = useMutation({
-    mutationFn: () => createRootDocument({ workspace_id: workspaceSlug }),
-    onSuccess: async (document) => {
-      queryClient.setQueryData(documentKeys.detail(document.id), document);
-      insertCreatedPrivateRootDocument(queryClient, workspaceSlug, document);
-      router.push(
-        workspaceRoutes.document(
-          workspaceSlug,
-          document.public_id,
-          document.title,
-        ),
-      );
-    },
-  });
+  const {
+    createDocumentMutation,
+    handleCreateDocument,
+  } = useCreateRootDocumentAction(workspaceSlug);
 
   const createPrivateDocumentButton = (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon-xs"
-      className="size-5 rounded-sm bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent-foreground/5 hover:text-sidebar-accent-foreground"
-      aria-label="Create private document"
-      onClick={() => {
-        void createDocumentMutation.mutateAsync();
-      }}
+    <CreateDocumentButton
+      ariaLabel="Create private document"
+      onClick={handleCreateDocument}
       disabled={createDocumentMutation.isPending}
-    >
-      {createDocumentMutation.isPending
-        ? (
-          <LoadingIcon className="size-3" />
-        )
-        : (
-          <PlusIcon className="size-4" />
-        )}
-    </Button>
+      isPending={createDocumentMutation.isPending}
+    />
   );
 
   return (

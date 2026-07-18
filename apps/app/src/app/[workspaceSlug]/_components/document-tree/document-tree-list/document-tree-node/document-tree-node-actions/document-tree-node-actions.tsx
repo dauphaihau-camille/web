@@ -6,12 +6,10 @@ import {
   EllipsisIcon,
   LinkIcon,
   StarOffIcon,
-  PlusIcon,
   StarIcon,
   Trash2Icon,
 } from 'lucide-react';
 
-import { Button } from '@shared/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,10 +23,10 @@ import {
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
 import type { DocumentNavigationNode } from '@/domains/document';
-import { LoadingIcon } from '@shared/components/loading-icon';
 import { cn } from '@shared/lib/utils';
 
 import { useDocumentTreeNodeActions } from './use-document-tree-node-actions';
+import { CreateDocumentButton } from '@/app/[workspaceSlug]/_components/create-document-button';
 
 type DocumentTreeNodeActionsProps = {
   document: DocumentNavigationNode;
@@ -61,24 +59,14 @@ export function DocumentTreeNodeActions({
   });
 
   const isBusy = createSubdocumentMutation.isPending;
+
   const createSubdocumentButton = (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon-xs"
-      className="size-5 rounded-sm bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent-foreground/10 hover:text-sidebar-accent-foreground"
-      aria-label="Create subdocument"
+    <CreateDocumentButton
+      ariaLabel="Create subdocument"
       disabled={isBusy}
       onClick={handleCreateSubdocument}
-    >
-      {isBusy
-        ? (
-          <LoadingIcon className="size-4" />
-        )
-        : (
-          <PlusIcon className="size-4" />
-        )}
-    </Button>
+      isPending={isBusy}
+    />
   );
 
   return (
@@ -89,14 +77,13 @@ export function DocumentTreeNodeActions({
       )}
     >
       <Tooltip>
-        <TooltipTrigger delay={0} render={createSubdocumentButton} />
+        <TooltipTrigger render={createSubdocumentButton} />
         <TooltipContent side="bottom">Add a document inside</TooltipContent>
       </Tooltip>
 
       <DropdownMenu onOpenChange={setIsMenuOpen}>
         <Tooltip>
           <TooltipTrigger
-            delay={0}
             render={
               <DropdownMenuTrigger
                 className={cn(
