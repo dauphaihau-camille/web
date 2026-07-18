@@ -1,58 +1,21 @@
 'use client';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-import {
-  createSubdocumentCommand,
-  documentKeys,
-  type Document,
-  type DocumentNavigationNode,
+import type {
+  DocumentNavigationNode,
 } from '@/domains/document';
 import { workspaceRoutes } from '@/domains/workspace';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
-import {
-  insertCreatedSubdocIntoCachedChildren,
-  markCachedNavigationNodeHasChildren,
-} from '@/domains/document/cache/document-query-cache';
 import type { FavoriteDocument } from '@/domains/favorite';
-import { markCachedFavoriteDocumentHasChildren } from '@/domains/document/actions/document-action-cache';
 import { useDocumentActions } from '@/domains/document/hooks/use-document-actions';
 
 import { resolveArchiveDestination } from './document-tree-node-action-helpers';
+import { useCreateSubdocumentAction } from './use-create-subdocument-action';
 
 type UseDocumentTreeNodeActionArgs = {
   document: DocumentNavigationNode;
   isActive: boolean;
   workspaceSlug: string;
 };
-
-function withParentBreadcrumb(
-  childDocument: Document,
-  parentDocument: Pick<Document, 'breadcrumb' | 'id' | 'public_id' | 'title'>,
-): Document {
-  return {
-    ...childDocument,
-    breadcrumb: [
-      ...(parentDocument.breadcrumb ?? []),
-      {
-        id: parentDocument.id,
-        public_id: parentDocument.public_id,
-        title: parentDocument.title,
-      },
-    ],
-  };
-}
-
-function mergeDocumentWithCachedDetail(
-  nextDocument: Document,
-  cachedDocument?: Document,
-): Document {
-  return {
-    ...(cachedDocument ?? {}),
-    ...nextDocument,
-    breadcrumb: nextDocument.breadcrumb ?? cachedDocument?.breadcrumb,
-  };
-}
 
 function createOptimisticFavoriteDocument(
   document: DocumentNavigationNode,
@@ -69,101 +32,6 @@ function createOptimisticFavoriteDocument(
     has_children: document.has_children,
     has_content: document.has_content,
     favorited_at: new Date().toISOString(),
-  };
-}
-
-function useCreateSubdocumentAction({
-  document,
-  workspaceSlug,
-}: Omit<UseDocumentTreeNodeActionArgs, 'isActive'>) {
-  const queryClient = useQueryClient();
-
-  const expandedByWorkspace = useDocumentTreeExpansionStore(
-    (state) => state.expandedByWorkspace,
-  );
-
-  const setExpandedDocumentIds = useDocumentTreeExpansionStore(
-    (state) => state.setExpandedDocumentIds,
-  );
-
-  const mutation = useMutation({
-    mutationFn: () => {
-      const parentDocument = queryClient.getQueryData<Document>(
-        documentKeys.detail(document.id),
-      );
-
-      return createSubdocumentCommand(document.id, {
-        version: parentDocument?.version,
-      });
-    },
-    onSuccess: async ({ child_document: childDocument, parent_document: parentDocument }) => {
-      const cachedParentDocument = queryClient.getQueryData<Document>(
-        documentKeys.detail(document.id),
-      );
-      const nextChildDocument = withParentBreadcrumb(
-        childDocument,
-        cachedParentDocument ?? {
-          breadcrumb: undefined,
-          id: document.id,
-          public_id: document.public_id,
-          title: document.title,
-        },
-      );
-
-      queryClient.setQueryData(
-        documentKeys.detail(nextChildDocument.id),
-        nextChildDocument,
-      );
-      queryClient.setQueryData(
-        documentKeys.detail(nextChildDocument.public_id),
-        nextChildDocument,
-      );
-      const nextParentDocument = mergeDocumentWithCachedDetail(
-        parentDocument,
-        cachedParentDocument,
-      );
-      queryClient.setQueryData(
-        documentKeys.detail(nextParentDocument.id),
-        nextParentDocument,
-      );
-      queryClient.setQueryData(
-        documentKeys.detail(nextParentDocument.public_id),
-        nextParentDocument,
-      );
-      markCachedNavigationNodeHasChildren(
-        queryClient,
-        workspaceSlug,
-        document.id,
-      );
-      markCachedFavoriteDocumentHasChildren(
-        queryClient,
-        workspaceSlug,
-        document.id,
-      );
-      insertCreatedSubdocIntoCachedChildren(
-        queryClient,
-        workspaceSlug,
-        document.id,
-        nextChildDocument,
-      );
-      setExpandedDocumentIds(workspaceSlug, [
-        ...(expandedByWorkspace[workspaceSlug] ?? []),
-        document.id,
-      ]);
-      await queryClient.invalidateQueries({
-        queryKey: documentKeys.detail(document.id),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: documentKeys.lists(workspaceSlug),
-      });
-    },
-  });
-
-  return {
-    createSubdocumentMutation: mutation,
-    handleCreateSubdocument: () => {
-      void mutation.mutateAsync();
-    },
   };
 }
 

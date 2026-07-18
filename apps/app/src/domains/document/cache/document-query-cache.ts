@@ -259,6 +259,40 @@ export function insertCreatedPrivateRootDocument(
   }
 }
 
+export function replaceCreatedPrivateRootDocument(
+  queryClient: QueryClient,
+  workspaceSlug: string,
+  optimisticDocumentId: string,
+  document: Document,
+) {
+  const documentNode = buildDocumentNavigationNode(document);
+
+  for (const [
+    queryKey,
+    currentNavigation,
+  ] of queryClient.getQueriesData<WorkspaceDocumentNavigation>({
+      queryKey: [...documentKeys.lists(workspaceSlug), 'root'],
+    })) {
+
+    if (!currentNavigation || !isUnfilteredRootListKey(queryKey)) {
+      continue;
+    }
+
+    queryClient.setQueryData<WorkspaceDocumentNavigation>(queryKey, {
+      ...currentNavigation,
+      private_documents: {
+        ...currentNavigation.private_documents,
+        items: [
+          documentNode,
+          ...currentNavigation.private_documents.items.filter(
+            (item) => item.id !== optimisticDocumentId && item.id !== documentNode.id,
+          ),
+        ].sort((left, right) => left.sort_key - right.sort_key),
+      },
+    });
+  }
+}
+
 export function updateCachedReferencedSubdocTitles(
   queryClient: QueryClient,
   documentId: string,
@@ -371,6 +405,38 @@ export function insertCreatedSubdocIntoCachedChildren(
       return {
         ...currentPage,
         items: [childNode, ...itemsWithoutChild].sort(
+          (left, right) => right.sort_key - left.sort_key,
+        ),
+      };
+    },
+  );
+}
+
+export function replaceCreatedSubdocInCachedChildren(
+  queryClient: QueryClient,
+  workspaceSlug: string,
+  parentDocumentId: string,
+  optimisticChildId: string,
+  childDocument: Document,
+) {
+  const childNode = buildDocumentNavigationNode(childDocument);
+
+  queryClient.setQueriesData<DocumentNavigationPage>(
+    {
+      queryKey: [...documentKeys.lists(workspaceSlug), 'children', parentDocumentId],
+    },
+    (currentPage) => {
+      if (!currentPage) {
+        return currentPage;
+      }
+
+      const itemsWithoutPlaceholder = currentPage.items.filter(
+        (item) => item.id !== optimisticChildId && item.id !== childNode.id,
+      );
+
+      return {
+        ...currentPage,
+        items: [childNode, ...itemsWithoutPlaceholder].sort(
           (left, right) => right.sort_key - left.sort_key,
         ),
       };

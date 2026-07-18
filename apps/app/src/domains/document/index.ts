@@ -4,6 +4,8 @@ export * from './api/document.requests';
 export * from './api/document.schemas';
 export * from './api/document.types';
 export * from './hooks/use-document-query';
+export * from './hooks/use-archive-subdocument-mutation';
+export * from './hooks/use-create-subdocument-mutation';
 export * from './hooks/use-workspace-document-children-query';
 export * from './hooks/use-workspace-document-root-query';
 export * from './recent-document';

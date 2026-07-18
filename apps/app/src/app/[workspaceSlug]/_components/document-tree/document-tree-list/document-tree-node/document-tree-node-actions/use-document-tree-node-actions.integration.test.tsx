@@ -83,6 +83,7 @@ vi.mock('@/domains/document/api/document.requests', async () => {
   return {
     ...actual,
     archiveDocument: archiveDocumentMock,
+    createSubdocumentCommand: createSubdocumentCommandMock,
   };
 });
 
@@ -408,6 +409,13 @@ describe('useDocumentTreeNodeActions integration', () => {
       documentKeys.rootList('acme', 10),
       createNavigation([documentNodeFixture]),
     );
+    queryClient.setQueryData(
+      documentKeys.childList('acme', documentFixture.id, 10),
+      {
+        items: [],
+        next_cursor: undefined,
+      },
+    );
     queryClient.setQueryData<FavoriteDocument[]>(
       favoriteKeys.workspaceList('acme'),
       [favoriteFixture],
@@ -467,13 +475,194 @@ describe('useDocumentTreeNodeActions integration', () => {
           has_children: true,
         }),
       ]);
-      expect(pushMock).toHaveBeenCalledWith(
-        workspaceRoutes.document(
-          'acme',
-          childDocumentFixture.public_id,
-          childDocumentFixture.title,
+    });
+  });
+
+  it('optimistically adds a subdocument before the request resolves', async () => {
+    let resolveCreateRequest:
+      | ((value: { child_document: Document; parent_document: Document }) => void)
+      | undefined;
+
+    createSubdocumentCommandMock.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveCreateRequest = resolve;
+        }),
+    );
+
+    const { Wrapper, queryClient } = createWrapper();
+    queryClient.setQueryData(documentKeys.detail(documentFixture.id), documentFixture);
+    queryClient.setQueryData(
+      documentKeys.rootList('acme', 10),
+      createNavigation([documentNodeFixture]),
+    );
+    queryClient.setQueryData(
+      documentKeys.childList('acme', documentFixture.id, 10),
+      {
+        items: [],
+        next_cursor: undefined,
+      },
+    );
+    queryClient.setQueryData<FavoriteDocument[]>(
+      favoriteKeys.workspaceList('acme'),
+      [favoriteFixture],
+    );
+
+    const { result } = renderHook(
+      () =>
+        useDocumentTreeNodeActions({
+          document: documentNodeFixture,
+          isActive: true,
+          workspaceSlug: 'acme',
+        }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.handleCreateSubdocument();
+    });
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData<WorkspaceDocumentNavigation>(
+          documentKeys.rootList('acme', 10),
+        )?.private_documents.items[0],
+      ).toEqual(expect.objectContaining({
+        id: documentFixture.id,
+        has_children: true,
+      }));
+      expect(
+        queryClient.getQueryData<{ items: DocumentNavigationNode[] }>(
+          documentKeys.childList('acme', documentFixture.id, 10),
+        )?.items,
+      ).toEqual([
+        expect.objectContaining({
+          parent_document_id: documentFixture.id,
+          title: 'Untitled',
+        }),
+      ]);
+      expect(
+        queryClient.getQueryData<FavoriteDocument[]>(
+          favoriteKeys.workspaceList('acme'),
         ),
-      );
+      ).toEqual([
+        expect.objectContaining({
+          document_id: documentFixture.id,
+          has_children: true,
+        }),
+      ]);
+      expect(
+        useDocumentTreeExpansionStore.getState().expandedByWorkspace.acme,
+      ).toContain(documentFixture.id);
+    });
+
+    if (!resolveCreateRequest) {
+      throw new Error('Create subdocument request did not start');
+    }
+
+    resolveCreateRequest({
+      child_document: childDocumentFixture,
+      parent_document: {
+        ...documentFixture,
+        version: 4,
+        content: [],
+      },
+    });
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData<{ items: DocumentNavigationNode[] }>(
+          documentKeys.childList('acme', documentFixture.id, 10),
+        )?.items,
+      ).toEqual([
+        expect.objectContaining({
+          id: childDocumentFixture.id,
+          public_id: childDocumentFixture.public_id,
+        }),
+      ]);
+    });
+  });
+
+  it('rolls back the optimistic subdocument when the request fails', async () => {
+    let rejectCreateRequest: ((error: Error) => void) | undefined;
+
+    createSubdocumentCommandMock.mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectCreateRequest = reject;
+        }),
+    );
+
+    const { Wrapper, queryClient } = createWrapper();
+    queryClient.setQueryData(documentKeys.detail(documentFixture.id), documentFixture);
+    queryClient.setQueryData(
+      documentKeys.rootList('acme', 10),
+      createNavigation([documentNodeFixture]),
+    );
+    queryClient.setQueryData(
+      documentKeys.childList('acme', documentFixture.id, 10),
+      {
+        items: [],
+        next_cursor: undefined,
+      },
+    );
+    queryClient.setQueryData<FavoriteDocument[]>(
+      favoriteKeys.workspaceList('acme'),
+      [favoriteFixture],
+    );
+
+    const { result } = renderHook(
+      () =>
+        useDocumentTreeNodeActions({
+          document: documentNodeFixture,
+          isActive: true,
+          workspaceSlug: 'acme',
+        }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.handleCreateSubdocument();
+    });
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData<{ items: DocumentNavigationNode[] }>(
+          documentKeys.childList('acme', documentFixture.id, 10),
+        )?.items,
+      ).toHaveLength(1);
+    });
+
+    if (!rejectCreateRequest) {
+      throw new Error('Create subdocument request did not start');
+    }
+
+    rejectCreateRequest(new Error('create subdocument failed'));
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData<WorkspaceDocumentNavigation>(
+          documentKeys.rootList('acme', 10),
+        )?.private_documents.items[0],
+      ).toEqual(expect.objectContaining({
+        id: documentFixture.id,
+        has_children: false,
+      }));
+      expect(
+        queryClient.getQueryData<{ items: DocumentNavigationNode[] }>(
+          documentKeys.childList('acme', documentFixture.id, 10),
+        )?.items,
+      ).toEqual([]);
+      expect(
+        queryClient.getQueryData<FavoriteDocument[]>(
+          favoriteKeys.workspaceList('acme'),
+        ),
+      ).toEqual([
+        expect.objectContaining({
+          document_id: documentFixture.id,
+          has_children: false,
+        }),
+      ]);
     });
   });
 
