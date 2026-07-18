@@ -73,16 +73,15 @@ export const workspaceDocumentNavigationSchema = z.object({
   teamspaces: z.array(teamspaceDocumentNavigationSchema),
 });
 
-export const createDocumentSchema = z.object({
+export const createRootDocumentSchema = z.object({
   workspace_id: z.string().min(1),
   teamspace_id: z.string().optional(),
-  parent_document_id: z.string().optional(),
   title: z.string().max(180).optional(),
   content_format: documentContentFormatSchema.optional(),
   content: z.array(z.unknown()).optional(),
 });
 
-export const createSubdocCommandResultSchema = z.object({
+export const createSubdocumentCommandResultSchema = z.object({
   parent_document: documentSchema,
   child_document: documentSchema,
 });
@@ -92,7 +91,7 @@ export const archiveSubdocCommandResultSchema = z.object({
   archived_child_document: documentSchema,
 });
 
-export const createSubdocCommandSchema = z.object({
+export const createSubdocumentCommandSchema = z.object({
   anchor_block_id: z.string().min(1).optional(),
   slash_command_text: z.string().min(1).optional(),
   version: z.number().int().positive().optional(),

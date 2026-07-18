@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 import {
   archiveSubdocCommand,
-  createSubdocCommand,
+  createSubdocumentCommand,
   documentKeys,
   setRecentWorkspaceDocumentId,
   type Document,
@@ -116,7 +116,7 @@ export function useDocumentEditorActions({
       const latestDocument =
         queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
 
-      return createSubdocCommand(documentId, {
+      return createSubdocumentCommand(documentId, {
         anchor_block_id: input?.anchorBlockId,
         slash_command_text: input?.slashCommandText,
         version: latestDocument.version,

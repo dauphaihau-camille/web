@@ -6,9 +6,9 @@ import {
   archivedDocumentListPageSchema,
   archiveSubdocCommandResultSchema,
   archiveSubdocCommandSchema,
-  createDocumentSchema,
-  createSubdocCommandSchema,
-  createSubdocCommandResultSchema,
+  createRootDocumentSchema,
+  createSubdocumentCommandSchema,
+  createSubdocumentCommandResultSchema,
   documentSchema,
   documentNavigationPageSchema,
   workspaceDocumentNavigationSchema,
@@ -17,9 +17,9 @@ import type {
   ArchivedDocumentListPage,
   ArchiveSubdocCommandInput,
   ArchiveSubdocCommandResult,
-  CreateDocumentInput,
-  CreateSubdocCommandInput,
-  CreateSubdocCommandResult,
+  CreateRootDocumentInput,
+  CreateSubdocumentCommandInput,
+  CreateSubdocumentCommandResult,
   Document,
   DocumentId,
   DocumentNavigationPage,
@@ -92,27 +92,27 @@ export async function getWorkspaceChildDocuments(
   return documentNavigationPageSchema.parse(response) as DocumentNavigationPage;
 }
 
-export async function createDocument(input: CreateDocumentInput): Promise<Document> {
-  const payload = createDocumentSchema.parse({
+export async function createRootDocument(input: CreateRootDocumentInput): Promise<Document> {
+  const payload = createRootDocumentSchema.parse({
     content_format: 'blocknote_v1',
     ...input,
   });
-  const response = await apiPost<unknown, CreateDocumentInput>('documents', payload);
+  const response = await apiPost<unknown, CreateRootDocumentInput>('documents', payload);
 
   return documentSchema.parse(response);
 }
 
-export async function createSubdocCommand(
+export async function createSubdocumentCommand(
   documentId: DocumentId,
-  input?: CreateSubdocCommandInput,
-): Promise<CreateSubdocCommandResult> {
-  const payload = createSubdocCommandSchema.parse(input ?? {});
-  const response = await apiPost<unknown, CreateSubdocCommandInput>(
+  input?: CreateSubdocumentCommandInput,
+): Promise<CreateSubdocumentCommandResult> {
+  const payload = createSubdocumentCommandSchema.parse(input ?? {});
+  const response = await apiPost<unknown, CreateSubdocumentCommandInput>(
     `documents/${documentId}/commands/create-subdoc`,
     payload,
   );
 
-  return createSubdocCommandResultSchema.parse(response);
+  return createSubdocumentCommandResultSchema.parse(response);
 }
 
 export async function archiveSubdocCommand(

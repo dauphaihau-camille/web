@@ -4,11 +4,11 @@ import { apiServerPost, apiServerRequest } from '@shared/lib/api-server';
 import { logger } from '@shared/lib/server-logger';
 
 import {
-  createDocumentSchema,
+  createRootDocumentSchema,
   documentSchema,
 } from './document.schemas';
 import type {
-  CreateDocumentInput,
+  CreateRootDocumentInput,
   Document,
   DocumentId,
   WorkspaceId,
@@ -117,8 +117,8 @@ export async function getWorkspaceDefaultDocumentServer(
   return response.json() as Promise<{ document_id?: string }>;
 }
 
-export async function createDocumentServer(input: CreateDocumentInput): Promise<Document> {
-  const payload = createDocumentSchema.parse({
+export async function createRootDocumentServer(input: CreateRootDocumentInput): Promise<Document> {
+  const payload = createRootDocumentSchema.parse({
     content_format: 'blocknote_v1',
     ...input,
   });

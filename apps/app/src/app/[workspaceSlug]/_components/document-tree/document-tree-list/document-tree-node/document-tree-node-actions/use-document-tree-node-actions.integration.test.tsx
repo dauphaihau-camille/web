@@ -34,7 +34,7 @@ const {
   pushMock,
   toastMock,
   archiveDocumentMock,
-  createDocumentMock,
+  createSubdocumentCommandMock,
   favoriteDocumentMock,
   unfavoriteDocumentMock,
   documentDetailQueryOptionsMock,
@@ -44,7 +44,7 @@ const {
   pushMock: vi.fn(),
   toastMock: vi.fn(),
   archiveDocumentMock: vi.fn(),
-  createDocumentMock: vi.fn(),
+  createSubdocumentCommandMock: vi.fn(),
   favoriteDocumentMock: vi.fn(),
   unfavoriteDocumentMock: vi.fn(),
   documentDetailQueryOptionsMock: vi.fn(),
@@ -70,7 +70,7 @@ vi.mock('@/domains/document', async () => {
   return {
     ...actual,
     archiveDocument: archiveDocumentMock,
-    createDocument: createDocumentMock,
+    createSubdocumentCommand: createSubdocumentCommandMock,
     documentDetailQueryOptions: documentDetailQueryOptionsMock,
   };
 });
@@ -214,7 +214,7 @@ describe('useDocumentTreeNodeActions integration', () => {
     pushMock.mockReset();
     toastMock.mockReset();
     archiveDocumentMock.mockReset();
-    createDocumentMock.mockReset();
+    createSubdocumentCommandMock.mockReset();
     favoriteDocumentMock.mockReset();
     unfavoriteDocumentMock.mockReset();
     documentDetailQueryOptionsMock.mockReset();
@@ -381,7 +381,21 @@ describe('useDocumentTreeNodeActions integration', () => {
   });
 
   it('marks a favorited parent as having children after creating a subdocument', async () => {
-    createDocumentMock.mockResolvedValue(childDocumentFixture);
+    createSubdocumentCommandMock.mockResolvedValue({
+      child_document: childDocumentFixture,
+      parent_document: {
+        ...documentFixture,
+        version: 4,
+        content: [{
+          id: 'subdoc-block-1',
+          type: 'subdoc',
+          props: {
+            documentId: childDocumentFixture.id,
+          },
+          children: [],
+        }],
+      },
+    });
 
     const { Wrapper, queryClient } = createWrapper();
     queryClient.setQueryData(documentKeys.detail(documentFixture.id), documentFixture);
@@ -409,11 +423,18 @@ describe('useDocumentTreeNodeActions integration', () => {
     });
 
     await waitFor(() => {
-      expect(createDocumentMock).toHaveBeenCalledWith({
-        workspace_id: 'acme',
-        teamspace_id: undefined,
-        parent_document_id: documentFixture.id,
-      });
+      expect(createSubdocumentCommandMock).toHaveBeenCalledWith(
+        documentFixture.id,
+        {
+          version: documentFixture.version,
+        },
+      );
+      expect(
+        queryClient.getQueryData<Document>(documentKeys.detail(documentFixture.id)),
+      ).toEqual(expect.objectContaining({
+        id: documentFixture.id,
+        version: 4,
+      }));
       expect(
         queryClient.getQueryData<FavoriteDocument[]>(
           favoriteKeys.workspaceList('acme'),

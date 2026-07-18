@@ -4,8 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
-  createDocument,
+  createSubdocumentCommand,
   documentKeys,
+  type Document,
   type DocumentNavigationNode,
 } from '@/domains/document';
 import { workspaceRoutes } from '@/domains/workspace';
@@ -50,24 +51,33 @@ function useCreateSubdocumentAction({
 }: Omit<UseDocumentTreeNodeActionArgs, 'isActive'>) {
   const router = useRouter();
   const queryClient = useQueryClient();
+
   const expandedByWorkspace = useDocumentTreeExpansionStore(
     (state) => state.expandedByWorkspace,
   );
+
   const setExpandedDocumentIds = useDocumentTreeExpansionStore(
     (state) => state.setExpandedDocumentIds,
   );
 
   const mutation = useMutation({
-    mutationFn: () =>
-      createDocument({
-        workspace_id: workspaceSlug,
-        teamspace_id: document.teamspace_id,
-        parent_document_id: document.id,
-      }),
-    onSuccess: async (childDocument) => {
+    mutationFn: () => {
+      const parentDocument = queryClient.getQueryData<Document>(
+        documentKeys.detail(document.id),
+      );
+
+      return createSubdocumentCommand(document.id, {
+        version: parentDocument?.version,
+      });
+    },
+    onSuccess: async ({ child_document: childDocument, parent_document: parentDocument }) => {
       queryClient.setQueryData(
         documentKeys.detail(childDocument.id),
         childDocument,
+      );
+      queryClient.setQueryData(
+        documentKeys.detail(parentDocument.id),
+        parentDocument,
       );
       markCachedNavigationNodeHasChildren(
         queryClient,
@@ -121,6 +131,7 @@ export function useDocumentTreeNodeActions({
   const expandedByWorkspace = useDocumentTreeExpansionStore(
     (state) => state.expandedByWorkspace,
   );
+
   const setExpandedDocumentIds = useDocumentTreeExpansionStore(
     (state) => state.setExpandedDocumentIds,
   );

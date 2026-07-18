@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import {
-  createDocumentServer,
+  createRootDocumentServer,
   getDocumentServer,
   getWorkspaceDefaultDocumentServer,
 } from '@/domains/document/api/document.server.requests';
@@ -30,7 +30,7 @@ export default async function WorkspacePage({
     ));
   }
 
-  const document = await createDocumentServer({ workspace_id: workspaceSlug });
+  const document = await createRootDocumentServer({ workspace_id: workspaceSlug });
 
   redirect(workspaceRoutes.document(workspaceSlug, document.public_id, document.title));
 }

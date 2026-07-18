@@ -13,7 +13,7 @@ import {
 } from '@shared/components/ui/tooltip';
 import type { useWorkspaceDocumentRootQuery } from '@/domains/document';
 import {
-  createDocument,
+  createRootDocument,
   documentKeys,
 } from '@/domains/document';
 import { insertCreatedPrivateRootDocument } from '@/domains/document/cache/document-query-cache';
@@ -33,7 +33,7 @@ export function PrivateDocumentsGroup({
   const queryClient = useQueryClient();
 
   const createDocumentMutation = useMutation({
-    mutationFn: () => createDocument({ workspace_id: workspaceSlug }),
+    mutationFn: () => createRootDocument({ workspace_id: workspaceSlug }),
     onSuccess: async (document) => {
       queryClient.setQueryData(documentKeys.detail(document.id), document);
       insertCreatedPrivateRootDocument(queryClient, workspaceSlug, document);
