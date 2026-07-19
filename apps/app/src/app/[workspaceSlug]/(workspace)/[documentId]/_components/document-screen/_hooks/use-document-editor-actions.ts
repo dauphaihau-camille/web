@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import {
@@ -16,10 +16,12 @@ import { hasMeaningfulContent } from '@shared/components/editor/has-meaningful-c
 import { updateCachedNavigationContentStatus } from '@/domains/document/cache/document-query-cache';
 
 import { useLatestWinsSaveQueue } from './use-latest-wins-save-queue';
+import { useDocumentDraftPersistence } from './use-document-draft-persistence';
 
 type UseDocumentEditorActionsOptions = {
   document: Document;
   workspaceSlug: string;
+  onRestoreDraft: (content: unknown[]) => void;
 };
 
 type CreateSubdocumentInput = {
@@ -42,10 +44,51 @@ function mergeDocumentWithCachedDetail(
 export function useDocumentEditorActions({
   document,
   workspaceSlug,
+  onRestoreDraft,
 }: UseDocumentEditorActionsOptions) {
   const queryClient = useQueryClient();
   const documentId = document.id;
   const shouldSkipContentSaveRef = useRef(false);
+  const latestDocumentVersionRef = useRef(document.version);
+  const hasPendingLocalPersistenceRef = useRef(false);
+
+  useEffect(() => {
+    latestDocumentVersionRef.current = document.version;
+  }, [document.version]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!hasPendingLocalPersistenceRef.current) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = '';
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
+  const syncLatestDocumentVersion = useCallback(() => {
+    const latestDocument =
+      queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
+
+    latestDocumentVersionRef.current = latestDocument.version;
+    return latestDocument.version;
+  }, [document, documentId, queryClient]);
+
+  const draftPersistence = useDocumentDraftPersistence({
+    document: {
+      ...document,
+      version: latestDocumentVersionRef.current,
+    },
+    workspaceSlug,
+    onRestoreDraft,
+  });
 
   const syncDocumentContentCache = (nextDocument: Document) => {
     const cachedDocument =
@@ -109,6 +152,8 @@ export function useDocumentEditorActions({
         return;
       }
 
+      await draftPersistence.markRemoteSaveStarted();
+
       const latestDocument =
         queryClient.getQueryData<Document>(documentKeys.detail(documentId)) ?? document;
 
@@ -117,15 +162,23 @@ export function useDocumentEditorActions({
         content: nextContent,
       });
 
-      const updatedDocument = await updateContentMutation.mutateAsync({
-        version: latestDocument.version,
-        content: nextContent,
-      });
+      try {
+        const updatedDocument = await updateContentMutation.mutateAsync({
+          version: latestDocument.version,
+          content: nextContent,
+        });
 
-      syncDocumentContentCache({
-        ...updatedDocument,
-        content: nextContent,
-      });
+        latestDocumentVersionRef.current = updatedDocument.version;
+        await draftPersistence.markRemoteSaveSucceeded();
+        syncDocumentContentCache({
+          ...updatedDocument,
+          content: nextContent,
+        });
+      }
+      catch (error) {
+        await draftPersistence.markRemoteSaveFailed(error);
+        throw error;
+      }
     },
   });
 
@@ -184,6 +237,21 @@ export function useDocumentEditorActions({
     archiveSubdocument,
     archivingSubdocumentId: archiveSubdocumentMutation.variables?.subdocumentId ?? null,
     createSubdocument,
-    queueContentSave,
+    markPendingLocalPersistence: () => {
+      hasPendingLocalPersistenceRef.current = true;
+    },
+    queueContentSave: async (content: Document['content']) => {
+      syncLatestDocumentVersion();
+
+      try {
+        await draftPersistence.persistLocalDraft(content);
+        hasPendingLocalPersistenceRef.current = false;
+      }
+      catch (error) {
+        throw error;
+      }
+
+      return queueContentSave(content);
+    },
   };
 }

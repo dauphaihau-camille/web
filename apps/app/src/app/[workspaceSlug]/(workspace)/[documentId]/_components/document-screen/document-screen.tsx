@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useState } from 'react';
 import { createBlockNoteEditorLoader } from '@shared/components/editor/create-blocknote-editor-loader';
 import type { Document } from '@/domains/document';
 import { Input } from '@shared/components/ui/input';
@@ -24,6 +25,22 @@ export function DocumentScreen({
   document: Document;
   workspaceSlug: string;
 }) {
+  return (
+    <DocumentScreenContent
+      key={document.id}
+      document={document}
+      workspaceSlug={workspaceSlug}
+    />
+  );
+}
+
+function DocumentScreenContent({
+  document,
+  workspaceSlug,
+}: {
+  document: Document;
+  workspaceSlug: string;
+}) {
   const {
     hideChrome,
     isChromeVisible,
@@ -31,10 +48,16 @@ export function DocumentScreen({
   } = useDocumentChromeVisibility();
 
   const documentId = document.id;
+  const [editorContent, setEditorContent] = useState(document.content);
+
+  const handleRestoreDraft = useCallback((content: unknown[]) => {
+    setEditorContent(content);
+  }, []);
 
   const documentEditorActions = useDocumentEditorActions({
     document,
     workspaceSlug,
+    onRestoreDraft: handleRestoreDraft,
   });
 
   const documentToolbar = useDocumentToolbar({
@@ -127,7 +150,7 @@ export function DocumentScreen({
           documentId={documentId}
           documentTitle={savedTitle}
           workspaceSlug={workspaceSlug}
-          content={document.content}
+          content={editorContent}
           documentOperations={{
             isArchiving: documentToolbar.isArchiving,
             archivingSubdocumentId: documentEditorActions.archivingSubdocumentId,
@@ -137,7 +160,10 @@ export function DocumentScreen({
             onCopyLink: documentToolbar.copyLink,
             onDuplicate: documentToolbar.duplicateDocument,
           }}
-          onStartContentChangeAction={hideChrome}
+          onStartContentChangeAction={() => {
+            hideChrome();
+            documentEditorActions.markPendingLocalPersistence();
+          }}
           onContentChangeAction={documentEditorActions.queueContentSave}
           onCreateSubdocAction={documentEditorActions.createSubdocument}
         />

@@ -76,9 +76,11 @@ export const BlockNoteEditorClient = createBlockNoteEditorClient({
     const anchorBlock = editor.getTextCursorPosition().block as Block;
     const anchorBlockId = anchorBlock.id;
     const slashCommandText = `/${slashMenuQuery.trim()}`;
+
     const previousContent = JSON.parse(
       JSON.stringify(editor.document as unknown[]),
     ) as unknown[];
+
     const optimisticSubdocBlock = {
       type: 'subdoc' as const,
       props: {
