@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowLeftIcon, Settings2Icon, UsersIcon } from 'lucide-react';
+import { ChevronLeftIcon, Settings2Icon, UsersIcon } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -21,8 +21,6 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { workspaceRoutes } from '@/domains/workspace';
-
-import { WorkspaceUserDropdown } from '../../_components/workspace-user-dropdown';
 
 const workspaceSettingsItems = [
   { getHref: workspaceRoutes.settings, icon: Settings2Icon, label: 'General' },
@@ -45,24 +43,19 @@ export function SettingsSidebar({ workspaceSlug }: { workspaceSlug: string }) {
       className="h-auto min-h-svh self-stretch border-r border-sidebar-border bg-sidebar"
     >
       <SidebarHeader className="gap-3 py-3">
-        <WorkspaceUserDropdown workspaceSlug={workspaceSlug} />
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={<Link href={workspaceHref} />}
+              tooltip="Back to workspace"
+            >
+              <ChevronLeftIcon />
+              <span>Back to workspace</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  render={<Link href={workspaceHref} />}
-                  tooltip="Back to workspace"
-                >
-                  <ArrowLeftIcon />
-                  <span>Back to workspace</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Workspace</SidebarGroupLabel>
           <SidebarGroupContent>
