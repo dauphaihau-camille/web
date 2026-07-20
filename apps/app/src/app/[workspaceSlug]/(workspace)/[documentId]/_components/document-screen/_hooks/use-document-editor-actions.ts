@@ -19,6 +19,7 @@ import { useLatestWinsSaveQueue } from './use-latest-wins-save-queue';
 import { useDocumentDraftPersistence } from './use-document-draft-persistence';
 
 type UseDocumentEditorActionsOptions = {
+  collaborationEnabled?: boolean;
   document: Document;
   workspaceSlug: string;
   onRestoreDraft: (content: unknown[]) => void;
@@ -42,6 +43,7 @@ function mergeDocumentWithCachedDetail(
 }
 
 export function useDocumentEditorActions({
+  collaborationEnabled = false,
   document,
   workspaceSlug,
   onRestoreDraft,
@@ -82,6 +84,7 @@ export function useDocumentEditorActions({
   }, [document, documentId, queryClient]);
 
   const draftPersistence = useDocumentDraftPersistence({
+    enabled: !collaborationEnabled,
     document: {
       ...document,
       version: latestDocumentVersionRef.current,

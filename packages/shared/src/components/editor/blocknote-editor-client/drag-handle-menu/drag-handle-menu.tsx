@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { Block } from '@blocknote/core';
 import { SideMenuExtension } from '@blocknote/core/extensions';
 import {
@@ -64,24 +64,46 @@ export function DragHandleMenu({
       ? currentBlock.props.documentId
       : null;
 
-  const blocksToActOn = currentBlock
-    ? (
-      selectedBlocks.some((block) => block.id === currentBlock.id)
-        ? selectedBlocks
-        : [currentBlock]
-    )
-    : [];
-
   const isArchivingSubdocument = Boolean(
     isDocumentBlock
     && subdocumentId !== null
     && documentOperations?.archivingSubdocumentId === subdocumentId,
   );
 
-  useEffect(() => {
-    if (!canRenderMenu) {
+  const archiveSubdocument = useCallback((
+    documentId: string,
+    nextContent: Block[],
+    blockIds: string[],
+  ) => {
+    if (!documentOperations?.onArchiveSubdocument) {
       return;
     }
+
+    void documentOperations.onArchiveSubdocument(documentId, nextContent)
+      .then(() => {
+        if (!documentOperations.isCollaborative) {
+          return;
+        }
+
+        const currentBlocks = blockIds
+          .map((blockId) => editor.getBlock(blockId))
+          .filter((block): block is Block => Boolean(block));
+
+        if (currentBlocks.length > 0) {
+          editor.removeBlocks(currentBlocks);
+        }
+      })
+      .catch(() => {});
+  }, [documentOperations, editor]);
+
+  useEffect(() => {
+    if (!canRenderMenu || !currentBlock) {
+      return;
+    }
+
+    const effectBlocks = selectedBlocks.some((block) => block.id === currentBlock.id)
+      ? selectedBlocks
+      : [currentBlock];
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Delete' && event.key !== 'Backspace') {
@@ -102,15 +124,19 @@ export function DragHandleMenu({
         sideMenu.unfreezeMenu();
         const nextContent = removeBlocksFromContent(
           editor.document as Block[],
-          new Set(blocksToActOn.map((block) => block.id)),
+          new Set(effectBlocks.map((block) => block.id)),
         );
 
-        void documentOperations.onArchiveSubdocument(subdocumentId, nextContent).catch(() => {});
+        archiveSubdocument(
+          subdocumentId,
+          nextContent,
+          effectBlocks.map((block) => block.id),
+        );
         return;
       }
 
       sideMenu.unfreezeMenu();
-      editor.removeBlocks(blocksToActOn);
+      editor.removeBlocks(effectBlocks);
     };
 
     document.addEventListener('keydown', handleKeyDown, true);
@@ -119,19 +145,25 @@ export function DragHandleMenu({
       document.removeEventListener('keydown', handleKeyDown, true);
     };
   }, [
-    blocksToActOn,
+    archiveSubdocument,
     canRenderMenu,
+    currentBlock,
     documentOperations,
     editor,
     isArchivingSubdocument,
     isDocumentBlock,
     sideMenu,
+    selectedBlocks,
     subdocumentId,
   ]);
 
   if (!canRenderMenu || !Components || !documentOperations || !currentBlock) {
     return null;
   }
+
+  const blocksToActOn = selectedBlocks.some((block) => block.id === currentBlock.id)
+    ? selectedBlocks
+    : [currentBlock];
 
   const handleArchiveSubdocument = () => {
     if (
@@ -148,7 +180,11 @@ export function DragHandleMenu({
       new Set(blocksToActOn.map((block) => block.id)),
     );
 
-    void documentOperations.onArchiveSubdocument(subdocumentId, nextContent).catch(() => {});
+    archiveSubdocument(
+      subdocumentId,
+      nextContent,
+      blocksToActOn.map((block) => block.id),
+    );
   };
 
   const handleDelete = () => {

@@ -65,6 +65,7 @@ export const BlockNoteEditorClient = createBlockNoteEditorClient({
     cancelScheduledSave,
     createSubdoc,
     editor,
+    isCollaborative,
     isExecutingSlashCommandRef,
     isSelectingSlashMenuItemRef,
     lastSerializedContentRef,
@@ -91,6 +92,58 @@ export const BlockNoteEditorClient = createBlockNoteEditorClient({
         hasContent: false,
       },
     };
+
+    if (isCollaborative) {
+      isExecutingSlashCommandRef.current = true;
+      pendingSlashMenuSaveRef.current = null;
+      cancelScheduledSave();
+      setIsSaving(false);
+
+      void createSubdoc({
+        anchorBlockId,
+        slashCommandText,
+        content: previousContent,
+      })
+        .then((createdDocument) => {
+          const currentAnchorBlock = editor.getBlock(anchorBlockId);
+
+          if (!currentAnchorBlock) {
+            return;
+          }
+
+          const createdSubdocBlock = {
+            type: 'subdoc' as const,
+            props: {
+              documentId: createdDocument.id,
+              publicId: createdDocument.public_id,
+              workspaceId: workspaceSlug,
+              title: createdDocument.title || 'Untitled',
+              hasContent: createdDocument.content.length > 0,
+            },
+          };
+
+          editor.transact(() => {
+            if (shouldReplaceSlashAnchorBlock(currentAnchorBlock as Block, slashCommandText)) {
+              editor.updateBlock(currentAnchorBlock, createdSubdocBlock as never);
+              return;
+            }
+
+            editor.insertBlocks(
+              [createdSubdocBlock] as never[],
+              currentAnchorBlock,
+              'after',
+            );
+          });
+        })
+        .catch(() => {})
+        .finally(() => {
+          isExecutingSlashCommandRef.current = false;
+          isSelectingSlashMenuItemRef.current = false;
+          pendingSlashMenuSaveRef.current = null;
+        });
+
+      return;
+    }
 
     isExecutingSlashCommandRef.current = true;
     pendingSlashMenuSaveRef.current = null;

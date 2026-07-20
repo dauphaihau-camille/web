@@ -17,6 +17,7 @@ import {
 import type { DocumentDraftRecord } from './document-draft-db';
 
 type UseDocumentDraftPersistenceOptions = {
+  enabled?: boolean;
   document: Document;
   workspaceSlug: string;
   onRestoreDraft: (content: unknown[]) => void;
@@ -35,6 +36,7 @@ function isSameContent(left: unknown[], right: unknown[]) {
 }
 
 export function useDocumentDraftPersistence({
+  enabled = true,
   document,
   workspaceSlug,
   onRestoreDraft,
@@ -43,10 +45,18 @@ export function useDocumentDraftPersistence({
   const hasCheckedRecoveryRef = useRef(false);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     void cleanupStaleDocumentDrafts();
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     if (hasCheckedRecoveryRef.current) {
       return;
     }
@@ -85,9 +95,13 @@ export function useDocumentDraftPersistence({
     return () => {
       isCancelled = true;
     };
-  }, [draftId, document.content, document.version, onRestoreDraft]);
+  }, [draftId, document.content, document.version, enabled, onRestoreDraft]);
 
   const persistLocalDraft = async (content: unknown[]) => {
+    if (!enabled) {
+      return;
+    }
+
     const record: DocumentDraftRecord = {
       id: draftId,
       workspaceSlug,
@@ -102,14 +116,26 @@ export function useDocumentDraftPersistence({
   };
 
   const markRemoteSaveStarted = async () => {
+    if (!enabled) {
+      return;
+    }
+
     await markDocumentDraftSyncing(draftId);
   };
 
   const markRemoteSaveSucceeded = async () => {
+    if (!enabled) {
+      return;
+    }
+
     await deleteDocumentDraft(draftId);
   };
 
   const markRemoteSaveFailed = async (error: unknown) => {
+    if (!enabled) {
+      return;
+    }
+
     await markDocumentDraftFailed(draftId, getErrorMessage(error));
   };
 

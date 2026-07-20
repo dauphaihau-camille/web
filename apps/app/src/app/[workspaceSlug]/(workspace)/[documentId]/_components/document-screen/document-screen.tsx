@@ -13,6 +13,7 @@ import { PublishedDocumentBar } from './published-document-bar';
 import { useDocumentEditorActions } from './_hooks/use-document-editor-actions';
 import { useDocumentTitle } from './_hooks/use-document-title';
 import { useDocumentChromeVisibility } from './_hooks/use-document-chrome-visibility';
+import { useDocumentCollaboration } from './_hooks/document-collaboration/use-document-collaboration';
 
 const BlockNoteEditorLoader = createBlockNoteEditorLoader(
   () => import('./editor/blocknote-editor-client/blocknote-editor-client'),
@@ -50,11 +51,14 @@ function DocumentScreenContent({
   const documentId = document.id;
   const [editorContent, setEditorContent] = useState(document.content);
 
+  const documentCollaboration = useDocumentCollaboration(documentId);
+
   const handleRestoreDraft = useCallback((content: unknown[]) => {
     setEditorContent(content);
   }, []);
 
   const documentEditorActions = useDocumentEditorActions({
+    collaborationEnabled: true,
     document,
     workspaceSlug,
     onRestoreDraft: handleRestoreDraft,
@@ -72,6 +76,7 @@ function DocumentScreenContent({
     savedTitle,
     title,
   } = useDocumentTitle({
+    collaborationDocument: documentCollaboration.document,
     document,
     workspaceSlug,
   });
@@ -145,28 +150,34 @@ function DocumentScreenContent({
           </div>
         </div>
 
-        <BlockNoteEditorLoader
-          key={documentId}
-          documentId={documentId}
-          documentTitle={savedTitle}
-          workspaceSlug={workspaceSlug}
-          content={editorContent}
-          documentOperations={{
-            isArchiving: documentToolbar.isArchiving,
-            archivingSubdocumentId: documentEditorActions.archivingSubdocumentId,
-            isDuplicating: documentToolbar.isDuplicating,
-            onArchive: documentToolbar.archiveCurrentDocument,
-            onArchiveSubdocument: documentEditorActions.archiveSubdocument,
-            onCopyLink: documentToolbar.copyLink,
-            onDuplicate: documentToolbar.duplicateDocument,
-          }}
-          onStartContentChangeAction={() => {
-            hideChrome();
-            documentEditorActions.markPendingLocalPersistence();
-          }}
-          onContentChangeAction={documentEditorActions.queueContentSave}
-          onCreateSubdocAction={documentEditorActions.createSubdocument}
-        />
+        {documentCollaboration.isReady
+          ? (
+            <BlockNoteEditorLoader
+              key={documentId}
+              collaboration={documentCollaboration.collaboration}
+              documentId={documentId}
+              documentTitle={savedTitle}
+              workspaceSlug={workspaceSlug}
+              content={editorContent}
+              editable={documentCollaboration.canEdit}
+              documentOperations={{
+                isCollaborative: true,
+                isArchiving: documentToolbar.isArchiving,
+                archivingSubdocumentId: documentEditorActions.archivingSubdocumentId,
+                isDuplicating: documentToolbar.isDuplicating,
+                onArchive: documentToolbar.archiveCurrentDocument,
+                onArchiveSubdocument: documentEditorActions.archiveSubdocument,
+                onCopyLink: documentToolbar.copyLink,
+                onDuplicate: documentToolbar.duplicateDocument,
+              }}
+              onCreateSubdocAction={documentEditorActions.createSubdocument}
+            />
+          )
+          : (
+            <div className="px-[3.8rem] py-4 text-sm text-muted-foreground">
+              {documentCollaboration.error ?? 'Connecting editor...'}
+            </div>
+          )}
       </div>
     </section>
   );

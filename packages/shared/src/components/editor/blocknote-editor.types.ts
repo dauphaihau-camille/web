@@ -1,4 +1,11 @@
+import type { useCreateBlockNote } from '@blocknote/react';
+
+type CollaborationOptions = NonNullable<
+  NonNullable<Parameters<typeof useCreateBlockNote>[0]>['collaboration']
+>;
+
 export type BlockNoteDocumentOperations = {
+  isCollaborative?: boolean;
   isArchiving: boolean;
   archivingSubdocumentId?: string | null;
   isDuplicating: boolean;
@@ -16,6 +23,7 @@ export type CreatedSubdoc = {
 };
 
 export type BlockNoteEditorProps = {
+  collaboration?: CollaborationOptions;
   documentTitle: string;
   content: unknown[];
   documentId?: string;

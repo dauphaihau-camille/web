@@ -58,6 +58,7 @@ type CreateSubdocSelectionContext = {
   createSubdoc: NonNullable<BlockNoteEditorProps['onCreateSubdocAction']>;
   documentTitle: string;
   editor: ReturnType<typeof useCreateBlockNote>;
+  isCollaborative: boolean;
   isExecutingSlashCommandRef: RefObject<boolean>;
   isSelectingSlashMenuItemRef: RefObject<boolean>;
   lastSerializedContentRef: RefObject<string>;
@@ -89,6 +90,7 @@ export function createBlockNoteEditorClient({
   const hiddenSlashMenuTitleSet = new Set(hiddenSlashMenuTitles);
 
   return function BlockNoteEditorClient({
+    collaboration,
     documentTitle,
     content,
     documentId: _documentId,
@@ -113,12 +115,14 @@ export function createBlockNoteEditorClient({
 
     const editor = useCreateBlockNote({
       schema,
-      initialContent: normalizedContent as never[],
+      ...(collaboration
+        ? { collaboration }
+        : { initialContent: normalizedContent as never[] }),
       extensions: [
         editorKeyboardExtension,
         dragHandleMenuSelectionExtension(),
       ],
-    }, []);
+    }, [collaboration?.fragment]);
 
     const { run: scheduleSave, cancel: cancelScheduledSave } = useDebounceFn(
       (nextContent: unknown[]) => {
@@ -139,6 +143,10 @@ export function createBlockNoteEditorClient({
     );
 
     useEffect(() => {
+      if (collaboration) {
+        return;
+      }
+
       const nextSerializedContent = JSON.stringify(normalizedContent);
 
       if (nextSerializedContent === lastSerializedContentRef.current) {
@@ -152,7 +160,7 @@ export function createBlockNoteEditorClient({
       setSaveError(null);
       lastSerializedContentRef.current = nextSerializedContent;
       editor.replaceBlocks(editor.document, normalizedContent as never[]);
-    }, [cancelScheduledSave, normalizedContent, editor]);
+    }, [cancelScheduledSave, collaboration, normalizedContent, editor]);
 
     useEffect(() => {
       return () => {
@@ -210,7 +218,7 @@ export function createBlockNoteEditorClient({
       };
     }, [editor]);
 
-    const isEditable = editable && Boolean(onContentChangeAction);
+    const isEditable = editable && Boolean(onContentChangeAction || collaboration);
 
     const blockNoteViewClassName = cn(
       'min-h-[60vh] bg-transparent py-2',
@@ -255,6 +263,7 @@ export function createBlockNoteEditorClient({
             createSubdoc: onCreateSubdocAction,
             documentTitle,
             editor,
+            isCollaborative: Boolean(collaboration),
             isExecutingSlashCommandRef,
             isSelectingSlashMenuItemRef,
             lastSerializedContentRef,
@@ -293,7 +302,7 @@ export function createBlockNoteEditorClient({
           className={blockNoteViewClassName}
           onSelectionChange={onSelectionChangeAction}
           onChange={() => {
-            if (!isEditable || !onContentChangeAction) {
+            if (!isEditable || collaboration || !onContentChangeAction) {
               return;
             }
 
