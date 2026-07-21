@@ -8,6 +8,10 @@ import * as Yjs from 'yjs';
 import { useCurrentUserQuery } from '@/domains/auth/hooks/use-current-user-query';
 
 import { DocumentBroadcastProvider } from './document-broadcast-provider';
+import {
+  documentCollaborationChannelName,
+  documentCollaborationStorageName,
+} from './document-collaboration.constants';
 import { DocumentSocketProvider } from './document-socket-provider';
 
 export function useDocumentCollaboration(documentId: string) {
@@ -35,14 +39,14 @@ export function useDocumentCollaboration(documentId: string) {
     }
 
     const persistence = new IndexeddbPersistence(
-      `camille:document:${documentId}`,
+      documentCollaborationStorageName(documentId),
       resources.document,
     );
 
     const broadcastProvider = new DocumentBroadcastProvider(
       resources.document,
       resources.awareness,
-      new BroadcastChannel(`camille:document:${documentId}`),
+      new BroadcastChannel(documentCollaborationChannelName(documentId)),
     );
 
     const socketProvider = new DocumentSocketProvider(
