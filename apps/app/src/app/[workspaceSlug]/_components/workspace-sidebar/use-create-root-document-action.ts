@@ -27,6 +27,7 @@ function createOptimisticRootDocument(workspaceSlug: string): Document {
     public_id: `optimistic-root-doc:${workspaceSlug}:${now}`,
     version: 0,
     workspace_id: workspaceSlug,
+    owner_user_id: 'optimistic-owner',
     teamspace_id: undefined,
     parent_document_id: undefined,
     title: 'Untitled',

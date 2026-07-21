@@ -35,6 +35,7 @@ function createOptimisticSubdocument(
     public_id: `optimistic-subdoc:${document.public_id}:${now}`,
     version: 0,
     workspace_id: workspaceSlug,
+    owner_user_id: 'optimistic-owner',
     teamspace_id: document.teamspace_id,
     parent_document_id: document.id,
     title: 'Untitled',

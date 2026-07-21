@@ -13,6 +13,7 @@ export const documentSchema = z.object({
   public_id: z.string().min(1),
   version: z.number().int().positive(),
   workspace_id: z.string().min(1),
+  owner_user_id: z.string().min(1),
   teamspace_id: z.string().nullable().optional().transform((value) => value ?? undefined),
   parent_document_id: z.string().nullable().optional().transform((value) => value ?? undefined),
   title: z.string(),

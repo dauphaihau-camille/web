@@ -70,6 +70,7 @@ const documentFixture: Document = {
   public_id: 'public-doc-1',
   version: 2,
   workspace_id: 'acme',
+  owner_user_id: 'user-1',
   teamspace_id: undefined,
   parent_document_id: undefined,
   title: 'Quarterly plan',
