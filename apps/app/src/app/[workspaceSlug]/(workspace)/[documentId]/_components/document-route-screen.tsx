@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   documentKeys,
+  getLastValidDocumentRoute,
+  setLastValidDocumentRoute,
   type DocumentId,
   useDocumentQuery,
 } from '@/domains/document';
@@ -20,6 +23,7 @@ import { ServerCrashIcon } from 'lucide-react';
 
 import { DocumentScreen } from './document-screen/document-screen';
 import { DocumentScreenSkeleton } from '../../../_components/workspace-skeleton/document-screen-skeleton';
+import { workspaceRoutes } from '@/domains/workspace';
 
 export function DocumentRouteScreen({
   documentId: documentRouteId,
@@ -28,17 +32,24 @@ export function DocumentRouteScreen({
   documentId: string;
   workspaceSlug: string;
 }) {
+  const pathname = usePathname();
   const queryClient = useQueryClient();
+  const router = useRouter();
+
   const routeDocumentQuery = useDocumentQuery(documentRouteId, {
     refetchOnMount: false,
   });
+
   const canonicalDocumentId = routeDocumentQuery.data?.id;
+
+  const isCanonicalDocumentQueryEnabled =
+    canonicalDocumentId !== undefined
+    && canonicalDocumentId !== documentRouteId;
+
   const canonicalDocumentQuery = useDocumentQuery(
     (canonicalDocumentId ?? documentRouteId) as DocumentId,
     {
-      enabled:
-        canonicalDocumentId !== undefined
-        && canonicalDocumentId !== documentRouteId,
+      enabled: isCanonicalDocumentQueryEnabled,
       initialData: routeDocumentQuery.data,
       refetchOnMount: false,
     },
@@ -52,9 +63,44 @@ export function DocumentRouteScreen({
 
     queryClient.setQueryData(documentKeys.detail(document.id), document);
     queryClient.setQueryData(documentKeys.detail(document.public_id), document);
-  }, [document, queryClient]);
 
-  if (!document && (routeDocumentQuery.isPending || canonicalDocumentQuery.isPending)) {
+    setLastValidDocumentRoute(
+      workspaceRoutes.document(workspaceSlug, document.public_id, document.title),
+    );
+  }, [document, queryClient, workspaceSlug]);
+
+  useEffect(() => {
+    if (
+      document
+      || routeDocumentQuery.isPending
+      || (isCanonicalDocumentQueryEnabled && canonicalDocumentQuery.isPending)
+      || (
+        !routeDocumentQuery.isError
+        && (!isCanonicalDocumentQueryEnabled || !canonicalDocumentQuery.isError)
+      )
+    ) {
+      return;
+    }
+
+    router.replace(getLastValidDocumentRoute(pathname) ?? workspaceRoutes.entry());
+  }, [
+    canonicalDocumentQuery.isError,
+    canonicalDocumentQuery.isPending,
+    document,
+    isCanonicalDocumentQueryEnabled,
+    pathname,
+    routeDocumentQuery.isError,
+    routeDocumentQuery.isPending,
+    router,
+  ]);
+
+  if (
+    !document
+    && (
+      routeDocumentQuery.isPending
+      || (isCanonicalDocumentQueryEnabled && canonicalDocumentQuery.isPending)
+    )
+  ) {
     return <DocumentScreenSkeleton animate />;
   }
 

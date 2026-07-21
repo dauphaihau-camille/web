@@ -39,6 +39,10 @@ export function WorkspaceProvider({
       .then(() => {
         lastMarkedWorkspaceSlug = workspaceSlug;
       })
+      .catch(() => {
+        // Last-active tracking is best effort; inaccessible workspace routes
+        // should not interrupt redirect fallback handling.
+      })
       .finally(() => {
         if (pendingWorkspaceSlug === workspaceSlug) {
           pendingWorkspaceSlug = null;
