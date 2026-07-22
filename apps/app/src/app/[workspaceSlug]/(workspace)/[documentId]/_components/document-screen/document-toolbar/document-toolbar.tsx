@@ -17,6 +17,7 @@ import { ShareButton } from './share-button/share-button';
 
 type DocumentToolbarProps = {
   archiveCurrentDocument: () => void;
+  canEdit: boolean;
   copyLink: () => void | Promise<void>;
   copyPublishedLink: () => Promise<void>;
   duplicateDocument: () => void;
@@ -44,6 +45,7 @@ type DocumentToolbarProps = {
 
 export function DocumentToolbar({
   archiveCurrentDocument,
+  canEdit,
   copyLink,
   copyPublishedLink,
   duplicateDocument,
@@ -78,6 +80,7 @@ export function DocumentToolbar({
         />
       </div>
       <ShareButton
+        canEdit={canEdit}
         isArchived={isArchived}
         isPublished={Boolean(publishStatus?.published_document_id)}
         isPublishing={isPublishing}
@@ -114,6 +117,7 @@ export function DocumentToolbar({
         }
       />
       <DocOperations
+        canEdit={canEdit}
         isArchiving={isArchiving}
         isArchived={isArchived}
         isDuplicating={isDuplicating}

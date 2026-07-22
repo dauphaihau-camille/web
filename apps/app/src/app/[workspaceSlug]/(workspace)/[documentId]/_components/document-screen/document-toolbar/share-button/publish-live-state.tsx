@@ -18,12 +18,13 @@ import type { PublishTabContentProps } from './types';
 
 type PublishLiveStateProps = Pick<
   PublishTabContentProps,
-  'publicUrl' | 'isUnpublishing' | 'onCopyPublishedLink' | 'onUnpublish'
+  'canEdit' | 'publicUrl' | 'isUnpublishing' | 'onCopyPublishedLink' | 'onUnpublish'
 > & {
   copyPublishedLinkShortcut: string;
 };
 
 export function PublishLiveState({
+  canEdit,
   publicUrl,
   isUnpublishing,
   onCopyPublishedLink,
@@ -74,7 +75,7 @@ export function PublishLiveState({
           size="lg"
           variant="outline"
           className="flex-1"
-          disabled={isUnpublishing}
+          disabled={!canEdit || isUnpublishing}
           onClick={onUnpublish}
         >
           {isUnpublishing ? 'Unpublishing...' : 'Unpublish'}

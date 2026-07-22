@@ -5,6 +5,8 @@ import type {
 } from '@blocknote/core';
 import { createBlockNoteEditorClient } from '@shared/components/editor/blocknote-editor-client/create-blocknote-editor-client';
 
+import { DOCUMENT_SUBDOC_CREATED_EVENT } from '@/domains/document/document-subdoc-created-event';
+
 import { blockNoteSchema } from '../blocknote-schema';
 import { normalizeBlockNoteContent } from '../normalize-blocknote-content';
 import { blockNoteEditorClientStyles } from './blocknote-editor-client.styles';
@@ -56,6 +58,7 @@ function shouldReplaceSlashAnchorBlock(
 
 export const BlockNoteEditorClient = createBlockNoteEditorClient({
   SlashMenuComponent: SlashMenu,
+  externalSubdocCreatedEventName: DOCUMENT_SUBDOC_CREATED_EVENT,
   hiddenSlashMenuTitles: HIDDEN_SLASH_MENU_TITLES,
   normalizeContent: normalizeBlockNoteContent,
   schema: blockNoteSchema,

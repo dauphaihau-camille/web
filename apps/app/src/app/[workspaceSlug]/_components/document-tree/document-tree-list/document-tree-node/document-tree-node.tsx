@@ -25,23 +25,29 @@ import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store'
 
 import { DocumentTreeNodeActions } from './document-tree-node-actions/document-tree-node-actions';
 
+export type DocumentTreeNodeActionMode = 'full' | 'readOnly' | 'hidden';
+
 export function DocumentTreeNode({
   document,
   workspaceSlug,
   pathname,
+  actionMode = 'full',
 }: {
   document: DocumentNavigationNode;
   workspaceSlug: string;
   pathname: string;
+  actionMode?: DocumentTreeNodeActionMode;
 }) {
   const href = workspaceRoutes.document(
     workspaceSlug,
     document.public_id,
     document.title,
   );
+
   const currentDocumentRouteId = parseDocumentRouteSegment(
     pathname.split('/').filter(Boolean).at(-1) ?? '',
   );
+
   const isActive =
     currentDocumentRouteId === document.public_id
     || currentDocumentRouteId === document.id;
@@ -49,7 +55,9 @@ export function DocumentTreeNode({
   const hasChildren = document.has_children;
   const hasContent = document.has_content;
   const DocumentIcon = hasContent ? FileTextIcon : FileIcon;
+
   const queryClient = useQueryClient();
+
   const activeDraftDocumentId = useDocumentTitleDraftStore(
     (state) => state.activeDocumentId,
   );
@@ -136,11 +144,16 @@ export function DocumentTreeNode({
             <span className="font-semibold">{displayTitle}</span>
           </SidebarMenuSubButton>
 
-          <DocumentTreeNodeActions
-            document={document}
-            isActive={isActive}
-            workspaceSlug={workspaceSlug}
-          />
+          {actionMode !== 'hidden'
+            ? (
+              <DocumentTreeNodeActions
+                mode={actionMode}
+                document={document}
+                isActive={isActive}
+                workspaceSlug={workspaceSlug}
+              />
+            )
+            : null}
         </SidebarMenuSubItem>
 
         {hasChildren && isExpanded && (
@@ -164,6 +177,7 @@ export function DocumentTreeNode({
                 document={childDocument}
                 workspaceSlug={workspaceSlug}
                 pathname={pathname}
+                actionMode={actionMode}
               />
             ))}
           </SidebarMenuSub>

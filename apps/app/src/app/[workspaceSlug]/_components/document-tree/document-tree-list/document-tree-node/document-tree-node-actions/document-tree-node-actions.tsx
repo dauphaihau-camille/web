@@ -29,12 +29,14 @@ import { useDocumentTreeNodeActions } from './use-document-tree-node-actions';
 import { CreateDocumentButton } from '@/app/[workspaceSlug]/_components/create-document-button';
 
 type DocumentTreeNodeActionsProps = {
+  mode?: 'full' | 'readOnly';
   document: DocumentNavigationNode;
   isActive: boolean;
   workspaceSlug: string;
 };
 
 export function DocumentTreeNodeActions({
+  mode = 'full',
   document,
   isActive,
   workspaceSlug,
@@ -58,6 +60,7 @@ export function DocumentTreeNodeActions({
     workspaceSlug,
   });
 
+  const canMutate = mode === 'full';
   const isBusy = createSubdocumentMutation.isPending;
 
   const createSubdocumentButton = (
@@ -76,10 +79,14 @@ export function DocumentTreeNodeActions({
         isMenuOpen && 'opacity-100',
       )}
     >
-      <Tooltip>
-        <TooltipTrigger render={createSubdocumentButton} />
-        <TooltipContent side="bottom">Add a document inside</TooltipContent>
-      </Tooltip>
+      {canMutate
+        ? (
+          <Tooltip>
+            <TooltipTrigger render={createSubdocumentButton} />
+            <TooltipContent side="bottom">Add a document inside</TooltipContent>
+          </Tooltip>
+        )
+        : null}
 
       <DropdownMenu onOpenChange={setIsMenuOpen}>
         <Tooltip>
@@ -96,7 +103,7 @@ export function DocumentTreeNodeActions({
             }
           />
           <TooltipContent side="bottom">
-            Delete, duplicate, and more...
+            {canMutate ? 'Delete, duplicate, and more...' : 'Copy link and favorite'}
           </TooltipContent>
         </Tooltip>
 
@@ -105,17 +112,21 @@ export function DocumentTreeNodeActions({
           sideOffset={8}
           className="w-auto min-w-48"
         >
-          <DropdownMenuItem
-            disabled={duplicateDocumentMutation.isPending}
-            onClick={handleDuplicate}
-          >
-            <CopyIcon className="size-4" />
-            <span>
-              {duplicateDocumentMutation.isPending
-                ? 'Duplicating...'
-                : 'Duplicate'}
-            </span>
-          </DropdownMenuItem>
+          {canMutate
+            ? (
+              <DropdownMenuItem
+                disabled={duplicateDocumentMutation.isPending}
+                onClick={handleDuplicate}
+              >
+                <CopyIcon className="size-4" />
+                <span>
+                  {duplicateDocumentMutation.isPending
+                    ? 'Duplicating...'
+                    : 'Duplicate'}
+                </span>
+              </DropdownMenuItem>
+            )
+            : null}
 
           <DropdownMenuItem onClick={() => void handleCopyLink()}>
             <LinkIcon className="size-4" />
@@ -138,21 +149,27 @@ export function DocumentTreeNodeActions({
             </span>
           </DropdownMenuItem>
 
-          <DropdownMenuSeparator />
+          {canMutate
+            ? (
+              <>
+                <DropdownMenuSeparator />
 
-          <DropdownMenuItem
-            variant="destructive"
-            className="!text-foreground focus:bg-accent focus:!text-destructive dark:focus:bg-accent [&_svg]:!text-muted-foreground focus:[&_svg]:!text-destructive data-disabled:[&_svg]:!text-muted-foreground"
-            disabled={archiveDocumentMutation.isPending}
-            onClick={handleArchive}
-          >
-            <Trash2Icon className="size-4" />
-            <span>
-              {archiveDocumentMutation.isPending
-                ? 'Moving to Trash...'
-                : 'Move to Trash'}
-            </span>
-          </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  className="!text-foreground focus:bg-accent focus:!text-destructive dark:focus:bg-accent [&_svg]:!text-muted-foreground focus:[&_svg]:!text-destructive data-disabled:[&_svg]:!text-muted-foreground"
+                  disabled={archiveDocumentMutation.isPending}
+                  onClick={handleArchive}
+                >
+                  <Trash2Icon className="size-4" />
+                  <span>
+                    {archiveDocumentMutation.isPending
+                      ? 'Moving to Trash...'
+                      : 'Move to Trash'}
+                  </span>
+                </DropdownMenuItem>
+              </>
+            )
+            : null}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

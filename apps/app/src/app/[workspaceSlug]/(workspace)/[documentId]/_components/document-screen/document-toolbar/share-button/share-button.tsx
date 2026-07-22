@@ -32,6 +32,7 @@ const SHARE_SHORTCUT = '\u21e7\u2318S';
 const COPY_PUBLISHED_LINK_SHORTCUT = '\u21e7\u2318C';
 
 export function ShareButton({
+  canEdit,
   isArchived,
   isPublished,
   isPublishing,
@@ -128,6 +129,7 @@ export function ShareButton({
           <TabsContent value="publish" className="p-4 outline-none">
             <PublishTabContent
               isArchived={isArchived}
+              canEdit={canEdit}
               isPublished={isPublished}
               isPublishing={isPublishing}
               isRestoring={isRestoring}

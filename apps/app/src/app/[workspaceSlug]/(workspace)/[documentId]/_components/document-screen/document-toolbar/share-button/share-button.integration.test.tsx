@@ -18,6 +18,7 @@ describe('ShareButton integration', () => {
 
     renderWithProviders(
       <ShareButton
+        canEdit
         isArchived={false}
         isPublished={false}
         isPublishing={false}
@@ -48,6 +49,7 @@ describe('ShareButton integration', () => {
 
     renderWithProviders(
       <ShareButton
+        canEdit
         isArchived={false}
         isPublished
         isPublishing={false}
@@ -72,5 +74,33 @@ describe('ShareButton integration', () => {
 
     expect(onCopyPublishedLink).toHaveBeenCalledTimes(1);
     expect(onUnpublish).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps published link actions available but disables mutating actions when read-only', async () => {
+    const onCopyPublishedLink = vi.fn();
+    const onUnpublish = vi.fn();
+
+    renderWithProviders(
+      <ShareButton
+        canEdit={false}
+        isArchived={false}
+        isPublished
+        isPublishing={false}
+        isRestoring={false}
+        isUnpublishing={false}
+        publishedPath="/share/published-doc"
+        onCopyPublishedLink={onCopyPublishedLink}
+        onPublish={vi.fn()}
+        onRestore={vi.fn()}
+        onUnpublish={onUnpublish}
+      />,
+    );
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Share' }));
+
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Copy link' }));
+    expect(onCopyPublishedLink).toHaveBeenCalledTimes(1);
+
+    expect(screen.getByRole('button', { name: 'Unpublish' })).toBeDisabled();
   });
 });

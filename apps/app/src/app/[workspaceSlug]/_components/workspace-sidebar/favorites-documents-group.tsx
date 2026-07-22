@@ -3,22 +3,15 @@
 import { HTTPError } from 'ky';
 
 import type { DocumentNavigationNode } from '@/domains/document';
+import type { FavoriteDocument } from '@/domains/favorite';
 import { useWorkspaceFavoritesQuery } from '@/domains/favorite';
+import type { DocumentTreeNodeActionMode } from '../document-tree/document-tree-list/document-tree-node/document-tree-node';
 
 import { DocumentTreeSkeleton } from '../workspace-skeleton/document-tree-skeleton';
 import { DocumentTreeList } from '../document-tree/document-tree-list/document-tree-list';
 import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
 
-function toFavoriteDocumentNode(favorite: {
-  document_id: string;
-  public_id: string;
-  title: string;
-  teamspace_id?: string;
-  parent_document_id?: string;
-  sort_key: number;
-  has_children: boolean;
-  has_content: boolean;
-}): DocumentNavigationNode {
+function toFavoriteDocumentNode(favorite: FavoriteDocument): DocumentNavigationNode {
   return {
     id: favorite.document_id,
     public_id: favorite.public_id,
@@ -32,6 +25,12 @@ function toFavoriteDocumentNode(favorite: {
   };
 }
 
+function resolveFavoriteDocumentActionMode(
+  favorite: FavoriteDocument,
+): DocumentTreeNodeActionMode {
+  return favorite.access.can_edit ? 'full' : 'readOnly';
+}
+
 export function FavoritesDocumentsGroup({
   workspaceSlug,
   favoritesQuery: favoritesQueryProp,
@@ -42,6 +41,11 @@ export function FavoritesDocumentsGroup({
   const localFavoritesQuery = useWorkspaceFavoritesQuery(workspaceSlug);
   const favoritesQuery = favoritesQueryProp ?? localFavoritesQuery;
   const favorites = favoritesQuery.data ?? [];
+
+  const favoriteByDocumentId = new Map(
+    favorites.map((favorite) => [favorite.document_id, favorite]),
+  );
+
   const isEmptyFavoritesResponse =
     !favoritesQuery.isLoading
     && (
@@ -65,6 +69,11 @@ export function FavoritesDocumentsGroup({
             workspaceSlug={workspaceSlug}
             items={favorites.map(toFavoriteDocumentNode)}
             emptyMessage="No favorites yet."
+            getActionMode={(document) => {
+              const favorite = favoriteByDocumentId.get(document.id);
+
+              return favorite ? resolveFavoriteDocumentActionMode(favorite) : 'readOnly';
+            }}
           />
         )
         : null}

@@ -23,6 +23,10 @@ import {
   type FavoriteDocument,
   type FavoriteStatus,
 } from '@/domains/favorite';
+import {
+  DOCUMENT_SUBDOC_CREATED_EVENT,
+  type DocumentSubdocCreatedEventDetail,
+} from '@/domains/document/document-subdoc-created-event';
 import type * as DocumentRequests from '@/domains/document/api/document.requests';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import type * as DocumentTreeNodeActionHelpers from './document-tree-node-action-helpers';
@@ -182,6 +186,12 @@ const favoriteFixture: FavoriteDocument = {
   has_children: false,
   has_content: false,
   favorited_at: '2026-01-01T00:00:00.000Z',
+  access: {
+    permission: 'manage',
+    can_view: true,
+    can_edit: true,
+    can_manage: true,
+  },
 };
 
 function createWrapper() {
@@ -389,6 +399,9 @@ describe('useDocumentTreeNodeActions integration', () => {
   });
 
   it('marks a favorited parent as having children after creating a subdocument', async () => {
+    const subdocCreatedListener = vi.fn();
+
+    window.addEventListener(DOCUMENT_SUBDOC_CREATED_EVENT, subdocCreatedListener);
     createSubdocumentCommandMock.mockResolvedValue({
       child_document: childDocumentFixture,
       parent_document: {
@@ -477,7 +490,18 @@ describe('useDocumentTreeNodeActions integration', () => {
           has_children: true,
         }),
       ]);
+      expect(subdocCreatedListener).toHaveBeenCalledWith(
+        expect.objectContaining({
+          detail: {
+            parentDocumentId: documentFixture.id,
+            workspaceSlug: 'acme',
+            childDocument: childDocumentFixture,
+          } satisfies DocumentSubdocCreatedEventDetail,
+        }),
+      );
     });
+
+    window.removeEventListener(DOCUMENT_SUBDOC_CREATED_EVENT, subdocCreatedListener);
   });
 
   it('optimistically adds a subdocument before the request resolves', async () => {

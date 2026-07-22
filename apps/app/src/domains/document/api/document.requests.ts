@@ -74,22 +74,18 @@ export async function getArchivedWorkspaceDocuments(
 }
 
 export async function getWorkspaceChildDocuments(
-  workspaceId: WorkspaceId,
+  _workspaceId: WorkspaceId,
   input: {
     parent_document_id: DocumentId;
     limit?: number;
     cursor?: string;
   },
 ): Promise<DocumentNavigationPage> {
-  const response = await apiGet<unknown>(`workspaces/${workspaceId}/documents`, {
-    searchParams: {
-      parent_document_id: input.parent_document_id,
-      limit: String(input.limit ?? 50),
-      ...(input.cursor ? { cursor: input.cursor } : {}),
-    },
-  });
+  const response = await apiGet<unknown>(`documents/${input.parent_document_id}/children`);
 
-  return documentNavigationPageSchema.parse(response) as DocumentNavigationPage;
+  return {
+    items: documentNavigationPageSchema.shape.items.parse(response),
+  } as DocumentNavigationPage;
 }
 
 export async function createRootDocument(input: CreateRootDocumentInput): Promise<Document> {

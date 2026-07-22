@@ -82,6 +82,16 @@ vi.mock('./private-documents-group', () => ({
   PrivateDocumentsGroup: ({ workspaceSlug }: { workspaceSlug: string }) => <div>{`private:${workspaceSlug}`}</div>,
 }));
 
+vi.mock('./teamspaces-group', () => ({
+  TeamspacesGroup: ({
+    canEditDocuments,
+    workspaceSlug,
+  }: {
+    canEditDocuments: boolean;
+    workspaceSlug: string;
+  }) => <div>{`teamspaces:${workspaceSlug}:${canEditDocuments ? 'editable' : 'readonly'}`}</div>,
+}));
+
 describe('WorkspaceSidebar', () => {
   beforeEach(() => {
     useWorkspaceDocumentRootQueryMock.mockReset();
@@ -120,7 +130,7 @@ describe('WorkspaceSidebar', () => {
 
   it('renders the groups once either query has resolved data', () => {
     useWorkspaceQueryMock.mockReturnValue({
-      data: { name: 'Acme' },
+      data: { name: 'Acme', current_user_role: 'admin' },
       isPending: false,
       isLoading: false,
     });
@@ -145,5 +155,6 @@ describe('WorkspaceSidebar', () => {
     expect(screen.queryByText('tree-skeleton')).not.toBeInTheDocument();
     expect(screen.getByText('favorites:acme')).toBeInTheDocument();
     expect(screen.getByText('private:acme')).toBeInTheDocument();
+    expect(screen.getByText('teamspaces:acme:editable')).toBeInTheDocument();
   });
 });

@@ -18,6 +18,7 @@ import { WorkspaceSidebarTreeSkeleton } from '../workspace-skeleton/workspace-si
 import { WorkspaceUserDropdown } from '../workspace-user-dropdown';
 import { PrivateDocumentsGroup } from './private-documents-group';
 import { FavoritesDocumentsGroup } from './favorites-documents-group';
+import { TeamspacesGroup } from './teamspaces-group';
 import { WorkspaceSearchButton } from './workspace-search-button';
 import { WorkspaceTrashButton } from './workspace-trash-button/workspace-trash-button';
 
@@ -25,6 +26,10 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
   const workspaceQuery = useWorkspaceQuery(workspaceSlug);
   const favoritesQuery = useWorkspaceFavoritesQuery(workspaceSlug);
   const rootQuery = useWorkspaceDocumentRootQuery(workspaceSlug);
+
+  const canEditTeamspaceDocuments =
+    workspaceQuery.data?.current_user_role === 'owner'
+    || workspaceQuery.data?.current_user_role === 'admin';
 
   const isInitialWorkspaceLoading =
     !workspaceQuery.data
@@ -83,6 +88,11 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
               <PrivateDocumentsGroup
                 workspaceSlug={workspaceSlug}
                 rootQuery={rootQuery}
+              />
+              <TeamspacesGroup
+                workspaceSlug={workspaceSlug}
+                rootQuery={rootQuery}
+                canEditDocuments={canEditTeamspaceDocuments}
               />
             </>
           )}

@@ -43,6 +43,12 @@ function createOptimisticFavoriteDocument(document: Document): FavoriteDocument 
     teamspace_id: document.teamspace_id,
     title: document.title,
     workspace_id: document.workspace_id,
+    access: {
+      permission: 'manage',
+      can_view: true,
+      can_edit: true,
+      can_manage: true,
+    },
   };
 }
 

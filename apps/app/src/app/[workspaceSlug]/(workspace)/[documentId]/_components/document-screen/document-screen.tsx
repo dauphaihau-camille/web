@@ -52,6 +52,8 @@ function DocumentScreenContent({
   const [editorContent, setEditorContent] = useState(document.content);
 
   const documentCollaboration = useDocumentCollaboration(documentId);
+  const canEditDocument =
+    documentCollaboration.isReady && documentCollaboration.canEdit;
 
   const handleRestoreDraft = useCallback((content: unknown[]) => {
     setEditorContent(content);
@@ -125,6 +127,7 @@ function DocumentScreenContent({
           />
 
           <DocumentToolbar
+            canEdit={canEditDocument}
             isVisible={isChromeVisible}
             updatedAt={document.updated_at}
             {...documentToolbar}
@@ -141,10 +144,21 @@ function DocumentScreenContent({
             <Input
               value={title}
               onChange={(event) => {
+                if (!canEditDocument) {
+                  return;
+                }
+
                 hideChrome();
                 handleTitleChange(event.target.value);
               }}
-              onBlur={(event) => handleTitleBlur(event.currentTarget.value)}
+              onBlur={(event) => {
+                if (!canEditDocument) {
+                  return;
+                }
+
+                handleTitleBlur(event.currentTarget.value);
+              }}
+              readOnly={!canEditDocument}
               className="h-auto border-0 bg-transparent px-0 text-4xl font-semibold tracking-tight shadow-none focus-visible:ring-0 dark:bg-transparent md:text-5xl"
             />
           </div>
@@ -159,7 +173,7 @@ function DocumentScreenContent({
               documentTitle={savedTitle}
               workspaceSlug={workspaceSlug}
               content={editorContent}
-              editable={documentCollaboration.canEdit}
+              editable={canEditDocument}
               documentOperations={{
                 isCollaborative: true,
                 isArchiving: documentToolbar.isArchiving,
@@ -170,7 +184,9 @@ function DocumentScreenContent({
                 onCopyLink: documentToolbar.copyLink,
                 onDuplicate: documentToolbar.duplicateDocument,
               }}
-              onCreateSubdocAction={documentEditorActions.createSubdocument}
+              onCreateSubdocAction={
+                canEditDocument ? documentEditorActions.createSubdocument : undefined
+              }
             />
           )
           : (

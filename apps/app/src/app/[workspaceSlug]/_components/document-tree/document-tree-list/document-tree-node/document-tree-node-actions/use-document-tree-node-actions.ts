@@ -32,6 +32,12 @@ function createOptimisticFavoriteDocument(
     has_children: document.has_children,
     has_content: document.has_content,
     favorited_at: new Date().toISOString(),
+    access: {
+      permission: 'manage',
+      can_view: true,
+      can_edit: true,
+      can_manage: true,
+    },
   };
 }
 

@@ -8,6 +8,7 @@ type PublishTabContentViewProps = PublishTabContentProps & {
 };
 
 export function PublishTabContent({
+  canEdit,
   isArchived,
   isPublished,
   isPublishing,
@@ -23,6 +24,7 @@ export function PublishTabContent({
   if (isArchived) {
     return (
       <PublishArchivedState
+        canEdit={canEdit}
         isRestoring={isRestoring}
         onRestore={onRestore}
       />
@@ -33,6 +35,7 @@ export function PublishTabContent({
     return (
       <PublishLiveState
         publicUrl={publicUrl}
+        canEdit={canEdit}
         isUnpublishing={isUnpublishing}
         onCopyPublishedLink={onCopyPublishedLink}
         onUnpublish={onUnpublish}
@@ -44,6 +47,7 @@ export function PublishTabContent({
   return (
     <PublishDraftState
       isPublishing={isPublishing}
+      canEdit={canEdit}
       onPublish={onPublish}
     />
   );

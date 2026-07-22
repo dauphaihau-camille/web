@@ -9,18 +9,25 @@ import {
 import type { DocumentNavigationNode } from '@/domains/document';
 
 import { DocumentTreeMoreButton } from './document-tree-more-button/document-tree-more-button';
-import { DocumentTreeNode } from './document-tree-node/document-tree-node';
+import {
+  DocumentTreeNode,
+  type DocumentTreeNodeActionMode,
+} from './document-tree-node/document-tree-node';
 
 export function DocumentTreeList({
   workspaceSlug,
   items,
   emptyMessage,
   nextCursor,
+  actionMode = 'full',
+  getActionMode,
 }: {
   workspaceSlug: string;
   items: DocumentNavigationNode[];
   emptyMessage: string;
   nextCursor?: string;
+  actionMode?: DocumentTreeNodeActionMode;
+  getActionMode?: (document: DocumentNavigationNode) => DocumentTreeNodeActionMode;
 }) {
   const pathname = usePathname();
 
@@ -42,6 +49,7 @@ export function DocumentTreeList({
                 document={document}
                 workspaceSlug={workspaceSlug}
                 pathname={pathname}
+                actionMode={getActionMode?.(document) ?? actionMode}
               />
             ))
           )}

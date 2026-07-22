@@ -6,10 +6,11 @@ import type { ShareButtonProps } from './types';
 
 type PublishArchivedStateProps = Pick<
   ShareButtonProps,
-  'isRestoring' | 'onRestore'
+  'canEdit' | 'isRestoring' | 'onRestore'
 >;
 
 export function PublishArchivedState({
+  canEdit,
   isRestoring,
   onRestore,
 }: PublishArchivedStateProps) {
@@ -31,7 +32,7 @@ export function PublishArchivedState({
       <Button
         variant="outline"
         className="px-8"
-        disabled={isRestoring}
+        disabled={!canEdit || isRestoring}
         onClick={onRestore}
       >
         {isRestoring ? 'Restoring...' : 'Restore'}

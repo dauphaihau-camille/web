@@ -4,9 +4,13 @@ import { Button } from '@shared/components/ui/button';
 
 import type { ShareButtonProps } from './types';
 
-type PublishDraftStateProps = Pick<ShareButtonProps, 'isPublishing' | 'onPublish'>;
+type PublishDraftStateProps = Pick<
+  ShareButtonProps,
+  'canEdit' | 'isPublishing' | 'onPublish'
+>;
 
 export function PublishDraftState({
+  canEdit,
   isPublishing,
   onPublish,
 }: PublishDraftStateProps) {
@@ -28,7 +32,7 @@ export function PublishDraftState({
       <Button
         variant="publish"
         className="w-full"
-        disabled={isPublishing}
+        disabled={!canEdit || isPublishing}
         onClick={onPublish}
       >
         {isPublishing ? 'Publishing...' : 'Publish'}

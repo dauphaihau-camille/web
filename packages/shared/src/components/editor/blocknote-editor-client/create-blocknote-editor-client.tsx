@@ -70,6 +70,7 @@ type CreateSubdocSelectionContext = {
 
 type CreateBlockNoteEditorClientOptions = {
   SlashMenuComponent: ComponentType<SharedSlashMenuProps>;
+  externalSubdocCreatedEventName?: string;
   hiddenSlashMenuTitles?: string[];
   normalizeContent?: (content: unknown[]) => unknown[];
   schema: NonNullable<Parameters<typeof useCreateBlockNote>[0]>['schema'];
@@ -80,6 +81,7 @@ type CreateBlockNoteEditorClientOptions = {
 
 export function createBlockNoteEditorClient({
   SlashMenuComponent,
+  externalSubdocCreatedEventName,
   hiddenSlashMenuTitles = [],
   normalizeContent,
   schema,
@@ -141,6 +143,119 @@ export function createBlockNoteEditorClient({
       },
       { wait: 500 },
     );
+
+    useEffect(() => {
+      if (!externalSubdocCreatedEventName || !_documentId) {
+        return;
+      }
+
+      const documentHasSubdocReference = (
+        blocks: unknown[],
+        childDocumentId: string,
+      ): boolean => blocks.some((value) => {
+        if (!value || typeof value !== 'object' || Array.isArray(value)) {
+          return false;
+        }
+
+        const block = value as {
+          type?: unknown;
+          props?: unknown;
+          children?: unknown;
+        };
+
+        if (
+          block.type === 'subdoc'
+          && block.props
+          && typeof block.props === 'object'
+          && !Array.isArray(block.props)
+          && (block.props as { documentId?: unknown }).documentId === childDocumentId
+        ) {
+          return true;
+        }
+
+        return Array.isArray(block.children)
+          ? documentHasSubdocReference(block.children, childDocumentId)
+          : false;
+      });
+
+      const handleExternalSubdocCreated = (event: Event) => {
+        const detail = (event as CustomEvent<{
+          childDocument?: {
+            content?: unknown[];
+            id?: unknown;
+            public_id?: unknown;
+            title?: unknown;
+          };
+          parentDocumentId?: unknown;
+          workspaceSlug?: unknown;
+        }>).detail;
+
+        if (
+          !detail
+          || detail.parentDocumentId !== _documentId
+          || !detail.childDocument
+          || typeof detail.childDocument.id !== 'string'
+          || typeof detail.childDocument.public_id !== 'string'
+        ) {
+          return;
+        }
+
+        const currentDocument = editor.document as unknown[];
+
+        if (documentHasSubdocReference(currentDocument, detail.childDocument.id)) {
+          return;
+        }
+
+        const childTitle =
+          typeof detail.childDocument.title === 'string'
+            ? detail.childDocument.title
+            : 'Untitled';
+        const createdSubdocBlock = {
+          type: 'subdoc' as const,
+          props: {
+            documentId: detail.childDocument.id,
+            publicId: detail.childDocument.public_id,
+            workspaceId: typeof detail.workspaceSlug === 'string'
+              ? detail.workspaceSlug
+              : workspaceSlug,
+            title: childTitle || 'Untitled',
+            hasContent: Array.isArray(detail.childDocument.content)
+              && detail.childDocument.content.length > 0,
+          },
+        };
+        const lastBlock = editor.document.at(-1);
+
+        editor.transact(() => {
+          if (lastBlock) {
+            editor.insertBlocks(
+              [createdSubdocBlock] as never[],
+              lastBlock,
+              'after',
+            );
+            return;
+          }
+
+          editor.replaceBlocks(editor.document, [createdSubdocBlock] as never[]);
+        });
+      };
+
+      window.addEventListener(
+        externalSubdocCreatedEventName,
+        handleExternalSubdocCreated,
+      );
+
+      return () => {
+        window.removeEventListener(
+          externalSubdocCreatedEventName,
+          handleExternalSubdocCreated,
+        );
+      };
+    }, [
+      _documentId,
+      editor,
+      externalSubdocCreatedEventName,
+      workspaceSlug,
+    ]);
 
     useEffect(() => {
       if (collaboration) {

@@ -5,6 +5,13 @@ export const favoriteStatusSchema = z.object({
   is_favorite: z.boolean(),
 });
 
+export const favoriteDocumentAccessSchema = z.object({
+  permission: z.enum(['view', 'edit', 'manage']),
+  can_view: z.boolean(),
+  can_edit: z.boolean(),
+  can_manage: z.boolean(),
+});
+
 export const favoriteDocumentSchema = z.object({
   document_id: z.string().min(1),
   public_id: z.string().min(1),
@@ -16,4 +23,5 @@ export const favoriteDocumentSchema = z.object({
   has_children: z.boolean(),
   has_content: z.boolean(),
   favorited_at: z.string(),
+  access: favoriteDocumentAccessSchema,
 });

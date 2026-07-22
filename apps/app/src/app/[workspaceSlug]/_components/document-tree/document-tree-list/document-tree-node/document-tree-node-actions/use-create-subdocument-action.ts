@@ -8,6 +8,7 @@ import {
   type DocumentNavigationNode,
   useCreateSubdocumentMutation,
 } from '@/domains/document';
+import { dispatchDocumentSubdocCreatedEvent } from '@/domains/document/document-subdoc-created-event';
 import {
   markCachedNavigationNodeHasChildren,
   insertCreatedSubdocIntoCachedChildren,
@@ -148,7 +149,12 @@ export function useCreateSubdocumentAction({
         );
       }
     },
-    onSuccess: (_result, _variables, _context) => {
+    onSuccess: (result, _variables, _context) => {
+      dispatchDocumentSubdocCreatedEvent({
+        parentDocumentId: document.id,
+        workspaceSlug,
+        childDocument: result.child_document,
+      });
       markCachedFavoriteDocumentHasChildren(
         queryClient,
         workspaceSlug,

@@ -17,9 +17,20 @@ vi.mock('../workspace-skeleton/document-tree-skeleton', () => ({
 }));
 
 vi.mock('../document-tree/document-tree-list/document-tree-list', () => ({
-  DocumentTreeList: ({ items }: { items: Array<{ title: string; has_children: boolean; has_content: boolean }> }) => (
+  DocumentTreeList: ({
+    getActionMode,
+    items,
+  }: {
+    getActionMode?: (item: { id: string }) => string;
+    items: Array<{
+      id: string;
+      title: string;
+      has_children: boolean;
+      has_content: boolean;
+    }>;
+  }) => (
     <div>
-      {items.map((item) => `${item.title}:${item.has_children ? 'children' : 'leaf'}:${item.has_content ? 'content' : 'empty'}`).join('|')}
+      {items.map((item) => `${item.title}:${item.has_children ? 'children' : 'leaf'}:${item.has_content ? 'content' : 'empty'}:${getActionMode?.(item) ?? 'full'}`).join('|')}
     </div>
   ),
 }));
@@ -45,6 +56,30 @@ describe('FavoritesDocumentsGroup', () => {
           has_children: true,
           has_content: true,
           favorited_at: '2026-01-01T00:00:00.000Z',
+          access: {
+            permission: 'edit',
+            can_view: true,
+            can_edit: true,
+            can_manage: false,
+          },
+        },
+        {
+          document_id: 'document-2',
+          public_id: 'public-2',
+          workspace_id: 'acme',
+          teamspace_id: 'teamspace-1',
+          parent_document_id: undefined,
+          title: 'Read-only favorite',
+          sort_key: 2,
+          has_children: false,
+          has_content: true,
+          favorited_at: '2026-01-02T00:00:00.000Z',
+          access: {
+            permission: 'view',
+            can_view: true,
+            can_edit: false,
+            can_manage: false,
+          },
         },
       ],
     });
@@ -52,6 +87,6 @@ describe('FavoritesDocumentsGroup', () => {
     render(<FavoritesDocumentsGroup workspaceSlug="acme" />);
 
     expect(screen.getByText('Favorites')).toBeInTheDocument();
-    expect(screen.getByText('Parent favorite:children:content')).toBeInTheDocument();
+    expect(screen.getByText('Parent favorite:children:content:full|Read-only favorite:leaf:content:readOnly')).toBeInTheDocument();
   });
 });

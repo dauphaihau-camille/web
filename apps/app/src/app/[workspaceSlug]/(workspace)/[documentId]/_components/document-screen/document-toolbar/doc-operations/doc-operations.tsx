@@ -21,6 +21,7 @@ import { cn } from '@shared/lib/utils';
 import { RelativeTimeText } from './relative-time-text';
 
 type DocOperationsProps = {
+  canEdit: boolean;
   isArchiving: boolean;
   isArchived?: boolean;
   isDuplicating: boolean;
@@ -31,6 +32,7 @@ type DocOperationsProps = {
 };
 
 export function DocOperations({
+  canEdit,
   isArchiving,
   isArchived = false,
   isDuplicating,
@@ -41,7 +43,7 @@ export function DocOperations({
 }: DocOperationsProps) {
   useEffect(() => {
     const handleDuplicateDocument = () => {
-      if (isDuplicating) {
+      if (!canEdit || isDuplicating) {
         return;
       }
       onDuplicate();
@@ -55,7 +57,7 @@ export function DocOperations({
         handleDuplicateDocument,
       );
     };
-  }, [isDuplicating, onDuplicate]);
+  }, [canEdit, isDuplicating, onDuplicate]);
 
   useEffect(() => {
     const handleCopyLink = () => {
@@ -86,7 +88,10 @@ export function DocOperations({
         sideOffset={8}
         className="w-auto min-w-48"
       >
-        <DropdownMenuItem disabled={isDuplicating} onClick={onDuplicate}>
+        <DropdownMenuItem
+          disabled={!canEdit || isDuplicating}
+          onClick={onDuplicate}
+        >
           <CopyIcon className="size-4" />
           <span>{isDuplicating ? 'Duplicating...' : 'Duplicate'}</span>
           <DropdownMenuShortcut>{'\u2318D'}</DropdownMenuShortcut>
@@ -101,7 +106,7 @@ export function DocOperations({
             <DropdownMenuItem
               variant="destructive"
               className="!text-foreground focus:bg-accent focus:!text-destructive dark:focus:bg-accent [&_svg]:!text-muted-foreground focus:[&_svg]:!text-destructive data-disabled:[&_svg]:!text-muted-foreground"
-              disabled={isArchiving}
+              disabled={!canEdit || isArchiving}
               onClick={onArchive}
             >
               <Trash2Icon className="size-4" />

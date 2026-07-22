@@ -1,4 +1,5 @@
 export type ShareButtonProps = {
+  canEdit: boolean;
   isArchived: boolean;
   isPublished: boolean;
   isPublishing: boolean;
@@ -14,6 +15,7 @@ export type ShareButtonProps = {
 export type PublishTabContentProps = Pick<
   ShareButtonProps,
   | 'isArchived'
+  | 'canEdit'
   | 'isPublished'
   | 'isPublishing'
   | 'isRestoring'
