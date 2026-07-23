@@ -9,8 +9,15 @@ import {
   createRootDocumentSchema,
   createSubdocumentCommandSchema,
   createSubdocumentCommandResultSchema,
+  documentCollaboratorListSchema,
+  documentCollaboratorSchema,
+  documentAccessSettingsSchema,
   documentSchema,
   documentNavigationPageSchema,
+  shareDocumentSchema,
+  shareDocumentsResponseSchema,
+  shareDocumentsSchema,
+  updateDocumentAccessSettingsSchema,
   workspaceDocumentNavigationSchema,
 } from './document.schemas';
 import type {
@@ -21,9 +28,16 @@ import type {
   CreateSubdocumentCommandInput,
   CreateSubdocumentCommandResult,
   Document,
+  DocumentAccessSettings,
+  DocumentCollaborator,
+  DocumentCollaboratorList,
   DocumentId,
   DocumentNavigationPage,
   MoveDocumentInput,
+  ShareDocumentInput,
+  ShareDocumentsInput,
+  ShareDocumentsResponse,
+  UpdateDocumentAccessSettingsInput,
   UpdateDocumentInput,
   WorkspaceDocumentNavigation,
   WorkspaceId,
@@ -33,6 +47,68 @@ export async function getDocument(documentId: DocumentId): Promise<Document> {
   const response = await apiGet<unknown>(`documents/${documentId}`);
 
   return documentSchema.parse(response);
+}
+
+export async function listDocumentCollaborators(
+  documentId: DocumentId,
+): Promise<DocumentCollaboratorList> {
+  const response = await apiGet<unknown>(`documents/${documentId}/collaborators`);
+
+  return documentCollaboratorListSchema.parse(response);
+}
+
+export async function shareDocument(
+  documentId: DocumentId,
+  input: ShareDocumentInput,
+): Promise<DocumentCollaborator> {
+  const payload = shareDocumentSchema.parse(input);
+  const response = await apiPost<unknown, ShareDocumentInput>(
+    `documents/${documentId}/share`,
+    payload,
+  );
+
+  return documentCollaboratorSchema.parse(response);
+}
+
+export async function shareDocuments(
+  documentId: DocumentId,
+  input: ShareDocumentsInput,
+): Promise<ShareDocumentsResponse> {
+  const payload = shareDocumentsSchema.parse(input);
+  const response = await apiPost<unknown, ShareDocumentsInput>(
+    `documents/${documentId}/shares`,
+    payload,
+  );
+
+  return shareDocumentsResponseSchema.parse(response);
+}
+
+export async function revokeDocumentAccess(
+  documentId: DocumentId,
+  userId: string,
+): Promise<void> {
+  await apiDelete<void>(`documents/${documentId}/collaborators/${userId}`);
+}
+
+export async function getDocumentAccessSettings(
+  documentId: DocumentId,
+): Promise<DocumentAccessSettings> {
+  const response = await apiGet<unknown>(`documents/${documentId}/access-settings`);
+
+  return documentAccessSettingsSchema.parse(response);
+}
+
+export async function updateDocumentAccessSettings(
+  documentId: DocumentId,
+  input: UpdateDocumentAccessSettingsInput,
+): Promise<DocumentAccessSettings> {
+  const payload = updateDocumentAccessSettingsSchema.parse(input);
+  const response = await apiPatch<unknown, UpdateDocumentAccessSettingsInput>(
+    `documents/${documentId}/access-settings`,
+    payload,
+  );
+
+  return documentAccessSettingsSchema.parse(response);
 }
 
 export async function getWorkspaceRootDocuments(

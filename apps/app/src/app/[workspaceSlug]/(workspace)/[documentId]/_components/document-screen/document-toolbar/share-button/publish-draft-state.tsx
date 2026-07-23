@@ -30,8 +30,7 @@ export function PublishDraftState({
         </div>
       </div>
       <Button
-        variant="publish"
-        className="w-full"
+        className="w-full rounded-sm"
         disabled={!canEdit || isPublishing}
         onClick={onPublish}
       >

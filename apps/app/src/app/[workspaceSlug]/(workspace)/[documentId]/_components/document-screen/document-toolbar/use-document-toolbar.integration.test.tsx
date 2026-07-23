@@ -160,6 +160,10 @@ describe('useDocumentToolbar integration', () => {
           }],
           next_cursor: undefined,
         },
+        shared_documents: {
+          items: [],
+          next_cursor: undefined,
+        },
         teamspaces: [],
       },
     );

@@ -127,9 +127,12 @@ function DocumentScreenContent({
           />
 
           <DocumentToolbar
+            canManageAccess={Boolean(document.access?.can_manage)}
             canEdit={canEditDocument}
+            document={document}
             isVisible={isChromeVisible}
             updatedAt={document.updated_at}
+            workspaceSlug={workspaceSlug}
             {...documentToolbar}
           />
         </div>

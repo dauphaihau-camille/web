@@ -17,6 +17,7 @@ import { ShareButton } from './share-button/share-button';
 
 type DocumentToolbarProps = {
   archiveCurrentDocument: () => void;
+  canManageAccess: boolean;
   canEdit: boolean;
   copyLink: () => void | Promise<void>;
   copyPublishedLink: () => Promise<void>;
@@ -41,10 +42,13 @@ type DocumentToolbarProps = {
   toggleFavorite: () => void;
   unpublishCurrentDocument: () => void;
   updatedAt: Document['updated_at'];
+  document: Document;
+  workspaceSlug: string;
 };
 
 export function DocumentToolbar({
   archiveCurrentDocument,
+  canManageAccess,
   canEdit,
   copyLink,
   copyPublishedLink,
@@ -64,6 +68,8 @@ export function DocumentToolbar({
   toggleFavorite,
   unpublishCurrentDocument,
   updatedAt,
+  document,
+  workspaceSlug,
 }: DocumentToolbarProps) {
   return (
     <div
@@ -80,13 +86,17 @@ export function DocumentToolbar({
         />
       </div>
       <ShareButton
+        canManageAccess={canManageAccess}
         canEdit={canEdit}
+        document={document}
         isArchived={isArchived}
         isPublished={Boolean(publishStatus?.published_document_id)}
         isPublishing={isPublishing}
         isRestoring={isRestoring}
         isUnpublishing={isUnpublishing}
         publishedPath={publishStatus?.public_path}
+        workspaceSlug={workspaceSlug}
+        onCopyLink={copyLink}
         onCopyPublishedLink={copyPublishedLink}
         onPublish={publishCurrentDocument}
         onRestore={restoreCurrentDocument}

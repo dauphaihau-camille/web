@@ -61,6 +61,8 @@ function buildDocumentNavigationNode(document: Document): DocumentNavigationNode
   return {
     id: document.id,
     public_id: document.public_id,
+    access_scope: document.access?.scope ?? (document.teamspace_id ? 'teamspace' : 'private'),
+    is_owned_by_current_user: true,
     title: document.title,
     teamspace_id: document.teamspace_id,
     parent_document_id: document.parent_document_id,

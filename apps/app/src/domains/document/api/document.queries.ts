@@ -3,7 +3,9 @@ import { queryOptions } from '@tanstack/react-query';
 import { documentKeys } from './document.keys';
 import {
   getArchivedWorkspaceDocuments,
+  getDocumentAccessSettings,
   getDocument,
+  listDocumentCollaborators,
   getWorkspaceChildDocuments,
   getWorkspaceRootDocuments,
 } from './document.requests';
@@ -13,6 +15,22 @@ export function documentDetailQueryOptions(documentId: DocumentId) {
   return queryOptions({
     queryKey: documentKeys.detail(documentId),
     queryFn: () => getDocument(documentId),
+    staleTime: 30_000,
+  });
+}
+
+export function documentCollaboratorsQueryOptions(documentId: DocumentId) {
+  return queryOptions({
+    queryKey: documentKeys.collaborators(documentId),
+    queryFn: () => listDocumentCollaborators(documentId),
+    staleTime: 30_000,
+  });
+}
+
+export function documentAccessSettingsQueryOptions(documentId: DocumentId) {
+  return queryOptions({
+    queryKey: documentKeys.accessSettings(documentId),
+    queryFn: () => getDocumentAccessSettings(documentId),
     staleTime: 30_000,
   });
 }

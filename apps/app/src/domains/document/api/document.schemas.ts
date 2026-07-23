@@ -7,6 +7,26 @@ export const documentBreadcrumbItemSchema = z.object({
   public_id: z.string().min(1),
   title: z.string(),
 });
+export const documentAccessPermissionSchema = z.enum(['none', 'view', 'edit', 'manage']);
+export const documentAccessGrantPermissionSchema = z.enum(['view', 'comment', 'edit', 'manage']);
+const nullableDocumentAccessGrantPermissionSchema = z.preprocess(
+  (value) => value ?? undefined,
+  documentAccessGrantPermissionSchema.optional(),
+);
+export const documentAccessScopeSchema = z.enum(['private', 'shared', 'teamspace']);
+export const documentAccessSchema = z.object({
+  scope: documentAccessScopeSchema,
+  permission: documentAccessPermissionSchema,
+  can_view: z.boolean(),
+  can_edit: z.boolean(),
+  can_manage: z.boolean(),
+  workspace_member_permission: nullableDocumentAccessGrantPermissionSchema,
+});
+export const documentOwnerUserSchema = z.object({
+  id: z.string().min(1),
+  email: z.string().email(),
+  display_name: z.string().optional(),
+});
 
 export const documentSchema = z.object({
   id: documentIdSchema,
@@ -14,6 +34,7 @@ export const documentSchema = z.object({
   version: z.number().int().positive(),
   workspace_id: z.string().min(1),
   owner_user_id: z.string().min(1),
+  owner_user: documentOwnerUserSchema.optional(),
   teamspace_id: z.string().nullable().optional().transform((value) => value ?? undefined),
   parent_document_id: z.string().nullable().optional().transform((value) => value ?? undefined),
   title: z.string(),
@@ -28,11 +49,63 @@ export const documentSchema = z.object({
   published_document_id: z.string().optional(),
   public_path: z.string().optional(),
   breadcrumb: z.array(documentBreadcrumbItemSchema).optional(),
+  access: documentAccessSchema.optional(),
+});
+
+export const documentCollaboratorUserSchema = z.object({
+  id: z.string().min(1),
+  email: z.string().email(),
+  display_name: z.string().optional(),
+});
+
+export const documentCollaboratorSchema = z.object({
+  id: z.string().min(1),
+  document_id: documentIdSchema,
+  user: documentCollaboratorUserSchema,
+  permission: documentAccessGrantPermissionSchema,
+  granted_by_user_id: z.string().min(1),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export const documentCollaboratorListSchema = z.array(documentCollaboratorSchema);
+
+export const shareDocumentSchema = z.object({
+  user_id: z.string().min(1),
+  permission: documentAccessGrantPermissionSchema,
+});
+
+export const shareDocumentsSchema = z.object({
+  grants: z.array(shareDocumentSchema).min(1),
+});
+
+export const shareDocumentFailureSchema = z.object({
+  user_id: z.string().min(1),
+  reason: z.enum(['workspace_user_not_found']),
+});
+
+export const shareDocumentsResponseSchema = z.object({
+  collaborators: documentCollaboratorListSchema,
+  failed: z.array(shareDocumentFailureSchema),
+});
+
+export const documentAccessSettingsSchema = z.object({
+  document_id: documentIdSchema,
+  workspace_member_permission: nullableDocumentAccessGrantPermissionSchema,
+  updated_by_user_id: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+export const updateDocumentAccessSettingsSchema = z.object({
+  workspace_member_permission: documentAccessGrantPermissionSchema.nullish(),
 });
 
 export const documentNavigationNodeSchema = z.object({
   id: documentIdSchema,
   public_id: z.string().min(1),
+  access_scope: documentAccessScopeSchema.optional(),
+  is_owned_by_current_user: z.boolean().optional(),
   title: z.string(),
   teamspace_id: z.string().nullable().optional().transform((value) => value ?? undefined),
   parent_document_id: z.string().nullable().optional().transform((value) => value ?? undefined),
@@ -71,6 +144,10 @@ export const teamspaceDocumentNavigationSchema = z.object({
 
 export const workspaceDocumentNavigationSchema = z.object({
   private_documents: documentNavigationPageSchema,
+  shared_documents: documentNavigationPageSchema.optional().default({
+    items: [],
+    next_cursor: undefined,
+  }),
   teamspaces: z.array(teamspaceDocumentNavigationSchema),
 });
 
