@@ -64,6 +64,7 @@ export function ShareButton({
   isRestoring,
   isUnpublishing,
   publishedPath,
+  triggerClassName,
   workspaceSlug,
   onCopyLink,
   onCopyPublishedLink,
@@ -111,6 +112,7 @@ export function ShareButton({
               className={cn(
                 buttonVariants({ variant: 'outline', size: 'default' }),
                 'gap-1.5 px-2 text-[14px] h-7 text-muted-foreground rounded-sm',
+                triggerClassName,
               )}
             >
               {renderShareTriggerIcon(document)}

@@ -10,6 +10,7 @@ export type ShareButtonProps = {
   isRestoring: boolean;
   isUnpublishing: boolean;
   publishedPath?: string;
+  triggerClassName?: string;
   workspaceSlug: string;
   onCopyLink: () => void | Promise<void>;
   onCopyPublishedLink: () => void | Promise<void>;

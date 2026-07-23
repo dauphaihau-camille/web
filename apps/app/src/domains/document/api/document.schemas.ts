@@ -66,6 +66,9 @@ export const documentCollaboratorSchema = z.object({
   granted_by_user_id: z.string().min(1),
   created_at: z.string(),
   updated_at: z.string(),
+  access_source: z.enum(['direct', 'inherited']).optional(),
+  inherited_from_document_id: z.string().optional(),
+  inherited_from_document_title: z.string().optional(),
 });
 
 export const documentCollaboratorListSchema = z.array(documentCollaboratorSchema);

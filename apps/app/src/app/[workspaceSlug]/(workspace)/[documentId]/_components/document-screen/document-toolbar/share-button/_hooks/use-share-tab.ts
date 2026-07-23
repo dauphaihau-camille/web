@@ -101,11 +101,11 @@ export function useShareTab({
       documentKeys.collaborators(document.id),
       (existing = []) => {
         const collaboratorsById = new Map(
-          existing.map((collaborator) => [collaborator.id, collaborator]),
+          existing.map((collaborator) => [collaborator.user.id, collaborator]),
         );
 
         for (const collaborator of collaborators) {
-          collaboratorsById.set(collaborator.id, collaborator);
+          collaboratorsById.set(collaborator.user.id, collaborator);
         }
 
         return Array.from(collaboratorsById.values());

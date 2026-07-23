@@ -342,6 +342,66 @@ describe('ShareButton integration', () => {
     expect(accessRows.slice(0, 2)).toEqual(['Member (You)', 'Owner']);
   });
 
+  it('shows inherited collaborators and turns them into direct grants when changed', async () => {
+    const directGrantUpdates: string[] = [];
+
+    mswServer.use(
+      http.post(/\/documents\/doc-1\/share\/?$/, async ({ request }) => {
+        const body = await request.json() as {
+          permission: string;
+          user_id: string;
+        };
+        directGrantUpdates.push(`${body.user_id}:${body.permission}`);
+
+        return HttpResponse.json({
+          id: `child-grant-${body.user_id}`,
+          document_id: 'doc-1',
+          user: {
+            id: body.user_id,
+            email: 'member@example.com',
+            display_name: 'Member',
+          },
+          permission: body.permission,
+          granted_by_user_id: 'user-1',
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          access_source: 'direct',
+        });
+      }),
+    );
+    renderShareButton(undefined, {
+      collaborators: [
+        {
+          id: 'parent-grant-2',
+          document_id: 'parent-doc',
+          user: {
+            id: 'user-2',
+            email: 'member@example.com',
+            display_name: 'Member',
+          },
+          permission: 'view',
+          granted_by_user_id: 'user-1',
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          access_source: 'inherited',
+          inherited_from_document_id: 'parent-doc',
+          inherited_from_document_title: 'Parent document',
+        },
+      ],
+    });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+
+    expect(await screen.findByText('Member')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Can view' }));
+    expect(await screen.findByText('Parent document')).toBeInTheDocument();
+    await user.click(screen.getByText('Can edit'));
+
+    expect(directGrantUpdates).toEqual(['user-2:edit']);
+    expect(await screen.findByRole('button', { name: 'Can edit' })).toBeInTheDocument();
+  });
+
   it('updates general access for everyone in the workspace', async () => {
     const updates: Array<string | null | undefined> = [];
 

@@ -118,15 +118,24 @@ export function ShareOverview({
             : (
               <MemberAccessRow
                 key={row.collaborator.id}
+                accessSourceLabel={row.collaborator.access_source === 'inherited'
+                  ? 'inherited access'
+                  : undefined}
                 name={row.name}
                 email={row.email}
                 isCurrentUser={row.id === currentUserId}
-                documentTitle={documentTitle}
+                documentTitle={
+                  row.collaborator.access_source === 'inherited'
+                    ? row.collaborator.inherited_from_document_title
+                    : documentTitle
+                }
                 permission={row.collaborator.permission}
                 permissionLabel={getPermissionLabel(row.collaborator.permission)}
                 disabled={!canManageAccess || isArchived || isMutating}
                 onPermissionChange={(permission) => onPermissionChange(row.collaborator, permission)}
-                onRevoke={() => onRevoke(row.collaborator)}
+                onRevoke={row.collaborator.access_source === 'inherited'
+                  ? undefined
+                  : () => onRevoke(row.collaborator)}
               />
             ))}
       </div>

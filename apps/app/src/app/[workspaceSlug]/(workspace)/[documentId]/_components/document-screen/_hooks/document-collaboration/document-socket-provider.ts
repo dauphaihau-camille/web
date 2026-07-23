@@ -26,6 +26,7 @@ type CollaborationResponse<T> =
 type ServerToClientEvents = {
   'collab:awareness': (payload: CollaborationUpdatePayload) => void;
   'collab:error': (response: CollaborationResponse<never>) => void;
+  'collab:permissions-changed': (payload: { documentId: string }) => void;
   'collab:update': (payload: CollaborationUpdatePayload) => void;
 };
 
@@ -113,6 +114,14 @@ export class DocumentSocketProvider {
     this.socket.on('collab:error', (response) => {
       this.error = response.ok ? null : response.error.message;
       this.emitStatus();
+    });
+
+    this.socket.on('collab:permissions-changed', (payload) => {
+      if (payload.documentId !== this.documentId) {
+        return;
+      }
+
+      this.synchronize();
     });
 
     this.socket.on('collab:update', (payload) => {
@@ -205,6 +214,7 @@ export class DocumentSocketProvider {
     }, (response) => {
       if (!response.ok) {
         this.error = response.error.message;
+        this.canEdit = false;
         this.emitStatus();
         return;
       }

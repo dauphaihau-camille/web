@@ -11,6 +11,7 @@ import {
 import { PermissionMenuContent } from '../permission-menu-content';
 
 export function MemberAccessRow({
+  accessSourceLabel,
   documentTitle,
   disabled = false,
   email,
@@ -21,6 +22,7 @@ export function MemberAccessRow({
   onPermissionChange,
   onRevoke,
 }: {
+  accessSourceLabel?: string;
   documentTitle?: string;
   disabled?: boolean;
   email: string;
@@ -53,6 +55,7 @@ export function MemberAccessRow({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-70 p-2">
               <PermissionMenuContent
+                accessSourceLabel={accessSourceLabel}
                 documentTitle={documentTitle}
                 selectedPermission={permission ?? 'manage'}
                 showCurrentAccess

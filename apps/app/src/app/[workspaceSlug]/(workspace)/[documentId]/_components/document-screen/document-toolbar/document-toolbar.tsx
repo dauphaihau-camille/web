@@ -101,6 +101,7 @@ export function DocumentToolbar({
         onPublish={publishCurrentDocument}
         onRestore={restoreCurrentDocument}
         onUnpublish={unpublishCurrentDocument}
+        triggerClassName="mr-1"
       />
       <ToolbarActionButton
         ariaLabel="Copy link"
