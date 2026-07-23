@@ -5,6 +5,7 @@ import {
   CopyIcon,
   EllipsisIcon,
   LinkIcon,
+  PlusIcon,
   StarOffIcon,
   StarIcon,
   Trash2Icon,
@@ -22,11 +23,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
+import { LoadingIcon } from '@shared/components/loading-icon';
+import { buttonVariants } from '@shared/components/ui/button';
 import type { DocumentNavigationNode } from '@/domains/document';
 import { cn } from '@shared/lib/utils';
 
 import { useDocumentTreeNodeActions } from './use-document-tree-node-actions';
-import { CreateDocumentButton } from '@/app/[workspaceSlug]/_components/create-document-button';
 
 type DocumentTreeNodeActionsProps = {
   mode?: 'full' | 'readOnly';
@@ -64,12 +66,20 @@ export function DocumentTreeNodeActions({
   const isBusy = createSubdocumentMutation.isPending;
 
   const createSubdocumentButton = (
-    <CreateDocumentButton
-      ariaLabel="Create subdocument"
+    <button
+      type="button"
+      aria-label="Create subdocument"
+      className={cn(
+        buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
+        'size-5 rounded-sm bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent-foreground/5 hover:text-sidebar-accent-foreground',
+      )}
       disabled={isBusy}
       onClick={handleCreateSubdocument}
-      isPending={isBusy}
-    />
+    >
+      {isBusy
+        ? <LoadingIcon className="size-4" />
+        : <PlusIcon className="size-4" />}
+    </button>
   );
 
   return (
@@ -82,7 +92,7 @@ export function DocumentTreeNodeActions({
       {canMutate
         ? (
           <Tooltip>
-            <TooltipTrigger render={createSubdocumentButton} />
+            <TooltipTrigger delay={0} render={createSubdocumentButton} />
             <TooltipContent side="bottom">Add a document inside</TooltipContent>
           </Tooltip>
         )
@@ -91,6 +101,7 @@ export function DocumentTreeNodeActions({
       <DropdownMenu onOpenChange={setIsMenuOpen}>
         <Tooltip>
           <TooltipTrigger
+            delay={0}
             render={
               <DropdownMenuTrigger
                 className={cn(

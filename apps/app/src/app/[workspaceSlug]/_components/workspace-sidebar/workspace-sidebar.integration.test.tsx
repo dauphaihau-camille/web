@@ -92,6 +92,10 @@ vi.mock('./teamspaces-group', () => ({
   }) => <div>{`teamspaces:${workspaceSlug}:${canEditDocuments ? 'editable' : 'readonly'}`}</div>,
 }));
 
+vi.mock('./shared-documents-group', () => ({
+  SharedDocumentsGroup: ({ workspaceSlug }: { workspaceSlug: string }) => <div>{`shared:${workspaceSlug}`}</div>,
+}));
+
 describe('WorkspaceSidebar', () => {
   beforeEach(() => {
     useWorkspaceDocumentRootQueryMock.mockReset();
@@ -156,5 +160,6 @@ describe('WorkspaceSidebar', () => {
     expect(screen.getByText('favorites:acme')).toBeInTheDocument();
     expect(screen.getByText('private:acme')).toBeInTheDocument();
     expect(screen.getByText('teamspaces:acme:editable')).toBeInTheDocument();
+    expect(screen.getByText('shared:acme')).toBeInTheDocument();
   });
 });

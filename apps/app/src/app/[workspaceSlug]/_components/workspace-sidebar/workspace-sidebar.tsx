@@ -18,6 +18,7 @@ import { WorkspaceSidebarTreeSkeleton } from '../workspace-skeleton/workspace-si
 import { WorkspaceUserDropdown } from '../workspace-user-dropdown';
 import { PrivateDocumentsGroup } from './private-documents-group';
 import { FavoritesDocumentsGroup } from './favorites-documents-group';
+import { SharedDocumentsGroup } from './shared-documents-group';
 import { TeamspacesGroup } from './teamspaces-group';
 import { WorkspaceSearchButton } from './workspace-search-button';
 import { WorkspaceTrashButton } from './workspace-trash-button/workspace-trash-button';
@@ -93,6 +94,10 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
                 workspaceSlug={workspaceSlug}
                 rootQuery={rootQuery}
                 canEditDocuments={canEditTeamspaceDocuments}
+              />
+              <SharedDocumentsGroup
+                workspaceSlug={workspaceSlug}
+                rootQuery={rootQuery}
               />
             </>
           )}

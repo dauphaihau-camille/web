@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { DocumentNavigationNode } from '@/domains/document';
+import { TooltipProvider } from '@shared/components/ui/tooltip';
 
 import { DocumentTreeNodeActions } from './document-tree-node-actions';
 
@@ -66,5 +67,24 @@ describe('DocumentTreeNodeActions', () => {
     expect(screen.getByRole('menuitem', { name: 'Add to favorites' })).toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Duplicate' })).not.toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Move to Trash' })).not.toBeInTheDocument();
+  });
+
+  it('shows the create subdocument tooltip on hover in full mode', async () => {
+    const user = userEvent.setup();
+
+    render(
+      <TooltipProvider delay={0}>
+        <DocumentTreeNodeActions
+          mode="full"
+          document={documentFixture}
+          isActive={false}
+          workspaceSlug="acme"
+        />
+      </TooltipProvider>,
+    );
+
+    await user.hover(screen.getByRole('button', { name: 'Create subdocument' }));
+
+    expect(await screen.findByText('Add a document inside')).toBeInTheDocument();
   });
 });

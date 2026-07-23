@@ -12,6 +12,12 @@ import {
   workspaceDocumentRootQueryOptions,
 } from '@/domains/document';
 
+function filterPrivateDocuments(items: DocumentNavigationNode[]): DocumentNavigationNode[] {
+  return items.filter((document) =>
+    (document.access_scope ?? 'private') === 'private'
+    || document.is_owned_by_current_user === true);
+}
+
 export function useDocumentTreeMore({
   initialCursor,
   workspaceId,
@@ -82,8 +88,8 @@ export function useDocumentTreeMore({
 
       setItems((currentItems) => (
         replace
-          ? page.private_documents.items
-          : [...currentItems, ...page.private_documents.items]
+          ? filterPrivateDocuments(page.private_documents.items)
+          : [...currentItems, ...filterPrivateDocuments(page.private_documents.items)]
       ));
       setNextCursor(page.private_documents.next_cursor);
     }

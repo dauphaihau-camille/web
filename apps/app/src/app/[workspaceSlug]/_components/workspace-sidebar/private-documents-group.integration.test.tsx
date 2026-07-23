@@ -89,6 +89,10 @@ function createNavigation(items: WorkspaceDocumentNavigation['private_documents'
       items,
       next_cursor: undefined,
     },
+    shared_documents: {
+      items: [],
+      next_cursor: undefined,
+    },
     teamspaces: [],
   } as WorkspaceDocumentNavigation;
 }

@@ -30,7 +30,9 @@ export function DocumentTree({
   return (
     <DocumentTreeList
       workspaceSlug={workspaceSlug}
-      items={rootQuery.data.private_documents.items}
+      items={rootQuery.data.private_documents.items.filter((document) =>
+        (document.access_scope ?? 'private') === 'private'
+        || document.is_owned_by_current_user === true)}
       emptyMessage="No private documents yet."
       nextCursor={rootQuery.data.private_documents.next_cursor}
     />

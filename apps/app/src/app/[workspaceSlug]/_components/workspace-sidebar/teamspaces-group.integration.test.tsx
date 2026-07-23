@@ -49,6 +49,10 @@ function createNavigation(): WorkspaceDocumentNavigation {
       items: [],
       next_cursor: undefined,
     },
+    shared_documents: {
+      items: [],
+      next_cursor: undefined,
+    },
     teamspaces: [
       {
         id: 'teamspace-1',
