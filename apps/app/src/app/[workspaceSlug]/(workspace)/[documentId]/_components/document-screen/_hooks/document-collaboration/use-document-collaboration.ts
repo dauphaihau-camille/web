@@ -14,7 +14,15 @@ import {
 } from './document-collaboration.constants';
 import { DocumentSocketProvider } from './document-socket-provider';
 
-export function useDocumentCollaboration(documentId: string) {
+type UseDocumentCollaborationOptions = {
+  showPresence: boolean;
+  workspaceId: string;
+};
+
+export function useDocumentCollaboration(
+  documentId: string,
+  options: UseDocumentCollaborationOptions,
+) {
   const currentUserQuery = useCurrentUserQuery();
 
   const [resources] = useState(() => {
@@ -31,28 +39,46 @@ export function useDocumentCollaboration(documentId: string) {
   const [canEdit, setCanEdit] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const currentUserId = currentUserQuery.data?.id;
 
   useEffect(() => {
+    setCanEdit(false);
+    setError(null);
+    setIsReady(false);
+
+    if (!currentUserId) {
+      return;
+    }
+
     if (resources.destructionTimer !== null) {
       window.clearTimeout(resources.destructionTimer);
       resources.destructionTimer = null;
     }
 
+    const collaborationNamespace = {
+      documentId,
+      userId: currentUserId,
+      workspaceId: options.workspaceId,
+    };
+
     const persistence = new IndexeddbPersistence(
-      documentCollaborationStorageName(documentId),
+      documentCollaborationStorageName(collaborationNamespace),
       resources.document,
     );
 
     const broadcastProvider = new DocumentBroadcastProvider(
       resources.document,
       resources.awareness,
-      new BroadcastChannel(documentCollaborationChannelName(documentId)),
+      new BroadcastChannel(documentCollaborationChannelName(collaborationNamespace)),
     );
 
     const socketProvider = new DocumentSocketProvider(
       documentId,
       resources.document,
       resources.awareness,
+      {
+        showPresence: options.showPresence,
+      },
     );
 
     let cancelled = false;
@@ -104,12 +130,19 @@ export function useDocumentCollaboration(documentId: string) {
         resources.document.destroy();
       });
     };
-  }, [documentId, resources]);
+  }, [
+    currentUserId,
+    documentId,
+    options.showPresence,
+    options.workspaceId,
+    resources,
+  ]);
 
   useEffect(() => {
     const currentUser = currentUserQuery.data;
 
-    if (!currentUser) {
+    if (!currentUser || !options.showPresence) {
+      resources.awareness.setLocalState(null);
       return;
     }
 
@@ -119,7 +152,7 @@ export function useDocumentCollaboration(documentId: string) {
       name,
       color: collaborationColor(currentUser.id),
     });
-  }, [currentUserQuery.data, resources.awareness]);
+  }, [currentUserQuery.data, options.showPresence, resources.awareness]);
 
   const currentUser = currentUserQuery.data;
   const userName = currentUser?.displayName ?? currentUser?.email ?? 'Collaborator';

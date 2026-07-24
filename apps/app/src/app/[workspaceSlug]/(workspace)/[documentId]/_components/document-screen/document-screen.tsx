@@ -51,9 +51,20 @@ function DocumentScreenContent({
   const documentId = document.id;
   const [editorContent, setEditorContent] = useState(document.content);
 
-  const documentCollaboration = useDocumentCollaboration(documentId);
+  const collaborationMode = document.collaboration?.mode ??
+    (document.access?.can_edit && !document.archived_at ? 'edit' : 'view');
+
+  const showPresence = Boolean(document.collaboration?.show_presence);
+
+  const documentCollaboration = useDocumentCollaboration(documentId, {
+    showPresence,
+    workspaceId: document.workspace_id,
+  });
+
   const canEditDocument =
-    documentCollaboration.isReady && documentCollaboration.canEdit;
+    documentCollaboration.isReady
+    && collaborationMode === 'edit'
+    && documentCollaboration.canEdit;
 
   const handleRestoreDraft = useCallback((content: unknown[]) => {
     setEditorContent(content);

@@ -31,6 +31,7 @@ import {
   type Workspace,
   workspaceRoutes,
 } from '@/domains/workspace';
+import { clearDocumentCollaborationStorageForUser } from '@/domains/document';
 import { cn } from '@shared/lib/utils';
 import { Skeleton } from '@shared/components/ui/skeleton';
 import {
@@ -76,13 +77,24 @@ export function WorkspaceUserDropdown({
     mutationFn: logout,
   });
 
-  function handleLogoutConfirm() {
+  async function handleLogoutConfirm() {
+    const userId = currentUser?.id;
+
     setIsLoggingOut(true);
     setIsLogoutDialogOpen(false);
     queryClient.setQueryData(authKeys.currentUser(), null);
     queryClient.removeQueries({ queryKey: workspaceKeys.all });
-    logoutMutation.mutate();
-    window.location.replace(authRoutes.loginAfterLogout());
+
+    try {
+      if (userId) {
+        await clearDocumentCollaborationStorageForUser(userId);
+      }
+
+      await logoutMutation.mutateAsync();
+    }
+    finally {
+      window.location.replace(authRoutes.loginAfterLogout());
+    }
   }
 
   if (!workspace) {

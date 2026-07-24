@@ -65,6 +65,10 @@ type ProviderStatus = {
   synced: boolean;
 };
 
+type DocumentSocketProviderOptions = {
+  showPresence: boolean;
+};
+
 function hasMeaningfulYjsUpdate(update: Uint8Array): boolean {
   return update.byteLength > EMPTY_YJS_UPDATE_LENGTH;
 }
@@ -83,6 +87,7 @@ export class DocumentSocketProvider {
     private readonly documentId: string,
     private readonly document: Yjs.Doc,
     awareness: Awareness,
+    private readonly options: DocumentSocketProviderOptions,
   ) {
     this.awareness = awareness;
 
@@ -141,6 +146,10 @@ export class DocumentSocketProvider {
         return;
       }
 
+      if (!this.options.showPresence) {
+        return;
+      }
+
       applyAwarenessUpdate(
         this.awareness,
         toUint8Array(payload.update),
@@ -189,6 +198,7 @@ export class DocumentSocketProvider {
   ) => {
     if (
       !this.joined
+      || !this.options.showPresence
       || origin === SOCKET_COLLABORATION_ORIGIN
       || origin === BROADCAST_COLLABORATION_ORIGIN
     ) {
@@ -234,7 +244,7 @@ export class DocumentSocketProvider {
       this.synced = true;
       this.emitStatus();
 
-      if (this.awareness.getLocalState()) {
+      if (this.options.showPresence && this.awareness.getLocalState()) {
         this.socket.emit('collab:awareness', {
           documentId: this.documentId,
           update: encodeAwarenessUpdate(this.awareness, [this.awareness.clientID]),

@@ -17,6 +17,7 @@ import type {
   documentCollaboratorListSchema,
   documentCollaboratorSchema,
   documentCollaboratorUserSchema,
+  documentCollaborationSchema,
   documentContentFormatSchema,
   documentIdSchema,
   documentNavigationNodeSchema,
@@ -42,6 +43,7 @@ export type DocumentAccessScope = z.infer<typeof documentAccessScopeSchema>;
 export type DocumentAccessPermission = z.infer<typeof documentAccessPermissionSchema>;
 export type DocumentAccessGrantPermission = z.infer<typeof documentAccessGrantPermissionSchema>;
 export type DocumentAccess = z.infer<typeof documentAccessSchema>;
+export type DocumentCollaboration = z.infer<typeof documentCollaborationSchema>;
 export type DocumentAccessSettings = z.infer<typeof documentAccessSettingsSchema>;
 export type Document = z.infer<typeof documentSchema>;
 export type DocumentOwnerUser = z.infer<typeof documentOwnerUserSchema>;

@@ -8,4 +8,5 @@ export * from './hooks/use-archive-subdocument-mutation';
 export * from './hooks/use-create-subdocument-mutation';
 export * from './hooks/use-workspace-document-children-query';
 export * from './hooks/use-workspace-document-root-query';
+export * from './document-collaboration-storage';
 export * from './recent-document';

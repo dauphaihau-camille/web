@@ -45,11 +45,21 @@ describe('document requests', () => {
         can_manage: true,
         workspace_member_permission: null,
       },
+      collaboration: {
+        enabled: false,
+        mode: 'edit',
+        show_presence: false,
+      },
     });
 
     await expect(getDocument('doc-1')).resolves.toMatchObject({
       access: {
         workspace_member_permission: undefined,
+      },
+      collaboration: {
+        enabled: false,
+        mode: 'edit',
+        show_presence: false,
       },
     });
   });

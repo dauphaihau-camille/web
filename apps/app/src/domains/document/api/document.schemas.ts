@@ -22,6 +22,11 @@ export const documentAccessSchema = z.object({
   can_manage: z.boolean(),
   workspace_member_permission: nullableDocumentAccessGrantPermissionSchema,
 });
+export const documentCollaborationSchema = z.object({
+  enabled: z.boolean(),
+  mode: z.enum(['edit', 'view']),
+  show_presence: z.boolean(),
+});
 export const documentOwnerUserSchema = z.object({
   id: z.string().min(1),
   email: z.string().email(),
@@ -50,6 +55,7 @@ export const documentSchema = z.object({
   public_path: z.string().optional(),
   breadcrumb: z.array(documentBreadcrumbItemSchema).optional(),
   access: documentAccessSchema.optional(),
+  collaboration: documentCollaborationSchema.optional(),
 });
 
 export const documentCollaboratorUserSchema = z.object({
