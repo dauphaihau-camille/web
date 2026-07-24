@@ -79,8 +79,22 @@ export const documentCollaboratorSchema = z.object({
 
 export const documentCollaboratorListSchema = z.array(documentCollaboratorSchema);
 
+export const documentInvitationSchema = z.object({
+  id: z.string().min(1),
+  document_id: documentIdSchema,
+  email: z.string().email(),
+  permission: documentAccessGrantPermissionSchema,
+  invited_by_user_id: z.string().min(1),
+  created_at: z.string(),
+  updated_at: z.string(),
+  status: z.literal('pending'),
+});
+
+export const documentInvitationListSchema = z.array(documentInvitationSchema);
+
 export const shareDocumentSchema = z.object({
-  user_id: z.string().min(1),
+  user_id: z.string().min(1).optional(),
+  email: z.string().email().optional(),
   permission: documentAccessGrantPermissionSchema,
 });
 
@@ -89,13 +103,19 @@ export const shareDocumentsSchema = z.object({
 });
 
 export const shareDocumentFailureSchema = z.object({
-  user_id: z.string().min(1),
-  reason: z.enum(['workspace_user_not_found']),
+  user_id: z.string().min(1).optional(),
+  email: z.string().email().optional(),
+  reason: z.enum(['user_not_found']),
 });
 
 export const shareDocumentsResponseSchema = z.object({
   collaborators: documentCollaboratorListSchema,
+  invitations: documentInvitationListSchema.default([]),
   failed: z.array(shareDocumentFailureSchema),
+});
+
+export const updateDocumentInvitationSchema = z.object({
+  permission: documentAccessGrantPermissionSchema,
 });
 
 export const documentAccessSettingsSchema = z.object({

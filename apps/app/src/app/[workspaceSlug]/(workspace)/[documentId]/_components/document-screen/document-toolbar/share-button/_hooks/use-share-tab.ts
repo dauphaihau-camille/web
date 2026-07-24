@@ -8,14 +8,18 @@ import { useCurrentUserQuery } from '@/domains/auth/hooks/use-current-user-query
 import {
   documentCollaboratorsQueryOptions,
   documentAccessSettingsQueryOptions,
+  documentInvitationsQueryOptions,
   documentKeys,
+  revokeDocumentInvitation,
   revokeDocumentAccess,
   shareDocument,
   shareDocuments,
+  updateDocumentInvitation,
   updateDocumentAccessSettings,
   type Document,
   type DocumentAccessGrantPermission,
   type DocumentCollaborator,
+  type DocumentInvitation,
   type DocumentOwnerUser,
 } from '@/domains/document';
 import { favoriteKeys } from '@/domains/favorite';
@@ -23,13 +27,19 @@ import { searchKeys } from '@/domains/search';
 import {
   workspaceMemberListQueryOptions,
   workspaceDetailQueryOptions,
-  type WorkspaceMember,
 } from '@/domains/workspace';
 
 export type SelectedInvitee = {
-  userId: string;
   email: string;
   displayName?: string;
+  userId?: string;
+};
+
+export type InviteSuggestion = {
+  displayName?: string;
+  email: string;
+  id: string;
+  userId?: string;
 };
 
 type UseShareTabOptions = {
@@ -62,6 +72,11 @@ export function useShareTab({
     enabled: document.access?.can_view ?? true,
   });
 
+  const invitationsQuery = useQuery({
+    ...documentInvitationsQueryOptions(document.id),
+    enabled: document.access?.can_view ?? true,
+  });
+
   const accessSettingsQuery = useQuery({
     ...documentAccessSettingsQueryOptions(document.id),
     enabled: canManageAccess,
@@ -71,6 +86,9 @@ export function useShareTab({
     await Promise.all([
       queryClient.invalidateQueries({
         queryKey: documentKeys.collaborators(document.id),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: documentKeys.invitations(document.id),
       }),
       queryClient.invalidateQueries({
         queryKey: documentKeys.accessSettings(document.id),
@@ -94,6 +112,23 @@ export function useShareTab({
         queryKey: searchKeys.all(),
       }),
     ]);
+  };
+
+  const upsertInvitations = (invitations: DocumentInvitation[]) => {
+    queryClient.setQueryData<DocumentInvitation[]>(
+      documentKeys.invitations(document.id),
+      (existing = []) => {
+        const invitationsById = new Map(
+          existing.map((invitation) => [invitation.id, invitation]),
+        );
+
+        for (const invitation of invitations) {
+          invitationsById.set(invitation.id, invitation);
+        }
+
+        return Array.from(invitationsById.values());
+      },
+    );
   };
 
   const upsertCollaborators = (collaborators: DocumentCollaborator[]) => {
@@ -131,19 +166,22 @@ export function useShareTab({
   const shareManyMutation = useMutation({
     mutationFn: async (input: {
       grants: Array<{
+        email?: string;
         permission: DocumentAccessGrantPermission;
-        userId: string;
+        userId?: string;
       }>;
     }) =>
       shareDocuments(document.id, {
         grants: input.grants.map((grant) => ({
           user_id: grant.userId,
+          email: grant.email,
           permission: grant.permission,
         })),
       }),
     onSuccess: async (result) => {
       await invalidateSharingState();
       upsertCollaborators(result.collaborators);
+      upsertInvitations(result.invitations);
     },
   });
 
@@ -165,6 +203,32 @@ export function useShareTab({
         workspace_member_permission: permission ?? null,
       }),
     onSuccess: invalidateSharingState,
+  });
+
+  const updateInvitationMutation = useMutation({
+    mutationFn: (input: {
+      invitationId: string;
+      permission: DocumentAccessGrantPermission;
+    }) =>
+      updateDocumentInvitation(document.id, input.invitationId, {
+        permission: input.permission,
+      }),
+    onSuccess: async (invitation) => {
+      await invalidateSharingState();
+      upsertInvitations([invitation]);
+    },
+  });
+
+  const revokeInvitationMutation = useMutation({
+    mutationFn: (invitationId: string) => revokeDocumentInvitation(document.id, invitationId),
+    onSuccess: async (_revokedInvitation, invitationId) => {
+      await invalidateSharingState();
+      queryClient.setQueryData<DocumentInvitation[]>(
+        documentKeys.invitations(document.id),
+        (existing = []) =>
+          existing.filter((invitation) => invitation.id !== invitationId),
+      );
+    },
   });
 
   const ownerMember = useMemo<DocumentOwnerUser | undefined>(() => {
@@ -193,31 +257,63 @@ export function useShareTab({
     [collaboratorsQuery.data],
   );
   const selectedInviteeIds = useMemo(
-    () => new Set(selectedInvitees.map((invitee) => invitee.userId)),
+    () => new Set(selectedInvitees.flatMap((invitee) =>
+      invitee.userId ? [invitee.userId] : [])),
     [selectedInvitees],
   );
-  const memberSuggestions = useMemo(() => {
+  const selectedInviteeEmails = useMemo(
+    () => new Set(selectedInvitees.map((invitee) => invitee.email.toLowerCase())),
+    [selectedInvitees],
+  );
+  const invitedEmails = useMemo(
+    () => new Set((invitationsQuery.data ?? []).map((invitation) => invitation.email.toLowerCase())),
+    [invitationsQuery.data],
+  );
+  const inviteSuggestions = useMemo(() => {
     const normalizedQuery = inviteQuery.trim().toLowerCase();
 
-    if (!normalizedQuery || !membersQuery.data) {
+    if (!normalizedQuery) {
       return [];
     }
 
-    return membersQuery.data
+    const suggestions: InviteSuggestion[] = (membersQuery.data ?? [])
       .filter((member) =>
         member.user_id !== document.owner_user_id
         && !selectedInviteeIds.has(member.user_id)
+        && !selectedInviteeEmails.has(member.email.toLowerCase())
         && !collaboratorsByUserId.has(member.user_id)
         && (
           member.email.toLowerCase().includes(normalizedQuery)
           || member.display_name?.toLowerCase().includes(normalizedQuery)
         ))
-      .slice(0, 5);
+      .slice(0, 5)
+      .map((member) => ({
+        displayName: member.display_name,
+        email: member.email,
+        id: member.user_id,
+        userId: member.user_id,
+      }));
+
+    if (
+      isEmail(normalizedQuery)
+      && !selectedInviteeEmails.has(normalizedQuery)
+      && !invitedEmails.has(normalizedQuery)
+      && !suggestions.some((suggestion) => suggestion.email.toLowerCase() === normalizedQuery)
+    ) {
+      suggestions.push({
+        email: normalizedQuery,
+        id: normalizedQuery,
+      });
+    }
+
+    return suggestions.slice(0, 5);
   }, [
     collaboratorsByUserId,
     document.owner_user_id,
+    invitedEmails,
     inviteQuery,
     membersQuery.data,
+    selectedInviteeEmails,
     selectedInviteeIds,
   ]);
 
@@ -225,28 +321,31 @@ export function useShareTab({
     shareMutation.isPending
     || shareManyMutation.isPending
     || revokeMutation.isPending
+    || updateInvitationMutation.isPending
+    || revokeInvitationMutation.isPending
     || updateAccessSettingsMutation.isPending;
+
   const canInvite =
     canManageAccess
     && !isArchived
     && selectedInvitees.length > 0
     && !shareManyMutation.isPending;
 
-  const addInvitee = (member: WorkspaceMember) => {
+  const addInvitee = (invitee: InviteSuggestion) => {
     setSelectedInvitees((invitees) => [
       ...invitees,
       {
-        userId: member.user_id,
-        email: member.email,
-        displayName: member.display_name,
+        userId: invitee.userId,
+        email: invitee.email,
+        displayName: invitee.displayName,
       },
     ]);
     setInviteQuery('');
   };
 
-  const removeInvitee = (userId: string) => {
+  const removeInvitee = (inviteeId: string) => {
     setSelectedInvitees((invitees) =>
-      invitees.filter((invitee) => invitee.userId !== userId));
+      invitees.filter((invitee) => getInviteeId(invitee) !== inviteeId));
   };
 
   const removeLastInvitee = () => {
@@ -261,6 +360,7 @@ export function useShareTab({
     const result = await shareManyMutation.mutateAsync({
       grants: selectedInvitees.map((invitee) => ({
         userId: invitee.userId,
+        email: invitee.userId ? undefined : invitee.email,
         permission: invitePermission,
       })),
     });
@@ -305,6 +405,36 @@ export function useShareTab({
     });
   };
 
+  const updateInvitationPermission = (
+    invitation: DocumentInvitation,
+    permission: DocumentAccessGrantPermission,
+  ) => {
+    if (invitation.permission === permission || isMutating) {
+      return;
+    }
+
+    updateInvitationMutation.mutate({
+      invitationId: invitation.id,
+      permission,
+    }, {
+      onSuccess: () => {
+        toast('Updated invitation');
+      },
+    });
+  };
+
+  const revokeInvitation = (invitation: DocumentInvitation) => {
+    if (isMutating) {
+      return;
+    }
+
+    revokeInvitationMutation.mutate(invitation.id, {
+      onSuccess: () => {
+        toast('Invitation revoked');
+      },
+    });
+  };
+
   const updateWorkspaceMemberPermission = (
     permission: DocumentAccessGrantPermission | undefined,
   ) => {
@@ -330,22 +460,33 @@ export function useShareTab({
     invitePermission,
     inviteQuery,
     inviteSelected,
+    invitations: invitationsQuery.data ?? [],
     isInviteMode,
     isMutating,
-    memberSuggestions,
+    inviteSuggestions,
     ownerMember,
     removeInvitee,
     removeLastInvitee,
     revokeAccess,
+    revokeInvitation,
     selectedInvitees,
     setInviteMode: setIsInviteMode,
     setInvitePermission,
     setInviteQuery,
     updateWorkspaceMemberPermission,
+    updateInvitationPermission,
     updatePermission,
     workspaceMemberPermission:
       accessSettingsQuery.data?.workspace_member_permission ??
       document.access?.workspace_member_permission,
     workspaceName: workspaceQuery.data?.name ?? workspaceSlug,
   };
+}
+
+function getInviteeId(invitee: SelectedInvitee): string {
+  return invitee.userId ?? invitee.email.toLowerCase();
+}
+
+function isEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }

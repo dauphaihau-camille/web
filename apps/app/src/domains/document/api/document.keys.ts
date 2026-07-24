@@ -7,6 +7,8 @@ export const documentKeys = {
   detail: (documentId: DocumentId) => createQueryKey(...documentKeys.all, 'detail', documentId),
   collaborators: (documentId: DocumentId) =>
     createQueryKey(...documentKeys.all, 'collaborators', documentId),
+  invitations: (documentId: DocumentId) =>
+    createQueryKey(...documentKeys.all, 'invitations', documentId),
   accessSettings: (documentId: DocumentId) =>
     createQueryKey(...documentKeys.all, 'access-settings', documentId),
   tree: (workspaceId: WorkspaceId) => createQueryKey(...documentKeys.all, 'tree', workspaceId),

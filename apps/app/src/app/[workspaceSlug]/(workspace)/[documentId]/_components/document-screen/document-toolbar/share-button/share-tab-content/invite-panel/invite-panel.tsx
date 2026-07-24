@@ -1,9 +1,8 @@
 import { ChevronLeftIcon } from 'lucide-react';
 
 import type { DocumentAccessGrantPermission } from '@/domains/document';
-import type { WorkspaceMember } from '@/domains/workspace';
 import { Button } from '@shared/components/ui/button';
-import type { SelectedInvitee } from '../../_hooks/use-share-tab';
+import type { InviteSuggestion, SelectedInvitee } from '../../_hooks/use-share-tab';
 import { InviteInput } from './invite-input/invite-input';
 import { InviteSuggestions } from './invite-suggestions';
 
@@ -13,7 +12,7 @@ export function InvitePanel({
   invitePermission,
   inviteQuery,
   isArchived,
-  memberSuggestions,
+  inviteSuggestions,
   selectedInvitees,
   onAddInvitee,
   onBack,
@@ -28,9 +27,9 @@ export function InvitePanel({
   invitePermission: DocumentAccessGrantPermission;
   inviteQuery: string;
   isArchived: boolean;
-  memberSuggestions: WorkspaceMember[];
+  inviteSuggestions: InviteSuggestion[];
   selectedInvitees: SelectedInvitee[];
-  onAddInvitee: (member: WorkspaceMember) => void;
+  onAddInvitee: (invitee: InviteSuggestion) => void;
   onBack: () => void;
   onInvite: () => void;
   onInvitePermissionChange: (permission: DocumentAccessGrantPermission) => void;
@@ -75,7 +74,7 @@ export function InvitePanel({
 
       <div className="mt-4">
         <InviteSuggestions
-          suggestions={memberSuggestions}
+          suggestions={inviteSuggestions}
           onAddInvitee={onAddInvitee}
         />
       </div>

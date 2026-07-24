@@ -43,9 +43,9 @@ export function InviteInput({
             <div className="flex min-w-0 flex-1 flex-wrap gap-1.5">
               {selectedInvitees.map((invitee) => (
                 <InviteeBadge
-                  key={invitee.userId}
+                  key={invitee.userId ?? invitee.email}
                   email={invitee.email}
-                  onRemove={() => onRemoveInvitee(invitee.userId)}
+                  onRemove={() => onRemoveInvitee(invitee.userId ?? invitee.email)}
                 />
               ))}
             </div>

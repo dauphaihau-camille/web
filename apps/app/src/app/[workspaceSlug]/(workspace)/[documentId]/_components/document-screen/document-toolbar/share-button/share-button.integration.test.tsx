@@ -50,10 +50,12 @@ function renderShareButton(
       email: string;
       id: string;
     };
+    invitations?: unknown[];
     members?: unknown[];
   },
 ) {
   const collaborators = options?.collaborators ?? [];
+  const invitations = options?.invitations ?? [];
   const currentUser = options?.currentUser ?? {
     displayName: 'Owner',
     email: 'owner@example.com',
@@ -96,6 +98,7 @@ function renderShareButton(
     http.get(/\/workspaces\/acme\/members\/?$/, () =>
       HttpResponse.json(members)),
     http.get(/\/documents\/doc-1\/collaborators\/?$/, () => HttpResponse.json(collaborators)),
+    http.get(/\/documents\/doc-1\/invitations\/?$/, () => HttpResponse.json(invitations)),
     http.get(/\/documents\/doc-1\/access-settings\/?$/, () =>
       HttpResponse.json({
         document_id: 'doc-1',
@@ -270,6 +273,105 @@ describe('ShareButton integration', () => {
 
     expect(sharedUserIds).toEqual(['user-2:manage']);
     expect(await screen.findByText('Kim Nguyen')).toBeInTheDocument();
+  });
+
+  it('invites an unknown email as a pending document invitation', async () => {
+    const sharedEmails: string[] = [];
+
+    mswServer.use(
+      http.post(/\/documents\/doc-1\/shares\/?$/, async ({ request }) => {
+        const body = await request.json() as {
+          grants: Array<{
+            email?: string;
+            permission: string;
+            user_id?: string;
+          }>;
+        };
+
+        sharedEmails.push(
+          ...body.grants.map((grant) => `${grant.email}:${grant.permission}`),
+        );
+
+        return HttpResponse.json({
+          collaborators: [],
+          invitations: body.grants.map((grant) => ({
+            id: `invitation-${grant.email}`,
+            document_id: 'doc-1',
+            email: grant.email,
+            permission: grant.permission,
+            invited_by_user_id: 'user-1',
+            created_at: '2026-01-01T00:00:00.000Z',
+            updated_at: '2026-01-01T00:00:00.000Z',
+            status: 'pending',
+          })),
+          failed: [],
+        });
+      }),
+    );
+    renderShareButton();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+    await user.click(await screen.findByText('Email or group, separated by commas'));
+    const inviteInput = await screen.findByPlaceholderText('Email or name');
+
+    await user.type(inviteInput, 'huongk1lk2clcla@yahoo.com');
+    await user.click(await screen.findByText('huongk1lk2clcla@yahoo.com'));
+    await user.click(screen.getByRole('button', { name: 'Invite' }));
+
+    expect(sharedEmails).toEqual(['huongk1lk2clcla@yahoo.com:manage']);
+    expect(await screen.findByText('huongk1lk2clcla@yahoo.com')).toBeInTheDocument();
+    expect(screen.getByText('Invited')).toBeInTheDocument();
+  });
+
+  it('shows pending invitations and updates their predefined permission', async () => {
+    const invitationUpdates: string[] = [];
+
+    mswServer.use(
+      http.patch(/\/documents\/doc-1\/invitations\/invitation-1\/?$/, async ({ request }) => {
+        const body = await request.json() as {
+          permission: string;
+        };
+        invitationUpdates.push(body.permission);
+
+        return HttpResponse.json({
+          id: 'invitation-1',
+          document_id: 'doc-1',
+          email: 'huongk1lk2clcla@yahoo.com',
+          permission: body.permission,
+          invited_by_user_id: 'user-1',
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          status: 'pending',
+        });
+      }),
+    );
+    renderShareButton(undefined, {
+      invitations: [
+        {
+          id: 'invitation-1',
+          document_id: 'doc-1',
+          email: 'huongk1lk2clcla@yahoo.com',
+          permission: 'comment',
+          invited_by_user_id: 'user-1',
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          status: 'pending',
+        },
+      ],
+    });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+
+    expect(await screen.findByText('huongk1lk2clcla@yahoo.com')).toBeInTheDocument();
+    expect(screen.getByText('Invited')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Can comment' }));
+    await user.click(await screen.findByText('Can view'));
+
+    expect(invitationUpdates).toEqual(['view']);
+    expect(await screen.findByRole('button', { name: 'Can view' })).toBeInTheDocument();
   });
 
   it('shows the document owner even when the workspace member list omits them', async () => {

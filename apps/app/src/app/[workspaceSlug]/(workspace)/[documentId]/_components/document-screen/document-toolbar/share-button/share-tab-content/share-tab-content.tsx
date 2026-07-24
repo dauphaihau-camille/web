@@ -35,7 +35,7 @@ export function ShareTabContent({
         invitePermission={shareTab.invitePermission}
         inviteQuery={shareTab.inviteQuery}
         isArchived={isArchived}
-        memberSuggestions={shareTab.memberSuggestions}
+        inviteSuggestions={shareTab.inviteSuggestions}
         selectedInvitees={shareTab.selectedInvitees}
         onAddInvitee={shareTab.addInvitee}
         onBack={() => shareTab.setInviteMode(false)}
@@ -56,6 +56,7 @@ export function ShareTabContent({
       collaborators={shareTab.collaborators}
       currentUserId={shareTab.currentUserId}
       documentTitle={document.title}
+      invitations={shareTab.invitations}
       isArchived={isArchived}
       isMutating={shareTab.isMutating}
       ownerMember={shareTab.ownerMember}
@@ -63,8 +64,10 @@ export function ShareTabContent({
       workspaceName={shareTab.workspaceName}
       onCopyLink={onCopyLink}
       onOpenInvite={() => shareTab.setInviteMode(true)}
+      onInvitationPermissionChange={shareTab.updateInvitationPermission}
       onPermissionChange={shareTab.updatePermission}
       onRevoke={shareTab.revokeAccess}
+      onRevokeInvitation={shareTab.revokeInvitation}
       onWorkspaceMemberPermissionChange={shareTab.updateWorkspaceMemberPermission}
     />
   );

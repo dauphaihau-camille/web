@@ -19,6 +19,7 @@ export function MemberAccessRow({
   name,
   permission,
   permissionLabel,
+  statusLabel,
   onPermissionChange,
   onRevoke,
 }: {
@@ -30,6 +31,7 @@ export function MemberAccessRow({
   name: string;
   permission?: DocumentAccessGrantPermission;
   permissionLabel: string;
+  statusLabel?: string;
   onPermissionChange?: (permission: DocumentAccessGrantPermission) => void;
   onRevoke?: () => void;
 }) {
@@ -40,8 +42,15 @@ export function MemberAccessRow({
         <p className="truncate text-sm font-medium text-foreground">
           {name}
           {isCurrentUser ? <span className="text-muted-foreground"> (You)</span> : null}
+          {statusLabel
+            ? (
+              <span className="ml-1.5 rounded-sm bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                {statusLabel}
+              </span>
+            )
+            : null}
         </p>
-        <p className="truncate text-[12px] text-muted-foreground">{email}</p>
+        {email ? <p className="truncate text-[12px] text-muted-foreground">{email}</p> : null}
       </div>
       {onPermissionChange
         ? (

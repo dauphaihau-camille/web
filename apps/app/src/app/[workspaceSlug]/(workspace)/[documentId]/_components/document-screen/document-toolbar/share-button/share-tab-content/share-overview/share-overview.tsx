@@ -1,6 +1,7 @@
 import type {
   DocumentAccessGrantPermission,
   DocumentCollaborator,
+  DocumentInvitation,
   DocumentOwnerUser,
 } from '@/domains/document';
 import { GeneralAccessRow } from './general-access-row';
@@ -24,6 +25,13 @@ type ShareAccessRow =
     id: string;
     isOwner: false;
     name: string;
+  }
+  | {
+    email: string;
+    id: string;
+    invitation: DocumentInvitation;
+    isOwner: false;
+    name: string;
   };
 
 export function ShareOverview({
@@ -31,6 +39,7 @@ export function ShareOverview({
   collaborators,
   currentUserId,
   documentTitle,
+  invitations,
   isArchived,
   isMutating,
   ownerMember,
@@ -39,6 +48,8 @@ export function ShareOverview({
   onCopyLink,
   onOpenInvite,
   onPermissionChange,
+  onInvitationPermissionChange,
+  onRevokeInvitation,
   onRevoke,
   onWorkspaceMemberPermissionChange,
 }: {
@@ -46,6 +57,7 @@ export function ShareOverview({
   collaborators: DocumentCollaborator[];
   currentUserId?: string;
   documentTitle: string;
+  invitations: DocumentInvitation[];
   isArchived: boolean;
   isMutating: boolean;
   ownerMember?: DocumentOwnerUser;
@@ -57,7 +69,12 @@ export function ShareOverview({
     collaborator: DocumentCollaborator,
     permission: DocumentAccessGrantPermission,
   ) => void;
+  onInvitationPermissionChange: (
+    invitation: DocumentInvitation,
+    permission: DocumentAccessGrantPermission,
+  ) => void;
   onRevoke: (collaborator: DocumentCollaborator) => void;
+  onRevokeInvitation: (invitation: DocumentInvitation) => void;
   onWorkspaceMemberPermissionChange: (
     permission: DocumentAccessGrantPermission | undefined,
   ) => void;
@@ -83,6 +100,16 @@ export function ShareOverview({
     });
   }
 
+  for (const invitation of invitations) {
+    rows.push({
+      email: '',
+      id: invitation.id,
+      invitation,
+      isOwner: false,
+      name: invitation.email,
+    });
+  }
+
   rows.sort((left, right) => {
     if (left.id === currentUserId) {
       return -1;
@@ -95,6 +122,63 @@ export function ShareOverview({
     return 0;
   });
 
+  const renderRow = (row: ShareAccessRow) => {
+    if (row.isOwner) {
+      return (
+        <MemberAccessRow
+          key={row.id}
+          name={row.name}
+          email={row.email}
+          isCurrentUser={row.id === currentUserId}
+          permissionLabel="Full access"
+          disabled
+        />
+      );
+    }
+
+    if ('collaborator' in row) {
+      return (
+        <MemberAccessRow
+          key={row.collaborator.id}
+          accessSourceLabel={row.collaborator.access_source === 'inherited'
+            ? 'inherited access'
+            : undefined}
+          name={row.name}
+          email={row.email}
+          isCurrentUser={row.id === currentUserId}
+          documentTitle={
+            row.collaborator.access_source === 'inherited'
+              ? row.collaborator.inherited_from_document_title
+              : documentTitle
+          }
+          permission={row.collaborator.permission}
+          permissionLabel={getPermissionLabel(row.collaborator.permission)}
+          disabled={!canManageAccess || isArchived || isMutating}
+          onPermissionChange={(permission) => onPermissionChange(row.collaborator, permission)}
+          onRevoke={row.collaborator.access_source === 'inherited'
+            ? undefined
+            : () => onRevoke(row.collaborator)}
+        />
+      );
+    }
+
+    return (
+      <MemberAccessRow
+        key={row.invitation.id}
+        name={row.name}
+        email={row.email}
+        isCurrentUser={false}
+        permission={row.invitation.permission}
+        permissionLabel={getPermissionLabel(row.invitation.permission)}
+        statusLabel="Invited"
+        disabled={!canManageAccess || isArchived || isMutating}
+        onPermissionChange={(permission) =>
+          onInvitationPermissionChange(row.invitation, permission)}
+        onRevoke={() => onRevokeInvitation(row.invitation)}
+      />
+    );
+  };
+
   return (
     <div className="space-y-4">
       <InviteEntryPoint
@@ -103,41 +187,7 @@ export function ShareOverview({
       />
 
       <div className="space-y-3">
-        {rows.map((row) =>
-          row.isOwner
-            ? (
-              <MemberAccessRow
-                key={row.id}
-                name={row.name}
-                email={row.email}
-                isCurrentUser={row.id === currentUserId}
-                permissionLabel="Full access"
-                disabled
-              />
-            )
-            : (
-              <MemberAccessRow
-                key={row.collaborator.id}
-                accessSourceLabel={row.collaborator.access_source === 'inherited'
-                  ? 'inherited access'
-                  : undefined}
-                name={row.name}
-                email={row.email}
-                isCurrentUser={row.id === currentUserId}
-                documentTitle={
-                  row.collaborator.access_source === 'inherited'
-                    ? row.collaborator.inherited_from_document_title
-                    : documentTitle
-                }
-                permission={row.collaborator.permission}
-                permissionLabel={getPermissionLabel(row.collaborator.permission)}
-                disabled={!canManageAccess || isArchived || isMutating}
-                onPermissionChange={(permission) => onPermissionChange(row.collaborator, permission)}
-                onRevoke={row.collaborator.access_source === 'inherited'
-                  ? undefined
-                  : () => onRevoke(row.collaborator)}
-              />
-            ))}
+        {rows.map(renderRow)}
       </div>
 
       <GeneralAccessRow

@@ -12,12 +12,15 @@ import {
   documentCollaboratorListSchema,
   documentCollaboratorSchema,
   documentAccessSettingsSchema,
+  documentInvitationListSchema,
+  documentInvitationSchema,
   documentSchema,
   documentNavigationPageSchema,
   shareDocumentSchema,
   shareDocumentsResponseSchema,
   shareDocumentsSchema,
   updateDocumentAccessSettingsSchema,
+  updateDocumentInvitationSchema,
   workspaceDocumentNavigationSchema,
 } from './document.schemas';
 import type {
@@ -32,12 +35,15 @@ import type {
   DocumentCollaborator,
   DocumentCollaboratorList,
   DocumentId,
+  DocumentInvitation,
+  DocumentInvitationList,
   DocumentNavigationPage,
   MoveDocumentInput,
   ShareDocumentInput,
   ShareDocumentsInput,
   ShareDocumentsResponse,
   UpdateDocumentAccessSettingsInput,
+  UpdateDocumentInvitationInput,
   UpdateDocumentInput,
   WorkspaceDocumentNavigation,
   WorkspaceId,
@@ -55,6 +61,14 @@ export async function listDocumentCollaborators(
   const response = await apiGet<unknown>(`documents/${documentId}/collaborators`);
 
   return documentCollaboratorListSchema.parse(response);
+}
+
+export async function listDocumentInvitations(
+  documentId: DocumentId,
+): Promise<DocumentInvitationList> {
+  const response = await apiGet<unknown>(`documents/${documentId}/invitations`);
+
+  return documentInvitationListSchema.parse(response);
 }
 
 export async function shareDocument(
@@ -88,6 +102,27 @@ export async function revokeDocumentAccess(
   userId: string,
 ): Promise<void> {
   await apiDelete<void>(`documents/${documentId}/collaborators/${userId}`);
+}
+
+export async function updateDocumentInvitation(
+  documentId: DocumentId,
+  invitationId: string,
+  input: UpdateDocumentInvitationInput,
+): Promise<DocumentInvitation> {
+  const payload = updateDocumentInvitationSchema.parse(input);
+  const response = await apiPatch<unknown, UpdateDocumentInvitationInput>(
+    `documents/${documentId}/invitations/${invitationId}`,
+    payload,
+  );
+
+  return documentInvitationSchema.parse(response);
+}
+
+export async function revokeDocumentInvitation(
+  documentId: DocumentId,
+  invitationId: string,
+): Promise<void> {
+  await apiDelete<void>(`documents/${documentId}/invitations/${invitationId}`);
 }
 
 export async function getDocumentAccessSettings(

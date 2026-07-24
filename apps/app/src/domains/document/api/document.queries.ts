@@ -6,6 +6,7 @@ import {
   getDocumentAccessSettings,
   getDocument,
   listDocumentCollaborators,
+  listDocumentInvitations,
   getWorkspaceChildDocuments,
   getWorkspaceRootDocuments,
 } from './document.requests';
@@ -23,6 +24,14 @@ export function documentCollaboratorsQueryOptions(documentId: DocumentId) {
   return queryOptions({
     queryKey: documentKeys.collaborators(documentId),
     queryFn: () => listDocumentCollaborators(documentId),
+    staleTime: 30_000,
+  });
+}
+
+export function documentInvitationsQueryOptions(documentId: DocumentId) {
+  return queryOptions({
+    queryKey: documentKeys.invitations(documentId),
+    queryFn: () => listDocumentInvitations(documentId),
     staleTime: 30_000,
   });
 }

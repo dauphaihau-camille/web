@@ -17,6 +17,8 @@ import type {
   documentCollaboratorListSchema,
   documentCollaboratorSchema,
   documentCollaboratorUserSchema,
+  documentInvitationListSchema,
+  documentInvitationSchema,
   documentCollaborationSchema,
   documentContentFormatSchema,
   documentIdSchema,
@@ -29,6 +31,7 @@ import type {
   shareDocumentSchema,
   shareDocumentsResponseSchema,
   shareDocumentsSchema,
+  updateDocumentInvitationSchema,
   updateDocumentAccessSettingsSchema,
   teamspaceDocumentNavigationSchema,
   updateDocumentSchema,
@@ -50,6 +53,8 @@ export type DocumentOwnerUser = z.infer<typeof documentOwnerUserSchema>;
 export type DocumentCollaboratorUser = z.infer<typeof documentCollaboratorUserSchema>;
 export type DocumentCollaborator = z.infer<typeof documentCollaboratorSchema>;
 export type DocumentCollaboratorList = z.infer<typeof documentCollaboratorListSchema>;
+export type DocumentInvitation = z.infer<typeof documentInvitationSchema>;
+export type DocumentInvitationList = z.infer<typeof documentInvitationListSchema>;
 export type DocumentNavigationNode = z.infer<typeof documentNavigationNodeSchema>;
 export type DocumentNavigationPage = z.infer<typeof documentNavigationPageSchema>;
 export type ArchivedDocumentListItem = z.infer<typeof archivedDocumentListItemSchema>;
@@ -67,4 +72,5 @@ export type ShareDocumentInput = z.infer<typeof shareDocumentSchema>;
 export type ShareDocumentsInput = z.infer<typeof shareDocumentsSchema>;
 export type ShareDocumentFailure = z.infer<typeof shareDocumentFailureSchema>;
 export type ShareDocumentsResponse = z.infer<typeof shareDocumentsResponseSchema>;
+export type UpdateDocumentInvitationInput = z.infer<typeof updateDocumentInvitationSchema>;
 export type UpdateDocumentAccessSettingsInput = z.infer<typeof updateDocumentAccessSettingsSchema>;
