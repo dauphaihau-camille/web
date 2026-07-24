@@ -4,7 +4,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from '@shared/components/ui/input-group';
-import type { SelectedInvitee } from '../../../_hooks/use-share-tab';
+import type { SelectedInvitee } from '../../../_hooks/use-invite-composer';
 import { InviteeBadge } from './invitee-badge';
 import { PermissionDropdown } from './permission-dropdown';
 

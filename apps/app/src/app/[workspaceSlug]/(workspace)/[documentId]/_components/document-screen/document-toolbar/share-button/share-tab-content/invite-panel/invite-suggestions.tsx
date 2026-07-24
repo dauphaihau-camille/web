@@ -3,7 +3,7 @@ import {
   UserRoundPlusIcon,
 } from 'lucide-react';
 
-import type { InviteSuggestion } from '../../_hooks/use-share-tab';
+import type { InviteSuggestion } from '../../_hooks/use-invite-composer';
 
 export function InviteSuggestions({
   suggestions,
