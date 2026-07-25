@@ -1,6 +1,9 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import {
+  useCallback,
+  useState,
+} from 'react';
 import { createBlockNoteEditorLoader } from '@shared/components/editor/create-blocknote-editor-loader';
 import type { Document } from '@/domains/document';
 import { Input } from '@shared/components/ui/input';
@@ -50,6 +53,7 @@ function DocumentScreenContent({
 
   const documentId = document.id;
   const [editorContent, setEditorContent] = useState(document.content);
+  const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
 
   const collaborationMode = document.collaboration?.mode ??
     (document.access?.can_edit && !document.archived_at ? 'edit' : 'view');
@@ -69,6 +73,14 @@ function DocumentScreenContent({
   const handleRestoreDraft = useCallback((content: unknown[]) => {
     setEditorContent(content);
   }, []);
+
+  const handleDocumentContentInput = useCallback(() => {
+    if (!canEditDocument) {
+      return;
+    }
+
+    hideChrome();
+  }, [canEditDocument, hideChrome]);
 
   const documentEditorActions = useDocumentEditorActions({
     collaborationEnabled: true,
@@ -106,7 +118,14 @@ function DocumentScreenContent({
     (isArchived ? statusBarHeight : 0);
 
   return (
-    <section className="space-y-6" onPointerMove={revealChrome}>
+    <section
+      className="space-y-6"
+      onPointerMove={() => {
+        if (!isSharePopoverOpen) {
+          revealChrome();
+        }
+      }}
+    >
       <PublishedDocumentBar
         publishedPath={documentToolbar.publishStatus?.public_path}
         offsetTop={publishedBarOffset}
@@ -144,6 +163,7 @@ function DocumentScreenContent({
             isVisible={isChromeVisible}
             updatedAt={document.updated_at}
             workspaceSlug={workspaceSlug}
+            onShareOpenChange={setIsSharePopoverOpen}
             {...documentToolbar}
           />
         </div>
@@ -152,6 +172,8 @@ function DocumentScreenContent({
       <div
         className="mx-auto max-w-2xl"
         style={{ paddingTop: `${110 + fixedHeaderOffset}px` }}
+        onInputCapture={handleDocumentContentInput}
+        onKeyDownCapture={handleDocumentContentInput}
       >
         <div className="space-y-3 px-[3.8rem]">
           <div className="min-w-0 flex-1 space-y-2">
@@ -188,6 +210,7 @@ function DocumentScreenContent({
               workspaceSlug={workspaceSlug}
               content={editorContent}
               editable={canEditDocument}
+              suppressHoverControls={isSharePopoverOpen}
               documentOperations={{
                 isCollaborative: true,
                 isArchiving: documentToolbar.isArchiving,

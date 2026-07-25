@@ -44,6 +44,7 @@ type DocumentToolbarProps = {
   updatedAt: Document['updated_at'];
   document: Document;
   workspaceSlug: string;
+  onShareOpenChange?: (open: boolean) => void;
 };
 
 export function DocumentToolbar({
@@ -70,6 +71,7 @@ export function DocumentToolbar({
   updatedAt,
   document,
   workspaceSlug,
+  onShareOpenChange,
 }: DocumentToolbarProps) {
   return (
     <div
@@ -98,6 +100,7 @@ export function DocumentToolbar({
         workspaceSlug={workspaceSlug}
         onCopyLink={copyLink}
         onCopyPublishedLink={copyPublishedLink}
+        onOpenChange={onShareOpenChange}
         onPublish={publishCurrentDocument}
         onRestore={restoreCurrentDocument}
         onUnpublish={unpublishCurrentDocument}

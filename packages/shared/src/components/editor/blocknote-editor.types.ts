@@ -29,6 +29,7 @@ export type BlockNoteEditorProps = {
   documentId?: string;
   workspaceSlug?: string;
   editable?: boolean;
+  suppressHoverControls?: boolean;
   documentOperations?: BlockNoteDocumentOperations;
   onContentChangeAction?: (content: unknown[]) => Promise<void>;
   onCreateSubdocAction?: (input?: {

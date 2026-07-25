@@ -98,6 +98,7 @@ export function createBlockNoteEditorClient({
     documentId: _documentId,
     workspaceSlug = '',
     editable = true,
+    suppressHoverControls = false,
     documentOperations,
     onContentChangeAction,
     onCreateSubdocAction,
@@ -452,9 +453,13 @@ export function createBlockNoteEditorClient({
           {isEditable
             ? (
               <>
-                <EditorSideMenuController
-                  documentOperations={documentOperations}
-                />
+                {!suppressHoverControls
+                  ? (
+                    <EditorSideMenuController
+                      documentOperations={documentOperations}
+                    />
+                  )
+                  : null}
                 <SuggestionMenuController
                   triggerCharacter="/"
                   shouldOpen={(state) =>
