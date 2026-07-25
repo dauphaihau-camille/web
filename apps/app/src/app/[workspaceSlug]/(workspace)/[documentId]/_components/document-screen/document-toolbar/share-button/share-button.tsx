@@ -4,7 +4,7 @@ import {
   LockIcon,
   UsersIcon,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { OPEN_SHARE_EVENT } from '@/app/[workspaceSlug]/_components/workspace-shortcuts-provider';
 import type { Document } from '@/domains/document';
@@ -18,12 +18,6 @@ import {
   PopoverTrigger,
 } from '@shared/components/ui/popover';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -31,8 +25,7 @@ import {
 import { cn } from '@shared/lib/utils';
 
 import { buildPublishedDocumentUrl } from '../document-toolbar.utils';
-import { PublishTabContent } from './publish-tab-content';
-import { ShareTabContent } from './share-tab-content/share-tab-content';
+import { SharePopoverContent } from './share-popover-content';
 import type { ShareButtonProps } from './types';
 
 const SHARE_SHORTCUT = '\u21e7\u2318S';
@@ -68,6 +61,7 @@ export function ShareButton({
   workspaceSlug,
   onCopyLink,
   onCopyPublishedLink,
+  onOpenChange,
   onPublish,
   onRestore,
   onUnpublish,
@@ -75,10 +69,14 @@ export function ShareButton({
   const [isOpen, setIsOpen] = useState(false);
 
   const publicUrl = buildPublishedDocumentUrl(publishedPath);
+  const handleOpenChange = useCallback((open: boolean) => {
+    setIsOpen(open);
+    onOpenChange?.(open);
+  }, [onOpenChange]);
 
   useEffect(() => {
     const handleOpenShare = () => {
-      setIsOpen((open) => !open);
+      handleOpenChange(!isOpen);
     };
 
     window.addEventListener(OPEN_SHARE_EVENT, handleOpenShare);
@@ -86,7 +84,7 @@ export function ShareButton({
     return () => {
       window.removeEventListener(OPEN_SHARE_EVENT, handleOpenShare);
     };
-  }, []);
+  }, [handleOpenChange, isOpen]);
 
   useKeyPress(
     'meta.shift.c',
@@ -104,7 +102,7 @@ export function ShareButton({
   );
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <Tooltip>
         <TooltipTrigger
           render={
@@ -131,44 +129,24 @@ export function ShareButton({
         sideOffset={8}
         className="w-104 gap-0 overflow-hidden p-0"
       >
-        <Tabs defaultValue="share" className="gap-0">
-          <TabsList
-            variant="line"
-            className="h-auto w-full rounded-none border-b justify-start px-3"
-          >
-            <TabsTrigger value="share" className="flex-none px-3 py-1">
-              Share
-            </TabsTrigger>
-            <TabsTrigger value="publish" className="flex-none px-3 py-1">
-              Publish
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="share" className="p-4 outline-none">
-            <ShareTabContent
-              canManageAccess={canManageAccess}
-              document={document}
-              isArchived={isArchived}
-              workspaceSlug={workspaceSlug}
-              onCopyLink={onCopyLink}
-            />
-          </TabsContent>
-          <TabsContent value="publish" className="p-4 outline-none">
-            <PublishTabContent
-              isArchived={isArchived}
-              canEdit={canEdit}
-              isPublished={isPublished}
-              isPublishing={isPublishing}
-              isRestoring={isRestoring}
-              isUnpublishing={isUnpublishing}
-              publicUrl={publicUrl}
-              onCopyPublishedLink={onCopyPublishedLink}
-              onPublish={onPublish}
-              onRestore={onRestore}
-              onUnpublish={onUnpublish}
-              copyPublishedLinkShortcut={COPY_PUBLISHED_LINK_SHORTCUT}
-            />
-          </TabsContent>
-        </Tabs>
+        <SharePopoverContent
+          canManageAccess={canManageAccess}
+          document={document}
+          isArchived={isArchived}
+          workspaceSlug={workspaceSlug}
+          onCopyLink={onCopyLink}
+          canEdit={canEdit}
+          isPublished={isPublished}
+          isPublishing={isPublishing}
+          isRestoring={isRestoring}
+          isUnpublishing={isUnpublishing}
+          publicUrl={publicUrl}
+          onCopyPublishedLink={onCopyPublishedLink}
+          onPublish={onPublish}
+          onRestore={onRestore}
+          onUnpublish={onUnpublish}
+          copyPublishedLinkShortcut={COPY_PUBLISHED_LINK_SHORTCUT}
+        />
       </PopoverContent>
     </Popover>
   );

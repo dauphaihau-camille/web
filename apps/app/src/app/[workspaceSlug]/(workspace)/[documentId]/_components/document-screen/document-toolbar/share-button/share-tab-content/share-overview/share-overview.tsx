@@ -1,7 +1,7 @@
 import { GeneralAccessRow } from './general-access-row';
-import { InviteEntryPoint } from './invite-entry-point';
 import { MemberAccessRow } from './member-access-row';
 import { getShareAccessRows, type ShareAccessRow } from './share-access-rows';
+import { InviteComposerRow } from '../invite-composer-row';
 import { useShareTabContext } from '../share-tab-context';
 import {
   getPermissionLabel,
@@ -79,9 +79,19 @@ export function ShareOverview() {
 
   return (
     <div className="space-y-4">
-      <InviteEntryPoint
+      <InviteComposerRow
+        canInvite={state.canInvite}
+        canManageAccess={state.canManageAccess}
         disabled={!state.canManageAccess || state.isArchived}
-        onOpenInvite={actions.openInvite}
+        invitePermission={state.invitePermission}
+        inviteQuery={state.inviteQuery}
+        isArchived={state.isArchived}
+        selectedInvitees={state.selectedInvitees}
+        onInvite={actions.invite}
+        onInvitePermissionChange={actions.setInvitePermission}
+        onInviteQueryChange={actions.setInviteQuery}
+        onRemoveInvitee={actions.removeInvitee}
+        onRemoveLastInvitee={actions.removeLastInvitee}
       />
 
       <div className="space-y-3">

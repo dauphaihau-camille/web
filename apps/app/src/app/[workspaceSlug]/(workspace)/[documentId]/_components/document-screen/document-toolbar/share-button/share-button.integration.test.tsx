@@ -258,13 +258,19 @@ describe('ShareButton integration', () => {
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: 'Share' }));
-    await user.click(await screen.findByText('Email or group, separated by commas'));
     const inviteInput = await screen.findByPlaceholderText('Email or name');
 
-    expect(screen.getByRole('button', { name: 'Back to sharing' })).toBeInTheDocument();
     expect(inviteInput).toHaveFocus();
+    expect(screen.queryByRole('button', { name: 'Back to sharing' })).not.toBeInTheDocument();
 
-    await user.type(inviteInput, 'kim');
+    await user.type(inviteInput, 'k');
+    const panelInviteInput = await screen.findByPlaceholderText('Email or name');
+    expect(screen.getByRole('button', { name: 'Back to sharing' })).toBeInTheDocument();
+
+    await user.clear(panelInviteInput);
+    expect(screen.getByRole('button', { name: 'Back to sharing' })).toBeInTheDocument();
+
+    await user.type(panelInviteInput, 'kim');
     await user.click(await screen.findByText('Kim Nguyen <kim@example.com>'));
 
     expect(await screen.findByText('kim@example.com')).toBeInTheDocument();
@@ -312,10 +318,10 @@ describe('ShareButton integration', () => {
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: 'Share' }));
-    await user.click(await screen.findByText('Email or group, separated by commas'));
     const inviteInput = await screen.findByPlaceholderText('Email or name');
 
-    await user.type(inviteInput, 'huongk1lk2clcla@yahoo.com');
+    await user.type(inviteInput, 'h');
+    await user.type(await screen.findByPlaceholderText('Email or name'), 'uongk1lk2clcla@yahoo.com');
     await user.click(await screen.findByText('huongk1lk2clcla@yahoo.com'));
     await user.click(screen.getByRole('button', { name: 'Invite' }));
 

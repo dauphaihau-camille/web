@@ -64,6 +64,14 @@ export function useShareTab({
     toast('Document shared');
   };
 
+  const setInviteQuery = (query: string) => {
+    invite.setInviteQuery(query);
+
+    if (query.trim()) {
+      setIsInviteMode(true);
+    }
+  };
+
   return {
     invitePanel: {
       actions: {
@@ -75,7 +83,7 @@ export function useShareTab({
         removeInvitee: invite.removeInvitee,
         removeLastInvitee: invite.removeLastInvitee,
         setInvitePermission: invite.setInvitePermission,
-        setInviteQuery: invite.setInviteQuery,
+        setInviteQuery,
       },
       state: {
         canInvite: invite.canInvite,
@@ -90,22 +98,32 @@ export function useShareTab({
     isInviteMode,
     overview: {
       actions: {
-        openInvite: () => setIsInviteMode(true),
+        invite: () => {
+          void inviteSelected();
+        },
+        removeInvitee: invite.removeInvitee,
+        removeLastInvitee: invite.removeLastInvitee,
         revokeAccess: mutations.revokeAccess,
         revokeInvitation: mutations.revokeInvitation,
+        setInvitePermission: invite.setInvitePermission,
+        setInviteQuery,
         updateInvitationPermission: mutations.updateInvitationPermission,
         updatePermission: mutations.updatePermission,
         updateWorkspaceMemberPermission: mutations.updateWorkspaceMemberPermission,
       },
       state: {
+        canInvite: invite.canInvite,
         canManageAccess,
         collaborators: access.collaborators,
         currentUserId: access.currentUserId,
         documentTitle: document.title,
+        invitePermission: invite.invitePermission,
+        inviteQuery: invite.inviteQuery,
         invitations: access.invitations,
         isArchived,
         isMutating: mutations.isMutating,
         ownerMember: access.ownerMember,
+        selectedInvitees: invite.selectedInvitees,
         workspaceMemberPermission: access.workspaceMemberPermission,
         workspaceName: access.workspaceName,
       },

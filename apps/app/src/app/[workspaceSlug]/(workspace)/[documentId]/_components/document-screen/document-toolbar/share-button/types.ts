@@ -14,6 +14,7 @@ export type ShareButtonProps = {
   workspaceSlug: string;
   onCopyLink: () => void | Promise<void>;
   onCopyPublishedLink: () => void | Promise<void>;
+  onOpenChange?: (open: boolean) => void;
   onPublish: () => void;
   onRestore: () => void;
   onUnpublish: () => void;
