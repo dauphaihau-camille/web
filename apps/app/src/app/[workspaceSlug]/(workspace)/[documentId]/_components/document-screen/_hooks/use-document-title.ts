@@ -1,7 +1,12 @@
 'use client';
 
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+import { useDebounceFn } from 'ahooks';
 import type * as Yjs from 'yjs';
 
 import {
@@ -21,6 +26,8 @@ type UseDocumentTitleArgs = {
   collaborationDocument: Yjs.Doc;
 };
 
+const TITLE_COMMIT_DEBOUNCE_MS = 300;
+
 export function useDocumentTitle({
   document,
   workspaceSlug,
@@ -38,6 +45,31 @@ export function useDocumentTitle({
     meta.get('title'),
     document.title,
   ));
+
+  const commitTitle = useCallback((nextTitle: string) => {
+    const normalizedTitle = getNormalizedTitle(nextTitle, document.title);
+
+    if (meta.get('title') !== normalizedTitle) {
+      meta.set('title', normalizedTitle);
+      return;
+    }
+
+    applyProjectedTitle({
+      document,
+      documentId,
+      nextTitle: normalizedTitle,
+      queryClient,
+      workspaceSlug,
+    });
+    setSavedTitle(normalizedTitle);
+  }, [document, document.title, documentId, meta, queryClient, workspaceSlug]);
+
+  const {
+    run: scheduleTitleCommit,
+    cancel: cancelScheduledTitleCommit,
+  } = useDebounceFn(commitTitle, {
+    wait: TITLE_COMMIT_DEBOUNCE_MS,
+  });
 
   useEffect(() => {
     const currentTitle = getNormalizedTitle(meta.get('title'), document.title);
@@ -75,10 +107,20 @@ export function useDocumentTitle({
     meta.observe(handleMetaChange);
 
     return () => {
+      cancelScheduledTitleCommit();
       meta.unobserve(handleMetaChange);
       clearDraftTitle(documentId);
     };
-  }, [clearDraftTitle, document, document.title, documentId, meta, queryClient, workspaceSlug]);
+  }, [
+    cancelScheduledTitleCommit,
+    clearDraftTitle,
+    document,
+    document.title,
+    documentId,
+    meta,
+    queryClient,
+    workspaceSlug,
+  ]);
 
   const title = activeDraftDocumentId === documentId && activeDraftTitle !== null
     ? activeDraftTitle
@@ -86,27 +128,13 @@ export function useDocumentTitle({
 
   const handleTitleChange = (nextTitle: string) => {
     setDocumentTitleDraft(documentId, nextTitle);
-    meta.set('title', nextTitle);
+    scheduleTitleCommit(nextTitle);
   };
 
   const handleTitleBlur = (nextTitle: string) => {
-    const normalizedTitle = getNormalizedTitle(nextTitle, document.title);
-
+    cancelScheduledTitleCommit();
     clearDraftTitle(documentId);
-
-    if (meta.get('title') !== normalizedTitle) {
-      meta.set('title', normalizedTitle);
-      return;
-    }
-
-    applyProjectedTitle({
-      document,
-      documentId,
-      nextTitle: normalizedTitle,
-      queryClient,
-      workspaceSlug,
-    });
-    setSavedTitle(normalizedTitle);
+    commitTitle(nextTitle);
   };
 
   return {

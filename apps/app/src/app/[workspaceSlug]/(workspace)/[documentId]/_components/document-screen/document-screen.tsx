@@ -6,7 +6,7 @@ import {
 } from 'react';
 import { createBlockNoteEditorLoader } from '@shared/components/editor/create-blocknote-editor-loader';
 import type { Document } from '@/domains/document';
-import { Input } from '@shared/components/ui/input';
+import { Textarea } from '@shared/components/ui/textarea';
 
 import { DocumentBreadcrumb } from './document-breadcrumb';
 import { DocumentToolbar } from './document-toolbar/document-toolbar';
@@ -111,7 +111,7 @@ function DocumentScreenContent({
   );
   const isArchived = Boolean(document.archived_at);
   const statusBarHeight = 48;
-  
+
   const publishedBarOffset = isArchived ? statusBarHeight : 0;
   const fixedHeaderOffset =
     (isPublished ? statusBarHeight : 0) +
@@ -177,7 +177,7 @@ function DocumentScreenContent({
       >
         <div className="space-y-3 px-[3.8rem]">
           <div className="min-w-0 flex-1 space-y-2">
-            <Input
+            <Textarea
               value={title}
               onChange={(event) => {
                 if (!canEditDocument) {
@@ -185,17 +185,31 @@ function DocumentScreenContent({
                 }
 
                 hideChrome();
-                handleTitleChange(event.target.value);
+                const nextTitle = event.currentTarget.value.replace(/\s*\r?\n\s*/g, ' ');
+
+                if (nextTitle !== event.currentTarget.value) {
+                  event.currentTarget.value = nextTitle;
+                }
+
+                handleTitleChange(nextTitle);
+              }}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter') {
+                  return;
+                }
+                event.preventDefault();
+                event.currentTarget.blur();
               }}
               onBlur={(event) => {
                 if (!canEditDocument) {
                   return;
                 }
-
                 handleTitleBlur(event.currentTarget.value);
               }}
               readOnly={!canEditDocument}
-              className="h-auto border-0 bg-transparent px-0 text-4xl font-semibold tracking-tight shadow-none focus-visible:ring-0 dark:bg-transparent md:text-5xl"
+              rows={1}
+              wrap="soft"
+              className="min-h-[1lh] resize-none overflow-hidden rounded-none border-0 bg-transparent px-0 py-0 text-4xl leading-tight font-semibold break-words whitespace-pre-wrap shadow-none focus-visible:ring-0 md:text-5xl dark:bg-transparent"
             />
           </div>
         </div>
