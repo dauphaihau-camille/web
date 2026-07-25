@@ -4,6 +4,7 @@ import {
   getWorkspace,
   listMyWorkspaces,
   listWorkspaceMembers,
+  searchWorkspaceMembers,
 } from './workspace.requests';
 import { workspaceKeys } from './workspace.keys';
 import type { WorkspaceId } from './workspace.types';
@@ -28,5 +29,18 @@ export function workspaceMemberListQueryOptions(workspaceId: WorkspaceId) {
   return queryOptions({
     queryKey: workspaceKeys.memberList(workspaceId),
     queryFn: () => listWorkspaceMembers(workspaceId),
+  });
+}
+
+export function workspaceMemberSearchQueryOptions(
+  workspaceId: WorkspaceId,
+  input?: {
+    query?: string;
+    limit?: number;
+  },
+) {
+  return queryOptions({
+    queryKey: workspaceKeys.memberSearch(workspaceId, input?.query, input?.limit),
+    queryFn: () => searchWorkspaceMembers(workspaceId, input),
   });
 }

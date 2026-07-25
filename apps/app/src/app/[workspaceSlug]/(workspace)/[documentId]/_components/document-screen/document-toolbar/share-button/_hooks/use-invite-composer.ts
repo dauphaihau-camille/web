@@ -1,5 +1,7 @@
 'use client';
 
+import { useDebounce } from 'ahooks';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 
 import type {
@@ -7,7 +9,9 @@ import type {
   DocumentCollaborator,
   DocumentInvitation,
 } from '@/domains/document';
-import type { WorkspaceMember } from '@/domains/workspace';
+import {
+  workspaceMemberSearchQueryOptions,
+} from '@/domains/workspace';
 
 export type SelectedInvitee = {
   email: string;
@@ -17,10 +21,16 @@ export type SelectedInvitee = {
 
 export type InviteSuggestion = {
   displayName?: string;
+  avatar?: string;
   email: string;
   id: string;
   source: 'workspace' | 'external';
   userId?: string;
+};
+
+export type InviteSuggestionGroups = {
+  external: InviteSuggestion[];
+  workspace: InviteSuggestion[];
 };
 
 type UseInviteComposerOptions = {
@@ -29,8 +39,8 @@ type UseInviteComposerOptions = {
   invitations: DocumentInvitation[];
   isArchived: boolean;
   isInvitePending: boolean;
-  members: WorkspaceMember[];
   ownerUserId: string;
+  workspaceId: string;
 };
 
 export function useInviteComposer({
@@ -39,13 +49,15 @@ export function useInviteComposer({
   invitations,
   isArchived,
   isInvitePending,
-  members,
   ownerUserId,
+  workspaceId,
 }: UseInviteComposerOptions) {
   const [inviteQuery, setInviteQuery] = useState('');
   const [selectedInvitees, setSelectedInvitees] = useState<SelectedInvitee[]>([]);
   const [invitePermission, setInvitePermission] =
     useState<DocumentAccessGrantPermission>('manage');
+  const normalizedQuery = inviteQuery.trim();
+  const debouncedQuery = useDebounce(normalizedQuery, { wait: 250 });
 
   const collaboratorsByUserId = useMemo(
     () => new Map(
@@ -73,23 +85,32 @@ export function useInviteComposer({
     [invitations],
   );
 
-  const inviteSuggestions = useMemo(() => {
-    const normalizedQuery = inviteQuery.trim().toLowerCase();
+  const workspaceMembersQuery = useQuery({
+    ...workspaceMemberSearchQueryOptions(workspaceId, {
+      query: debouncedQuery || undefined,
+      limit: debouncedQuery ? 5 : 3,
+    }),
+    enabled: canManageAccess && !isArchived,
+  });
 
-    const workspaceSuggestions: InviteSuggestion[] = members
+  const inviteSuggestions = useMemo<InviteSuggestionGroups>(() => {
+    const normalizedInviteQuery = normalizedQuery.toLowerCase();
+
+    const workspaceSuggestions: InviteSuggestion[] = (workspaceMembersQuery.data ?? [])
       .filter((member) =>
         member.user_id !== ownerUserId
         && !selectedInviteeIds.has(member.user_id)
         && !selectedInviteeEmails.has(member.email.toLowerCase())
         && !invitedEmails.has(member.email.toLowerCase())
         && !collaboratorsByUserId.has(member.user_id)
-        && (!normalizedQuery || (
-          member.email.toLowerCase().includes(normalizedQuery)
-          || member.display_name?.toLowerCase().includes(normalizedQuery)
+        && (!normalizedInviteQuery || (
+          member.email.toLowerCase().includes(normalizedInviteQuery)
+          || member.display_name?.toLowerCase().includes(normalizedInviteQuery)
         )))
-      .slice(0, normalizedQuery ? 5 : 3)
+      .slice(0, debouncedQuery ? 5 : 3)
       .map((member) => ({
         displayName: member.display_name,
+        avatar: member.avatar,
         email: member.email,
         id: member.user_id,
         source: 'workspace',
@@ -97,14 +118,20 @@ export function useInviteComposer({
       }));
 
     if (workspaceSuggestions.length > 0) {
-      return workspaceSuggestions;
+      return {
+        external: [],
+        workspace: workspaceSuggestions,
+      };
     }
 
-    if (!normalizedQuery) {
-      return [];
+    if (!normalizedInviteQuery) {
+      return {
+        external: [],
+        workspace: [],
+      };
     }
 
-    return getDefaultEmailSuggestions(normalizedQuery)
+    const externalSuggestions = getDefaultEmailSuggestions(normalizedInviteQuery)
       .filter((email) =>
         !selectedInviteeEmails.has(email)
         && !invitedEmails.has(email))
@@ -113,14 +140,21 @@ export function useInviteComposer({
         id: email,
         source: 'external' as const,
       }));
+
+    return {
+      external: externalSuggestions,
+      workspace: workspaceSuggestions,
+    };
   }, [
     collaboratorsByUserId,
     invitedEmails,
     inviteQuery,
-    members,
     ownerUserId,
+    workspaceMembersQuery.data,
     selectedInviteeEmails,
     selectedInviteeIds,
+    debouncedQuery,
+    normalizedQuery,
   ]);
 
   const canInvite =
@@ -128,6 +162,8 @@ export function useInviteComposer({
     && !isArchived
     && selectedInvitees.length > 0
     && !isInvitePending;
+
+  const activeInviteSuggestion = inviteSuggestions.external[0];
 
   const addInvitee = (invitee: InviteSuggestion) => {
     setSelectedInvitees((invitees) => [
@@ -139,6 +175,15 @@ export function useInviteComposer({
       },
     ]);
     setInviteQuery('');
+  };
+
+  const addActiveInviteSuggestion = () => {
+    if (!activeInviteSuggestion) {
+      return false;
+    }
+
+    addInvitee(activeInviteSuggestion);
+    return true;
   };
 
   const removeInvitee = (inviteeId: string) => {
@@ -156,6 +201,8 @@ export function useInviteComposer({
   };
 
   return {
+    activeInviteSuggestionId: activeInviteSuggestion?.id,
+    addActiveInviteSuggestion,
     addInvitee,
     canInvite,
     invitePermission,

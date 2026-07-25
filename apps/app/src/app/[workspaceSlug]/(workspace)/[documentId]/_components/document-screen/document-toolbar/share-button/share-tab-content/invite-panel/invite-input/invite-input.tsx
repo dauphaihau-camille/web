@@ -14,6 +14,7 @@ export function InviteInput({
   inviteQuery,
   isArchived,
   selectedInvitees,
+  onAddActiveInviteSuggestion,
   onInvitePermissionChange,
   onInviteQueryChange,
   onRemoveInvitee,
@@ -24,6 +25,7 @@ export function InviteInput({
   inviteQuery: string;
   isArchived: boolean;
   selectedInvitees: SelectedInvitee[];
+  onAddActiveInviteSuggestion: () => boolean;
   onInvitePermissionChange: (permission: DocumentAccessGrantPermission) => void;
   onInviteQueryChange: (query: string) => void;
   onRemoveInvitee: (userId: string) => void;
@@ -65,6 +67,15 @@ export function InviteInput({
         className="h-8 text-sm"
         onChange={(event) => onInviteQueryChange(event.target.value)}
         onKeyDown={(event) => {
+          if (event.key === 'Enter' && inviteQuery.trim()) {
+            const didAddInvitee = onAddActiveInviteSuggestion();
+
+            if (didAddInvitee) {
+              event.preventDefault();
+              return;
+            }
+          }
+
           if (
             event.key === 'Backspace'
             && inviteQuery.length === 0

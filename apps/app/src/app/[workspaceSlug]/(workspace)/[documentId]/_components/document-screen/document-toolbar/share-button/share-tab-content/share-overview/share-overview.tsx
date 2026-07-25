@@ -88,6 +88,7 @@ export function ShareOverview() {
         isArchived={state.isArchived}
         selectedInvitees={state.selectedInvitees}
         onInvite={actions.invite}
+        onAddActiveInviteSuggestion={() => false}
         onInvitePermissionChange={actions.setInvitePermission}
         onInviteQueryChange={actions.setInviteQuery}
         onRemoveInvitee={actions.removeInvitee}

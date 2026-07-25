@@ -163,7 +163,6 @@ function ToolbarActionButton({
       size="icon"
       aria-label={ariaLabel}
       className={cn(
-        'text-muted-foreground',
         disabled && 'pointer-events-none opacity-50',
       )}
       onClick={() => {

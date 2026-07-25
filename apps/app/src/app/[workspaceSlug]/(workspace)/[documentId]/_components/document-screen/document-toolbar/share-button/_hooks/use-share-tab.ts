@@ -39,8 +39,8 @@ export function useShareTab({
     invitations: access.invitations,
     isArchived,
     isInvitePending: mutations.isInvitePending,
-    members: access.members,
     ownerUserId: document.owner_user_id,
+    workspaceId: document.workspace_id,
   });
 
   const inviteSelected = async () => {
@@ -75,6 +75,7 @@ export function useShareTab({
   return {
     invitePanel: {
       actions: {
+        addActiveInviteSuggestion: invite.addActiveInviteSuggestion,
         addInvitee: invite.addInvitee,
         back: () => setIsInviteMode(false),
         invite: () => {
@@ -86,6 +87,7 @@ export function useShareTab({
         setInviteQuery,
       },
       state: {
+        activeInviteSuggestionId: invite.activeInviteSuggestionId,
         canInvite: invite.canInvite,
         canManageAccess,
         invitePermission: invite.invitePermission,

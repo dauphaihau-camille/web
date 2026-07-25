@@ -59,6 +59,23 @@ export async function listWorkspaceMembers(
   return workspaceMemberListSchema.parse(response);
 }
 
+export async function searchWorkspaceMembers(
+  workspaceId: WorkspaceId,
+  input?: {
+    query?: string;
+    limit?: number;
+  },
+): Promise<WorkspaceMember[]> {
+  const response = await apiGet<unknown>(`workspaces/${workspaceId}/members/search`, {
+    searchParams: {
+      ...(input?.query ? { q: input.query } : {}),
+      ...(input?.limit ? { limit: String(input.limit) } : {}),
+    },
+  });
+
+  return workspaceMemberListSchema.parse(response);
+}
+
 export async function addWorkspaceMember(
   workspaceId: WorkspaceId,
   input: AddWorkspaceMemberInput,

@@ -109,7 +109,7 @@ export function ShareButton({
             <PopoverTrigger
               className={cn(
                 buttonVariants({ variant: 'outline', size: 'default' }),
-                'gap-1.5 px-2 text-[14px] h-7 text-muted-foreground rounded-sm',
+                'gap-1.5 px-2 text-[14px] h-7 opacity-70 rounded-sm',
                 triggerClassName,
               )}
             >

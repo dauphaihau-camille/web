@@ -95,6 +95,21 @@ function renderShareButton(
         created_at: '2026-01-01T00:00:00.000Z',
         updated_at: '2026-01-01T00:00:00.000Z',
       })),
+    http.get(/\/workspaces\/acme\/members\/search\/?$/, ({ request }) => {
+      const url = new URL(request.url);
+      const query = url.searchParams.get('q')?.trim().toLowerCase() ?? '';
+
+      return HttpResponse.json(
+        members.filter((member) => {
+          if (!query) {
+            return true;
+          }
+
+          return member.email.toLowerCase().includes(query)
+            || (member.display_name as string | undefined)?.toLowerCase().includes(query);
+        }),
+      );
+    }),
     http.get(/\/workspaces\/acme\/members\/?$/, () =>
       HttpResponse.json(members)),
     http.get(/\/documents\/doc-1\/collaborators\/?$/, () => HttpResponse.json(collaborators)),
@@ -271,7 +286,7 @@ describe('ShareButton integration', () => {
     expect(screen.getByRole('button', { name: 'Back to sharing' })).toBeInTheDocument();
 
     await user.type(panelInviteInput, 'kim');
-    await user.click(await screen.findByText('Kim Nguyen <kim@example.com>'));
+    await user.click(await screen.findByRole('button', { name: 'Kim Nguyen <kim@example.com>' }));
 
     expect(await screen.findByText('kim@example.com')).toBeInTheDocument();
 
@@ -322,7 +337,7 @@ describe('ShareButton integration', () => {
 
     await user.type(inviteInput, 'h');
     await user.type(await screen.findByPlaceholderText('Email or name'), 'uongk1lk2clcla@yahoo.com');
-    await user.click(await screen.findByText('huongk1lk2clcla@yahoo.com'));
+    await user.keyboard('{Enter}');
     await user.click(screen.getByRole('button', { name: 'Invite' }));
 
     expect(sharedEmails).toEqual(['huongk1lk2clcla@yahoo.com:manage']);

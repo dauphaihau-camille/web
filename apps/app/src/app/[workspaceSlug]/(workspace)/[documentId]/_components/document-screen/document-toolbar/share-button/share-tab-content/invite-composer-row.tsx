@@ -13,6 +13,7 @@ export function InviteComposerRow({
   isArchived,
   selectedInvitees,
   onInvite,
+  onAddActiveInviteSuggestion,
   onInvitePermissionChange,
   onInviteQueryChange,
   onRemoveInvitee,
@@ -26,6 +27,7 @@ export function InviteComposerRow({
   isArchived: boolean;
   selectedInvitees: SelectedInvitee[];
   onInvite: () => void;
+  onAddActiveInviteSuggestion: () => boolean;
   onInvitePermissionChange: (permission: DocumentAccessGrantPermission) => void;
   onInviteQueryChange: (query: string) => void;
   onRemoveInvitee: (userId: string) => void;
@@ -39,6 +41,7 @@ export function InviteComposerRow({
         inviteQuery={inviteQuery}
         isArchived={isArchived}
         selectedInvitees={selectedInvitees}
+        onAddActiveInviteSuggestion={onAddActiveInviteSuggestion}
         onInvitePermissionChange={onInvitePermissionChange}
         onInviteQueryChange={onInviteQueryChange}
         onRemoveInvitee={onRemoveInvitee}

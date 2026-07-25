@@ -11,4 +11,9 @@ export const workspaceKeys = {
   members: () => [...workspaceKeys.all, 'members'] as const,
   memberList: (workspaceId: WorkspaceId) =>
     [...workspaceKeys.members(), workspaceId] as const,
+  memberSearch: (
+    workspaceId: WorkspaceId,
+    query?: string,
+    limit?: number,
+  ) => [...workspaceKeys.members(), workspaceId, 'search', { query, limit }] as const,
 };
