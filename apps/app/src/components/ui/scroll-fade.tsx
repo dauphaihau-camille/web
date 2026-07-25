@@ -87,13 +87,16 @@ export const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(func
       return;
     }
 
-    const resizeObserver = new ResizeObserver(() => {
-      syncFadeState();
-    });
+    const animationFrameId = window.requestAnimationFrame(syncFadeState);
+    const resizeObserver = new ResizeObserver(syncFadeState);
 
     resizeObserver.observe(element);
+    Array.from(element.children).forEach((child) => {
+      resizeObserver.observe(child);
+    });
 
     return () => {
+      window.cancelAnimationFrame(animationFrameId);
       resizeObserver.disconnect();
     };
   }, [children, syncFadeState]);
@@ -125,17 +128,17 @@ export const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(func
   const showStart = direction === 'bottom' ? false : hasStartFade;
   const showEnd = direction === 'top' ? false : hasEndFade;
   const startOverlayClassName = isHorizontal
-    ? 'sticky left-0 top-0 bottom-0 z-10 -mr-[var(--scroll-fade-overlay-size)] inline-block h-full w-[var(--scroll-fade-overlay-size)] shrink-0 align-top bg-[linear-gradient(to_right,var(--scroll-fade-overlay-color),transparent)]'
+    ? 'absolute inset-y-0 left-0 z-10 w-[var(--scroll-fade-overlay-size)] bg-[linear-gradient(to_right,var(--scroll-fade-overlay-color),transparent)]'
     : 'sticky top-[var(--scroll-fade-top-offset)] z-10 -mb-[var(--scroll-fade-overlay-size)] block h-[var(--scroll-fade-overlay-size)] w-full bg-[linear-gradient(to_bottom,var(--scroll-fade-overlay-color),transparent)]';
   const endOverlayClassName = isHorizontal
-    ? 'sticky right-0 top-0 bottom-0 z-10 -ml-[var(--scroll-fade-overlay-size)] inline-block h-full w-[var(--scroll-fade-overlay-size)] shrink-0 align-top bg-[linear-gradient(to_left,var(--scroll-fade-overlay-color),transparent)]'
+    ? 'absolute inset-y-0 right-0 z-10 w-[var(--scroll-fade-overlay-size)] bg-[linear-gradient(to_left,var(--scroll-fade-overlay-color),transparent)]'
     : 'sticky bottom-0 z-10 -mt-[var(--scroll-fade-overlay-size)] block h-[var(--scroll-fade-overlay-size)] w-full bg-[linear-gradient(to_top,var(--scroll-fade-overlay-color),transparent)]';
 
   return (
     <div
       ref={setRefs}
       data-slot="scroll-fade"
-      className={cn(className)}
+      className={cn(isHorizontal && 'relative', className)}
       style={fadeStyle}
       onScroll={(event) => {
         callHandler(onScroll, event);

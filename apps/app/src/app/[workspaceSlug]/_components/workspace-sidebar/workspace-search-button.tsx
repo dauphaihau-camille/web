@@ -173,7 +173,14 @@ export function WorkspaceSearchButton({
                           `Edited ${formatRelativeTime(document.updated_at)}`,
                         ]
                           .filter(Boolean)
-                          .join(' • ')}
+                          .map((metadata, index) => (
+                            <span key={`${metadata}-${index}`}>
+                              {index > 0
+                                ? <span className="mx-1.5">•</span>
+                                : null}
+                              {metadata}
+                            </span>
+                          ))}
                       </div>
                       {document.matched_text
                         ? (

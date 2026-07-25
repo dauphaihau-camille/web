@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import * as React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ChevronRightIcon, FileIcon, FileTextIcon } from 'lucide-react';
 
@@ -11,6 +12,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
+import { ScrollFade } from '@/components/ui/scroll-fade';
 import {
   documentDetailQueryOptions,
   type DocumentNavigationNode,
@@ -22,8 +24,10 @@ import {
 } from '@/domains/workspace';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
+import { cn } from '@shared/lib/utils';
 
 import { DocumentTreeNodeActions } from './document-tree-node-actions/document-tree-node-actions';
+import { useHorizontalAutoScroll } from './use-horizontal-auto-scroll';
 
 export type DocumentTreeNodeActionMode = 'full' | 'readOnly' | 'hidden';
 
@@ -57,6 +61,8 @@ export function DocumentTreeNode({
   const DocumentIcon = hasContent ? FileTextIcon : FileIcon;
 
   const queryClient = useQueryClient();
+  const titleAutoScroll = useHorizontalAutoScroll({ pixelsPerSecond: 20 });
+  const [isTitleInteracting, setIsTitleInteracting] = React.useState(false);
 
   const activeDraftDocumentId = useDocumentTitleDraftStore(
     (state) => state.activeDocumentId,
@@ -95,6 +101,20 @@ export function DocumentTreeNode({
       documentDetailQueryOptions(document.public_id),
     );
   };
+  const actionPaddingClassName =
+    actionMode === 'hidden'
+      ? ''
+      : actionMode === 'full'
+        ? 'group-hover/menu-sub-item:pr-14 group-has-[[aria-expanded=true]]/menu-sub-item:pr-14'
+        : 'group-hover/menu-sub-item:pr-8 group-has-[[aria-expanded=true]]/menu-sub-item:pr-8';
+  const handleTitleInteractionStart = (event: React.SyntheticEvent<HTMLDivElement>) => {
+    setIsTitleInteracting(true);
+    titleAutoScroll.scrollToEnd(event.currentTarget);
+  };
+  const handleTitleInteractionEnd = (event: React.SyntheticEvent<HTMLDivElement>) => {
+    setIsTitleInteracting(false);
+    titleAutoScroll.resetToStart(event.currentTarget);
+  };
 
   return (
     <SidebarMenuItem>
@@ -111,7 +131,10 @@ export function DocumentTreeNode({
               />
             )}
             isActive={isActive}
-            className="pr-14 group-hover/menu-sub-item:bg-sidebar-accent group-hover/menu-sub-item:text-sidebar-accent-foreground group-focus-within/menu-sub-item:bg-sidebar-accent group-focus-within/menu-sub-item:text-sidebar-accent-foreground"
+            className={cn(
+              '[--document-tree-node-title-fade-color:var(--sidebar)] group-hover/menu-sub-item:bg-sidebar-accent group-hover/menu-sub-item:text-sidebar-accent-foreground group-hover/menu-sub-item:[--document-tree-node-title-fade-color:var(--sidebar-accent)] group-focus-within/menu-sub-item:bg-sidebar-accent group-focus-within/menu-sub-item:text-sidebar-accent-foreground group-focus-within/menu-sub-item:[--document-tree-node-title-fade-color:var(--sidebar-accent)] data-active:[--document-tree-node-title-fade-color:var(--sidebar-accent)]',
+              actionPaddingClassName,
+            )}
           >
             {hasChildren
               ? (
@@ -141,7 +164,18 @@ export function DocumentTreeNode({
               : (
                 <DocumentIcon />
               )}
-            <span className="font-semibold">{displayTitle}</span>
+            <ScrollFade
+              direction="right"
+              fadeColor="var(--document-tree-node-title-fade-color)"
+              fadeSize={isTitleInteracting ? '0px' : '1.25rem'}
+              className="no-scrollbar flex min-w-0 flex-1 items-center overflow-x-auto overflow-y-hidden whitespace-nowrap"
+              onMouseEnter={handleTitleInteractionStart}
+              onMouseLeave={handleTitleInteractionEnd}
+              onFocus={handleTitleInteractionStart}
+              onBlur={handleTitleInteractionEnd}
+            >
+              <span className="shrink-0 font-semibold">{displayTitle}</span>
+            </ScrollFade>
           </SidebarMenuSubButton>
 
           {actionMode !== 'hidden'
