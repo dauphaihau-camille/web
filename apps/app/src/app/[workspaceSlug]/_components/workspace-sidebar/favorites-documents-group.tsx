@@ -67,6 +67,7 @@ export function FavoritesDocumentsGroup({
         ? (
           <DocumentTreeList
             workspaceSlug={workspaceSlug}
+            treeScope="favorites"
             items={favorites.map(toFavoriteDocumentNode)}
             emptyMessage="No favorites yet."
             getActionMode={(document) => {

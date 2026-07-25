@@ -5,6 +5,7 @@ import {
   workspacePreferenceSchema,
 } from './workspace-preference.schemas';
 import type { WorkspacePreference } from './workspace-preference.types';
+import type { ExpandedDocumentIdsByScope } from './workspace-preference.types';
 import type { Workspace } from '@/domains/workspace/api/workspace.types';
 
 export async function getWorkspacePreference(
@@ -19,11 +20,12 @@ export async function updateWorkspacePreference(
   workspaceId: string,
   input: {
     navigation: {
-      expanded_document_ids: string[];
+      expanded_document_ids_by_scope: ExpandedDocumentIdsByScope;
     };
   },
 ): Promise<WorkspacePreference> {
   const payload = updateWorkspacePreferenceSchema.parse(input);
+
   const response = await apiPatch<unknown, typeof payload>(
     `workspaces/${workspaceId}/preferences`,
     payload,

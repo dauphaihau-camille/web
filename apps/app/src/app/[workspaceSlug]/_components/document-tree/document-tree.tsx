@@ -4,7 +4,6 @@ import { useWorkspaceDocumentRootQuery } from '@/domains/document';
 
 import { DocumentTreeSkeleton } from '../workspace-skeleton/document-tree-skeleton';
 import { DocumentTreeList } from './document-tree-list/document-tree-list';
-import { useSyncDocumentTreeExpansion } from './use-sync-document-tree-expansion';
 
 export function DocumentTree({
   workspaceSlug,
@@ -17,9 +16,8 @@ export function DocumentTree({
     enabled: !rootQueryProp,
   });
   const rootQuery = rootQueryProp ?? fallbackRootQuery;
-  const treeExpansion = useSyncDocumentTreeExpansion(workspaceSlug);
 
-  if (rootQuery.isLoading || treeExpansion.isLoading) {
+  if (rootQuery.isLoading) {
     return <DocumentTreeSkeleton animate />;
   }
 
@@ -30,6 +28,7 @@ export function DocumentTree({
   return (
     <DocumentTreeList
       workspaceSlug={workspaceSlug}
+      treeScope="private"
       items={rootQuery.data.private_documents.items.filter((document) =>
         (document.access_scope ?? 'private') === 'private'
         || document.is_owned_by_current_user === true)}

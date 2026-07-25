@@ -37,6 +37,7 @@ export function SharedDocumentsGroup({
     <CollapsibleSidebarGroup label="Shared">
       <DocumentTreeList
         workspaceSlug={workspaceSlug}
+        treeScope="shared"
         items={rootQuery.data.shared_documents.items}
         emptyMessage="No shared documents yet."
         getActionMode={(document) =>

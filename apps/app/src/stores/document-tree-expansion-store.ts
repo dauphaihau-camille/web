@@ -3,12 +3,27 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type DocumentTreeScope = 'private' | 'favorites' | 'shared' | `teamspace:${string}`;
+
+type ExpandedByWorkspace = Record<string, Partial<Record<DocumentTreeScope, string[]>>>;
+
 type DocumentTreeExpansionStore = {
-  expandedByWorkspace: Record<string, string[]>;
-  hydratedWorkspaceIds: string[];
-  setExpandedDocumentIds: (workspaceSlug: string, documentIds: string[]) => void;
-  toggleExpandedDocumentId: (workspaceSlug: string, documentId: string) => void;
-  markWorkspaceHydrated: (workspaceSlug: string) => void;
+  expandedByWorkspace: ExpandedByWorkspace;
+  hydratedWorkspaceScopeKeys: string[];
+  setExpandedDocumentIds: (
+    workspaceSlug: string,
+    treeScope: DocumentTreeScope,
+    documentIds: string[],
+  ) => void;
+  toggleExpandedDocumentId: (
+    workspaceSlug: string,
+    treeScope: DocumentTreeScope,
+    documentId: string,
+  ) => void;
+  markWorkspaceScopeHydrated: (
+    workspaceSlug: string,
+    treeScope: DocumentTreeScope,
+  ) => void;
 };
 
 function normalizeDocumentIds(documentIds: string[]) {
@@ -23,18 +38,22 @@ export const useDocumentTreeExpansionStore = create<DocumentTreeExpansionStore>(
   persist(
     (set) => ({
       expandedByWorkspace: {},
-      hydratedWorkspaceIds: [],
-      setExpandedDocumentIds: (workspaceSlug, documentIds) => {
+      hydratedWorkspaceScopeKeys: [],
+      setExpandedDocumentIds: (workspaceSlug, treeScope, documentIds) => {
         set((state) => ({
           expandedByWorkspace: {
             ...state.expandedByWorkspace,
-            [workspaceSlug]: normalizeDocumentIds(documentIds),
+            [workspaceSlug]: {
+              ...state.expandedByWorkspace[workspaceSlug],
+              [treeScope]: normalizeDocumentIds(documentIds),
+            },
           },
         }));
       },
-      toggleExpandedDocumentId: (workspaceSlug, documentId) => {
+      toggleExpandedDocumentId: (workspaceSlug, treeScope, documentId) => {
         set((state) => {
-          const currentDocumentIds = state.expandedByWorkspace[workspaceSlug] ?? [];
+          const currentDocumentIds =
+            state.expandedByWorkspace[workspaceSlug]?.[treeScope] ?? [];
           const nextDocumentIds = currentDocumentIds.includes(documentId)
             ? currentDocumentIds.filter((currentDocumentId) => currentDocumentId !== documentId)
             : [...currentDocumentIds, documentId];
@@ -42,26 +61,58 @@ export const useDocumentTreeExpansionStore = create<DocumentTreeExpansionStore>(
           return {
             expandedByWorkspace: {
               ...state.expandedByWorkspace,
-              [workspaceSlug]: normalizeDocumentIds(nextDocumentIds),
+              [workspaceSlug]: {
+                ...state.expandedByWorkspace[workspaceSlug],
+                [treeScope]: normalizeDocumentIds(nextDocumentIds),
+              },
             },
           };
         });
       },
-      markWorkspaceHydrated: (workspaceSlug) => {
+      markWorkspaceScopeHydrated: (workspaceSlug, treeScope) => {
+        const scopeKey = `${workspaceSlug}:${treeScope}`;
+
         set((state) => (
-          state.hydratedWorkspaceIds.includes(workspaceSlug)
+          state.hydratedWorkspaceScopeKeys.includes(scopeKey)
             ? state
             : {
-              hydratedWorkspaceIds: [...state.hydratedWorkspaceIds, workspaceSlug],
+              hydratedWorkspaceScopeKeys: [
+                ...state.hydratedWorkspaceScopeKeys,
+                scopeKey,
+              ],
             }
         ));
       },
     }),
     {
       name: 'document-tree-expansion',
+      version: 1,
       partialize: (state) => ({
         expandedByWorkspace: state.expandedByWorkspace,
       }),
+      migrate: (persistedState) => {
+        if (!persistedState || typeof persistedState !== 'object') {
+          return persistedState;
+        }
+
+        const state = persistedState as {
+          expandedByWorkspace?: Record<string, string[] | Partial<Record<DocumentTreeScope, string[]>>>;
+        };
+
+        if (!state.expandedByWorkspace) {
+          return persistedState;
+        }
+
+        return {
+          ...state,
+          expandedByWorkspace: Object.fromEntries(
+            Object.entries(state.expandedByWorkspace).map(([workspaceSlug, value]) => [
+              workspaceSlug,
+              Array.isArray(value) ? { private: normalizeDocumentIds(value) } : value,
+            ]),
+          ),
+        };
+      },
     },
   ),
 );

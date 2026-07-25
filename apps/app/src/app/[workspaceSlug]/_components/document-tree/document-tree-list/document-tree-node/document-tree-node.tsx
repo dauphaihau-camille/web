@@ -18,6 +18,7 @@ import {
   type DocumentNavigationNode,
   useWorkspaceDocumentChildrenQuery,
 } from '@/domains/document';
+import type { DocumentTreeScope } from '@/stores/document-tree-expansion-store';
 import {
   parseDocumentRouteSegment,
   workspaceRoutes,
@@ -34,11 +35,13 @@ export type DocumentTreeNodeActionMode = 'full' | 'readOnly' | 'hidden';
 export function DocumentTreeNode({
   document,
   workspaceSlug,
+  treeScope,
   pathname,
   actionMode = 'full',
 }: {
   document: DocumentNavigationNode;
   workspaceSlug: string;
+  treeScope: DocumentTreeScope;
   pathname: string;
   actionMode?: DocumentTreeNodeActionMode;
 }) {
@@ -74,7 +77,7 @@ export function DocumentTreeNode({
     (state) => state.expandedByWorkspace,
   );
   const isExpanded =
-    expandedByWorkspace[workspaceSlug]?.includes(document.id) ?? false;
+    expandedByWorkspace[workspaceSlug]?.[treeScope]?.includes(document.id) ?? false;
 
   const toggleExpandedDocumentId = useDocumentTreeExpansionStore(
     (state) => state.toggleExpandedDocumentId,
@@ -152,7 +155,7 @@ export function DocumentTreeNode({
                     onClick={(event) => {
                       event.preventDefault();
                       event.stopPropagation();
-                      toggleExpandedDocumentId(workspaceSlug, document.id);
+                      toggleExpandedDocumentId(workspaceSlug, treeScope, document.id);
                     }}
                   >
                     <ChevronRightIcon
@@ -185,6 +188,7 @@ export function DocumentTreeNode({
                 document={document}
                 isActive={isActive}
                 workspaceSlug={workspaceSlug}
+                treeScope={treeScope}
               />
             )
             : null}
@@ -210,6 +214,7 @@ export function DocumentTreeNode({
                 key={childDocument.id}
                 document={childDocument}
                 workspaceSlug={workspaceSlug}
+                treeScope={treeScope}
                 pathname={pathname}
                 actionMode={actionMode}
               />

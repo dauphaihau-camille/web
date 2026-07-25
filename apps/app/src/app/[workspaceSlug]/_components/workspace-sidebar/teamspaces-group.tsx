@@ -140,6 +140,7 @@ function TeamspaceTreeSection({
           <div id={contentId} className="pl-3 pt-1">
             <DocumentTreeList
               workspaceSlug={workspaceSlug}
+              treeScope={`teamspace:${teamspace.id}` as const}
               items={teamspace.documents.items}
               emptyMessage="No documents yet."
               nextCursor={teamspace.documents.next_cursor}

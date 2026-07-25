@@ -51,19 +51,22 @@ describe('DocumentTreeNodeActions', () => {
     const user = userEvent.setup();
 
     render(
-      <DocumentTreeNodeActions
-        mode="readOnly"
-        document={documentFixture}
-        isActive={false}
-        workspaceSlug="acme"
-      />,
+      <TooltipProvider delay={0}>
+        <DocumentTreeNodeActions
+          mode="readOnly"
+          document={documentFixture}
+          isActive={false}
+          workspaceSlug="acme"
+          treeScope="private"
+        />
+      </TooltipProvider>,
     );
 
     expect(screen.queryByRole('button', { name: 'Create subdocument' })).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Open document actions' }));
 
-    expect(screen.getByRole('menuitem', { name: 'Copy link' })).toBeInTheDocument();
+    expect(await screen.findByRole('menuitem', { name: 'Copy link' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Add to favorites' })).toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Duplicate' })).not.toBeInTheDocument();
     expect(screen.queryByRole('menuitem', { name: 'Move to Trash' })).not.toBeInTheDocument();
@@ -79,6 +82,7 @@ describe('DocumentTreeNodeActions', () => {
           document={documentFixture}
           isActive={false}
           workspaceSlug="acme"
+          treeScope="private"
         />
       </TooltipProvider>,
     );

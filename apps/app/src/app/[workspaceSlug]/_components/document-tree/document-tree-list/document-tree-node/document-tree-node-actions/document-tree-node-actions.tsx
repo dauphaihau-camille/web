@@ -26,6 +26,7 @@ import {
 import { LoadingIcon } from '@shared/components/loading-icon';
 import { buttonVariants } from '@shared/components/ui/button';
 import type { DocumentNavigationNode } from '@/domains/document';
+import type { DocumentTreeScope } from '@/stores/document-tree-expansion-store';
 import { cn } from '@shared/lib/utils';
 
 import { useDocumentTreeNodeActions } from './use-document-tree-node-actions';
@@ -35,6 +36,7 @@ type DocumentTreeNodeActionsProps = {
   document: DocumentNavigationNode;
   isActive: boolean;
   workspaceSlug: string;
+  treeScope: DocumentTreeScope;
 };
 
 export function DocumentTreeNodeActions({
@@ -42,6 +44,7 @@ export function DocumentTreeNodeActions({
   document,
   isActive,
   workspaceSlug,
+  treeScope,
 }: DocumentTreeNodeActionsProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -60,6 +63,7 @@ export function DocumentTreeNodeActions({
     document,
     isActive,
     workspaceSlug,
+    treeScope,
   });
 
   const canMutate = mode === 'full';

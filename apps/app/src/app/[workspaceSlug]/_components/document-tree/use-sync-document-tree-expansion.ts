@@ -10,7 +10,10 @@ import {
   workspacePreferenceKeys,
   type WorkspacePreference,
 } from '@/domains/workspace-preference';
-import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
+import {
+  type DocumentTreeScope,
+  useDocumentTreeExpansionStore,
+} from '@/stores/document-tree-expansion-store';
 
 function normalizeDocumentIds(documentIds: string[]) {
   return [...new Set(
@@ -24,28 +27,60 @@ function buildSignature(documentIds: string[]) {
   return normalizeDocumentIds(documentIds).join('|');
 }
 
-export function useSyncDocumentTreeExpansion(workspaceSlug: string) {
+export function useSyncDocumentTreeExpansion(
+  workspaceSlug: string,
+  treeScope: DocumentTreeScope,
+) {
   const queryClient = useQueryClient();
   const expandedByWorkspace = useDocumentTreeExpansionStore((state) => state.expandedByWorkspace);
-  const hydratedWorkspaceIds = useDocumentTreeExpansionStore((state) => state.hydratedWorkspaceIds);
+
+  const hydratedWorkspaceScopeKeys = useDocumentTreeExpansionStore(
+    (state) => state.hydratedWorkspaceScopeKeys,
+  );
+
   const setExpandedDocumentIds = useDocumentTreeExpansionStore((state) => state.setExpandedDocumentIds);
-  const markWorkspaceHydrated = useDocumentTreeExpansionStore((state) => state.markWorkspaceHydrated);
+
+  const markWorkspaceScopeHydrated = useDocumentTreeExpansionStore(
+    (state) => state.markWorkspaceScopeHydrated,
+  );
+
   const preferenceQuery = useWorkspacePreferenceQuery(workspaceSlug);
   const lastSyncedSignatureRef = useRef<string | null>(null);
-  const isWorkspaceHydrated = hydratedWorkspaceIds.includes(workspaceSlug);
-  const expandedDocumentIds = expandedByWorkspace[workspaceSlug];
+  const workspaceScopeKey = `${workspaceSlug}:${treeScope}`;
+  const isWorkspaceScopeHydrated = hydratedWorkspaceScopeKeys.includes(workspaceScopeKey);
+  const expandedDocumentIds = expandedByWorkspace[workspaceSlug]?.[treeScope];
+
   const normalizedExpandedDocumentIds = useMemo(
     () => normalizeDocumentIds(expandedDocumentIds ?? []),
     [expandedDocumentIds],
   );
 
   const updatePreferenceMutation = useMutation({
-    mutationFn: (documentIds: string[]) =>
-      updateWorkspacePreference(workspaceSlug, {
+    mutationFn: (documentIds: string[]) => {
+      const currentPreference = queryClient.getQueryData<WorkspacePreference>(
+        workspacePreferenceKeys.detail(workspaceSlug),
+      );
+
+      const currentExpandedByScope =
+        useDocumentTreeExpansionStore.getState().expandedByWorkspace[workspaceSlug] ?? {};
+
+      const expandedDocumentIdsByScope = Object.fromEntries(
+        Object.entries(currentExpandedByScope).map(([scope, scopedDocumentIds]) => [
+          scope,
+          normalizeDocumentIds(scopedDocumentIds ?? []),
+        ]),
+      );
+
+      return updateWorkspacePreference(workspaceSlug, {
         navigation: {
-          expanded_document_ids: documentIds,
+          expanded_document_ids_by_scope: {
+            ...(currentPreference?.navigation.expanded_document_ids_by_scope ?? {}),
+            ...expandedDocumentIdsByScope,
+            [treeScope]: documentIds,
+          },
         },
-      }),
+      });
+    },
     onSuccess: (preference) => {
       queryClient.setQueryData<WorkspacePreference>(
         workspacePreferenceKeys.detail(workspaceSlug),
@@ -68,27 +103,28 @@ export function useSyncDocumentTreeExpansion(workspaceSlug: string) {
   }, [cancelPreferenceSync]);
 
   useEffect(() => {
-    if (!preferenceQuery.data || isWorkspaceHydrated) {
+    if (!preferenceQuery.data || isWorkspaceScopeHydrated) {
       return;
     }
 
     const nextExpandedDocumentIds = normalizeDocumentIds(
-      preferenceQuery.data.navigation.expanded_document_ids,
+      preferenceQuery.data.navigation.expanded_document_ids_by_scope[treeScope] ?? [],
     );
 
-    setExpandedDocumentIds(workspaceSlug, nextExpandedDocumentIds);
-    markWorkspaceHydrated(workspaceSlug);
+    setExpandedDocumentIds(workspaceSlug, treeScope, nextExpandedDocumentIds);
+    markWorkspaceScopeHydrated(workspaceSlug, treeScope);
     lastSyncedSignatureRef.current = buildSignature(nextExpandedDocumentIds);
   }, [
-    isWorkspaceHydrated,
-    markWorkspaceHydrated,
+    isWorkspaceScopeHydrated,
+    markWorkspaceScopeHydrated,
     preferenceQuery.data,
     setExpandedDocumentIds,
+    treeScope,
     workspaceSlug,
   ]);
 
   useEffect(() => {
-    if (!isWorkspaceHydrated) {
+    if (!isWorkspaceScopeHydrated) {
       return;
     }
 
@@ -101,13 +137,13 @@ export function useSyncDocumentTreeExpansion(workspaceSlug: string) {
     lastSyncedSignatureRef.current = nextSignature;
     schedulePreferenceSync(normalizedExpandedDocumentIds);
   }, [
-    isWorkspaceHydrated,
+    isWorkspaceScopeHydrated,
     normalizedExpandedDocumentIds,
     schedulePreferenceSync,
   ]);
 
   return {
-    isHydrated: isWorkspaceHydrated,
-    isLoading: preferenceQuery.isLoading && !isWorkspaceHydrated,
+    isHydrated: isWorkspaceScopeHydrated,
+    isLoading: preferenceQuery.isLoading && !isWorkspaceScopeHydrated,
   };
 }

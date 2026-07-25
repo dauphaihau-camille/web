@@ -4,7 +4,10 @@ import type {
   DocumentNavigationNode,
 } from '@/domains/document';
 import { workspaceRoutes } from '@/domains/workspace';
-import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
+import {
+  type DocumentTreeScope,
+  useDocumentTreeExpansionStore,
+} from '@/stores/document-tree-expansion-store';
 import type { FavoriteDocument } from '@/domains/favorite';
 import { useDocumentActions } from '@/domains/document/hooks/use-document-actions';
 
@@ -15,6 +18,7 @@ type UseDocumentTreeNodeActionArgs = {
   document: DocumentNavigationNode;
   isActive: boolean;
   workspaceSlug: string;
+  treeScope: DocumentTreeScope;
 };
 
 function createOptimisticFavoriteDocument(
@@ -45,6 +49,7 @@ export function useDocumentTreeNodeActions({
   document,
   isActive,
   workspaceSlug,
+  treeScope,
 }: UseDocumentTreeNodeActionArgs) {
   const expandedByWorkspace = useDocumentTreeExpansionStore(
     (state) => state.expandedByWorkspace,
@@ -60,6 +65,7 @@ export function useDocumentTreeNodeActions({
   } = useCreateSubdocumentAction({
     document,
     workspaceSlug,
+    treeScope,
   });
 
   const {
@@ -91,10 +97,12 @@ export function useDocumentTreeNodeActions({
           document.title,
         )}`,
     onArchiveOptimistic: () => {
-      const previousExpandedDocumentIds = expandedByWorkspace[workspaceSlug] ?? [];
+      const previousExpandedDocumentIds =
+        expandedByWorkspace[workspaceSlug]?.[treeScope] ?? [];
 
       setExpandedDocumentIds(
         workspaceSlug,
+        treeScope,
         previousExpandedDocumentIds.filter((documentId) => documentId !== document.id),
       );
 
@@ -105,7 +113,7 @@ export function useDocumentTreeNodeActions({
         return;
       }
 
-      setExpandedDocumentIds(workspaceSlug, previousExpandedDocumentIds);
+      setExpandedDocumentIds(workspaceSlug, treeScope, previousExpandedDocumentIds);
     },
     resolveArchiveDestination,
   });

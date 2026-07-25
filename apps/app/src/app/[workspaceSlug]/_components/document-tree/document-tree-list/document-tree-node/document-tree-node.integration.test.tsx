@@ -86,7 +86,7 @@ describe('DocumentTreeNode integration', () => {
     localStorage.clear();
     useDocumentTreeExpansionStore.setState({
       expandedByWorkspace: {},
-      hydratedWorkspaceIds: [],
+      hydratedWorkspaceScopeKeys: [],
     });
     useDocumentTitleDraftStore.setState({
       activeDocumentId: null,
@@ -113,6 +113,7 @@ describe('DocumentTreeNode integration', () => {
       <DocumentTreeNode
         document={parentDocument}
         workspaceSlug="acme"
+        treeScope="private"
         pathname="/acme/pub-parent-1"
       />,
     );
@@ -143,6 +144,40 @@ describe('DocumentTreeNode integration', () => {
     expect(childTitles).toEqual(['Newest child', 'Alpha child']);
   });
 
+  it('isolates expansion for the same document across tree scopes', async () => {
+    const user = userEvent.setup();
+
+    const { rerender } = renderWithProviders(
+      <DocumentTreeNode
+        document={parentDocument}
+        workspaceSlug="acme"
+        treeScope="favorites"
+        pathname="/acme/pub-parent-1"
+      />,
+    );
+
+    await user.click(screen.getByRole('button', {
+      name: 'Expand document children',
+    }));
+
+    expect(screen.getByRole('button', {
+      name: 'Collapse document children',
+    })).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(
+      <DocumentTreeNode
+        document={parentDocument}
+        workspaceSlug="acme"
+        treeScope="private"
+        pathname="/acme/pub-parent-1"
+      />,
+    );
+
+    expect(screen.getByRole('button', {
+      name: 'Expand document children',
+    })).toHaveAttribute('aria-expanded', 'false');
+  });
+
   it('uses the draft title for the active document', async () => {
     const { useDocumentTitleDraftStore } = await import('@/stores/document-title-draft-store');
 
@@ -152,6 +187,7 @@ describe('DocumentTreeNode integration', () => {
       <DocumentTreeNode
         document={parentDocument}
         workspaceSlug="acme"
+        treeScope="private"
         pathname="/acme"
       />,
     );

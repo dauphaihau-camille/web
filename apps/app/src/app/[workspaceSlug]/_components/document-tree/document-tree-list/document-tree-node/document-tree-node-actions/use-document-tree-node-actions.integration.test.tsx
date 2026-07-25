@@ -243,9 +243,11 @@ describe('useDocumentTreeNodeActions integration', () => {
     resolveArchiveDestinationMock.mockReset();
     useDocumentTreeExpansionStore.setState({
       expandedByWorkspace: {
-        acme: [documentFixture.id],
+        acme: {
+          private: [documentFixture.id],
+        },
       },
-      hydratedWorkspaceIds: [],
+      hydratedWorkspaceScopeKeys: [],
     });
     window.history.replaceState(
       {},
@@ -289,6 +291,7 @@ describe('useDocumentTreeNodeActions integration', () => {
           document: documentNodeFixture,
           isActive: true,
           workspaceSlug: 'acme',
+          treeScope: 'private',
         }),
       { wrapper: Wrapper },
     );
@@ -313,7 +316,9 @@ describe('useDocumentTreeNodeActions integration', () => {
       expect(result.current.archiveDocumentMutation.isPending).toBe(true);
       expect(
         useDocumentTreeExpansionStore.getState().expandedByWorkspace.acme,
-      ).toEqual([]);
+      ).toEqual({
+        private: [],
+      });
     });
 
     const finishArchiveRequest: (document: Document) => void =
@@ -362,6 +367,7 @@ describe('useDocumentTreeNodeActions integration', () => {
           document: documentNodeFixture,
           isActive: true,
           workspaceSlug: 'acme',
+          treeScope: 'private',
         }),
       { wrapper: Wrapper },
     );
@@ -395,7 +401,9 @@ describe('useDocumentTreeNodeActions integration', () => {
       expect(replaceMock).toHaveBeenLastCalledWith(previousRoute);
       expect(
         useDocumentTreeExpansionStore.getState().expandedByWorkspace.acme,
-      ).toEqual([documentFixture.id]);
+      ).toEqual({
+        private: [documentFixture.id],
+      });
       expect(toastMock).toHaveBeenLastCalledWith('Could not move to trash', {
         id: 'document-actions-archive-doc-1',
       });
@@ -446,6 +454,7 @@ describe('useDocumentTreeNodeActions integration', () => {
           document: documentNodeFixture,
           isActive: true,
           workspaceSlug: 'acme',
+          treeScope: 'private',
         }),
       { wrapper: Wrapper },
     );
@@ -544,6 +553,7 @@ describe('useDocumentTreeNodeActions integration', () => {
           document: documentNodeFixture,
           isActive: true,
           workspaceSlug: 'acme',
+          treeScope: 'private',
         }),
       { wrapper: Wrapper },
     );
@@ -583,7 +593,9 @@ describe('useDocumentTreeNodeActions integration', () => {
       ]);
       expect(
         useDocumentTreeExpansionStore.getState().expandedByWorkspace.acme,
-      ).toContain(documentFixture.id);
+      ).toEqual({
+        private: [documentFixture.id],
+      });
     });
 
     if (!resolveCreateRequest) {
@@ -647,6 +659,7 @@ describe('useDocumentTreeNodeActions integration', () => {
           document: documentNodeFixture,
           isActive: true,
           workspaceSlug: 'acme',
+          treeScope: 'private',
         }),
       { wrapper: Wrapper },
     );
@@ -728,6 +741,7 @@ describe('useDocumentTreeNodeActions integration', () => {
           },
           isActive: true,
           workspaceSlug: 'acme',
+          treeScope: 'private',
         }),
       { wrapper: Wrapper },
     );
@@ -796,6 +810,7 @@ describe('useDocumentTreeNodeActions integration', () => {
           },
           isActive: true,
           workspaceSlug: 'acme',
+          treeScope: 'private',
         }),
       { wrapper: Wrapper },
     );

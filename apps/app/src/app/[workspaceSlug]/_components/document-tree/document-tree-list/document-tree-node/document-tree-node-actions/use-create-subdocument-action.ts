@@ -22,7 +22,10 @@ import {
   favoriteKeys,
   type FavoriteDocument,
 } from '@/domains/favorite';
-import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
+import {
+  type DocumentTreeScope,
+  useDocumentTreeExpansionStore,
+} from '@/stores/document-tree-expansion-store';
 
 function createOptimisticSubdocument(
   document: DocumentNavigationNode,
@@ -60,9 +63,11 @@ type CreateSubdocumentMutationContext = {
 export function useCreateSubdocumentAction({
   document,
   workspaceSlug,
+  treeScope,
 }: {
   document: DocumentNavigationNode;
   workspaceSlug: string;
+  treeScope: DocumentTreeScope;
 }) {
   const queryClient = useQueryClient();
 
@@ -86,13 +91,18 @@ export function useCreateSubdocumentAction({
       });
 
       const previousDocumentLists = getDocumentListSnapshot(queryClient, workspaceSlug);
+
       const previousParentDocument = queryClient.getQueryData<Document>(
         documentKeys.detail(document.id),
       );
+
       const previousWorkspaceFavorites = queryClient.getQueryData<FavoriteDocument[]>(
         favoriteKeys.workspaceList(workspaceSlug),
       );
-      const previousExpandedDocumentIds = expandedByWorkspace[workspaceSlug] ?? [];
+
+      const previousExpandedDocumentIds =
+        expandedByWorkspace[workspaceSlug]?.[treeScope] ?? [];
+
       const optimisticChildDocument = createOptimisticSubdocument(
         document,
         workspaceSlug,
@@ -116,6 +126,7 @@ export function useCreateSubdocumentAction({
       );
       setExpandedDocumentIds(
         workspaceSlug,
+        treeScope,
         previousExpandedDocumentIds.includes(document.id)
           ? previousExpandedDocumentIds
           : [...previousExpandedDocumentIds, document.id],
@@ -132,7 +143,11 @@ export function useCreateSubdocumentAction({
     onError: (_error, _variables, context) => {
       if (context) {
         restoreDocumentListSnapshot(queryClient, context.previousDocumentLists);
-        setExpandedDocumentIds(workspaceSlug, context.previousExpandedDocumentIds);
+        setExpandedDocumentIds(
+          workspaceSlug,
+          treeScope,
+          context.previousExpandedDocumentIds,
+        );
       }
 
       if (context?.previousParentDocument) {
@@ -162,9 +177,10 @@ export function useCreateSubdocumentAction({
       );
       setExpandedDocumentIds(
         workspaceSlug,
-        (expandedByWorkspace[workspaceSlug] ?? []).includes(document.id)
-          ? (expandedByWorkspace[workspaceSlug] ?? [])
-          : [...(expandedByWorkspace[workspaceSlug] ?? []), document.id],
+        treeScope,
+        (expandedByWorkspace[workspaceSlug]?.[treeScope] ?? []).includes(document.id)
+          ? (expandedByWorkspace[workspaceSlug]?.[treeScope] ?? [])
+          : [...(expandedByWorkspace[workspaceSlug]?.[treeScope] ?? []), document.id],
       );
     },
     onSettled: async () => {
