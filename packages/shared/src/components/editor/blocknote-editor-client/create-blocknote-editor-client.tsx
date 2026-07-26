@@ -25,6 +25,8 @@ import { FilePlus2Icon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 import { cn } from '../../../lib/utils';
+import { isEmptyParagraphBlock } from '../blocknote-content-utils';
+import { hasMeaningfulContent } from '../has-meaningful-content';
 import type { BlockNoteEditorProps } from '../blocknote-editor.types';
 import { dragHandleMenuSelectionExtension } from './drag-handle-menu-selection-extension';
 import { EditorSideMenuController } from './side-menu-controller';
@@ -221,17 +223,23 @@ export function createBlockNoteEditorClient({
               ? detail.workspaceSlug
               : workspaceSlug,
             title: childTitle || 'Untitled',
-            hasContent: Array.isArray(detail.childDocument.content)
-              && detail.childDocument.content.length > 0,
+            hasContent: hasMeaningfulContent(detail.childDocument.content),
           },
         };
-        const lastBlock = editor.document.at(-1);
+        const lastBlock = editor.document.at(-1) as
+          | { type?: unknown; content?: unknown; children?: unknown }
+          | undefined;
 
         editor.transact(() => {
+          if (lastBlock && isEmptyParagraphBlock(lastBlock)) {
+            editor.updateBlock(lastBlock as never, createdSubdocBlock as never);
+            return;
+          }
+
           if (lastBlock) {
             editor.insertBlocks(
               [createdSubdocBlock] as never[],
-              lastBlock,
+              lastBlock as never,
               'after',
             );
             return;
