@@ -36,6 +36,7 @@ export function CollaboratorAvatarGroup({
     ...documentCollaboratorsQueryOptions(document.id),
     enabled: Boolean(document.id),
   });
+
   const participants = getCollaboratorParticipants(document, collaborators);
 
   if (participants.length === 0) {
@@ -43,6 +44,7 @@ export function CollaboratorAvatarGroup({
   }
 
   const visibleCollaborators = participants.slice(0, VISIBLE_COLLABORATOR_COUNT);
+
   const hiddenCollaboratorCount = Math.max(
     participants.length - visibleCollaborators.length,
     0,

@@ -127,6 +127,9 @@ function DocumentScreenContent({
   );
   const isArchived = Boolean(document.archived_at);
   const statusBarHeight = 48;
+  const showCollaborators =
+    document.collaboration?.enabled === true
+    && documentCollaboration.activeMemberCount >= 2;
 
   const publishedBarOffset = isArchived ? statusBarHeight : 0;
 
@@ -178,6 +181,7 @@ function DocumentScreenContent({
             canEdit={canEditDocument}
             document={document}
             isVisible={isChromeVisible}
+            showCollaborators={showCollaborators}
             updatedAt={displayUpdatedAt}
             workspaceSlug={workspaceSlug}
             onShareOpenChange={setIsSharePopoverOpen}

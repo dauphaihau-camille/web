@@ -20,6 +20,15 @@ type UseDocumentCollaborationOptions = {
   workspaceId: string;
 };
 
+type AwarenessUser = {
+  id?: string;
+  name?: string;
+};
+
+type AwarenessState = {
+  user?: AwarenessUser;
+};
+
 export function useDocumentCollaboration(
   documentId: string,
   options: UseDocumentCollaborationOptions,
@@ -41,6 +50,7 @@ export function useDocumentCollaboration(
   const [canEdit, setCanEdit] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
+  const [activeMemberCount, setActiveMemberCount] = useState(0);
   const currentUserId = currentUserQuery.data?.id;
 
   useEffect(() => {
@@ -148,6 +158,19 @@ export function useDocumentCollaboration(
   ]);
 
   useEffect(() => {
+    const updateActiveMemberCount = () => {
+      setActiveMemberCount(getActiveMemberCount(resources.awareness.getStates()));
+    };
+
+    updateActiveMemberCount();
+    resources.awareness.on('update', updateActiveMemberCount);
+
+    return () => {
+      resources.awareness.off('update', updateActiveMemberCount);
+    };
+  }, [resources.awareness]);
+
+  useEffect(() => {
     const currentUser = currentUserQuery.data;
 
     if (!currentUser || !options.showPresence) {
@@ -158,6 +181,7 @@ export function useDocumentCollaboration(
     const name = currentUser.displayName ?? currentUser.email;
 
     resources.awareness.setLocalStateField('user', {
+      id: currentUser.id,
       name,
       color: collaborationColor(currentUser.id),
     });
@@ -167,6 +191,7 @@ export function useDocumentCollaboration(
   const userName = currentUser?.displayName ?? currentUser?.email ?? 'Collaborator';
 
   return {
+    activeMemberCount,
     canEdit,
     collaboration: {
       fragment: resources.fragment,
@@ -182,6 +207,22 @@ export function useDocumentCollaboration(
     error,
     isReady,
   };
+}
+
+function getActiveMemberCount(states: Map<number, unknown>): number {
+  const memberKeys = new Set<string>();
+
+  for (const state of states.values()) {
+    const user = (state as AwarenessState | undefined)?.user;
+
+    if (!user) {
+      continue;
+    }
+
+    memberKeys.add(user.id ?? user.name ?? 'unknown');
+  }
+
+  return memberKeys.size;
 }
 
 function collaborationColor(value: string): string {

@@ -40,6 +40,7 @@ type DocumentToolbarProps = {
     published_document_id?: string;
   };
   restoreCurrentDocument: () => void;
+  showCollaborators: boolean;
   toggleFavorite: () => void;
   unpublishCurrentDocument: () => void;
   updatedAt: Document['updated_at'];
@@ -67,6 +68,7 @@ export function DocumentToolbar({
   publishCurrentDocument,
   publishStatus,
   restoreCurrentDocument,
+  showCollaborators,
   toggleFavorite,
   unpublishCurrentDocument,
   updatedAt,
@@ -87,7 +89,7 @@ export function DocumentToolbar({
           prefix="Edited"
           value={updatedAt}
         />
-        <CollaboratorAvatarGroup document={document} />
+        {showCollaborators ? <CollaboratorAvatarGroup document={document} /> : null}
       </div>
       <ShareButton
         canManageAccess={canManageAccess}
