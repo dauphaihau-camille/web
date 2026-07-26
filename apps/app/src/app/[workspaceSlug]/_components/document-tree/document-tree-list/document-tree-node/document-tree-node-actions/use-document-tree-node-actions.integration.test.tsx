@@ -289,7 +289,7 @@ describe('useDocumentTreeNodeActions integration', () => {
       () =>
         useDocumentTreeNodeActions({
           document: documentNodeFixture,
-          isActive: true,
+          shouldNavigateOnArchive: true,
           workspaceSlug: 'acme',
           treeScope: 'private',
         }),
@@ -365,7 +365,7 @@ describe('useDocumentTreeNodeActions integration', () => {
       () =>
         useDocumentTreeNodeActions({
           document: documentNodeFixture,
-          isActive: true,
+          shouldNavigateOnArchive: true,
           workspaceSlug: 'acme',
           treeScope: 'private',
         }),
@@ -452,7 +452,7 @@ describe('useDocumentTreeNodeActions integration', () => {
       () =>
         useDocumentTreeNodeActions({
           document: documentNodeFixture,
-          isActive: true,
+          shouldNavigateOnArchive: true,
           workspaceSlug: 'acme',
           treeScope: 'private',
         }),
@@ -540,7 +540,7 @@ describe('useDocumentTreeNodeActions integration', () => {
       () =>
         useDocumentTreeNodeActions({
           document: documentNodeFixture,
-          isActive: true,
+          shouldNavigateOnArchive: true,
           workspaceSlug: 'acme',
           treeScope: 'private',
         }),
@@ -646,7 +646,7 @@ describe('useDocumentTreeNodeActions integration', () => {
       () =>
         useDocumentTreeNodeActions({
           document: documentNodeFixture,
-          isActive: true,
+          shouldNavigateOnArchive: true,
           workspaceSlug: 'acme',
           treeScope: 'private',
         }),
@@ -728,7 +728,7 @@ describe('useDocumentTreeNodeActions integration', () => {
             ...documentNodeFixture,
             is_favorite: false,
           },
-          isActive: true,
+          shouldNavigateOnArchive: true,
           workspaceSlug: 'acme',
           treeScope: 'private',
         }),
@@ -797,7 +797,7 @@ describe('useDocumentTreeNodeActions integration', () => {
             ...documentNodeFixture,
             is_favorite: false,
           },
-          isActive: true,
+          shouldNavigateOnArchive: true,
           workspaceSlug: 'acme',
           treeScope: 'private',
         }),

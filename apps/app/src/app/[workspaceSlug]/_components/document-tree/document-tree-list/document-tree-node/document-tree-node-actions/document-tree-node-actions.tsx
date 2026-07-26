@@ -34,7 +34,7 @@ import { useDocumentTreeNodeActions } from './use-document-tree-node-actions';
 type DocumentTreeNodeActionsProps = {
   mode?: 'full' | 'readOnly';
   document: DocumentNavigationNode;
-  isActive: boolean;
+  shouldNavigateOnArchive: boolean;
   workspaceSlug: string;
   treeScope: DocumentTreeScope;
 };
@@ -42,7 +42,7 @@ type DocumentTreeNodeActionsProps = {
 export function DocumentTreeNodeActions({
   mode = 'full',
   document,
-  isActive,
+  shouldNavigateOnArchive,
   workspaceSlug,
   treeScope,
 }: DocumentTreeNodeActionsProps) {
@@ -61,7 +61,7 @@ export function DocumentTreeNodeActions({
     isFavorite,
   } = useDocumentTreeNodeActions({
     document,
-    isActive,
+    shouldNavigateOnArchive,
     workspaceSlug,
     treeScope,
   });

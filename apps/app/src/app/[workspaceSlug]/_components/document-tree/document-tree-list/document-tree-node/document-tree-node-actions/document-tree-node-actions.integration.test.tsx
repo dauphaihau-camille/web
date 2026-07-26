@@ -55,7 +55,7 @@ describe('DocumentTreeNodeActions', () => {
         <DocumentTreeNodeActions
           mode="readOnly"
           document={documentFixture}
-          isActive={false}
+          shouldNavigateOnArchive={false}
           workspaceSlug="acme"
           treeScope="private"
         />
@@ -80,7 +80,7 @@ describe('DocumentTreeNodeActions', () => {
         <DocumentTreeNodeActions
           mode="full"
           document={documentFixture}
-          isActive={false}
+          shouldNavigateOnArchive={false}
           workspaceSlug="acme"
           treeScope="private"
         />

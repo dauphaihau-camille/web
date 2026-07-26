@@ -71,7 +71,7 @@ export function useDocumentToolbar({
   } = useDocumentActions({
     document,
     workspaceSlug,
-    isActive: true,
+    shouldNavigateOnArchive: true,
     buildDocumentHref: (targetDocument) =>
       workspaceRoutes.document(
         workspaceSlug,

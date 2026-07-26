@@ -30,7 +30,6 @@ import {
   type FavoriteStatus,
   unfavoriteDocument,
 } from '@/domains/favorite';
-import { workspaceRoutes } from '@/domains/workspace';
 
 const ARCHIVE_TOAST_ID = 'document-actions-archive';
 
@@ -63,7 +62,7 @@ type FavoriteMutationContext = {
 type UseDocumentActionsArgs<TDocument extends SharedDocumentActionDocument, TArchiveState> = {
   document: TDocument;
   workspaceSlug: string;
-  isActive?: boolean;
+  shouldNavigateOnArchive?: boolean;
   buildDocumentHref: (document: Pick<Document, 'public_id' | 'title'>) => string;
   createOptimisticFavoriteDocument: () => FavoriteDocument;
   getCopyLinkUrl: () => string | undefined;
@@ -78,7 +77,7 @@ export function useDocumentActions<
 >({
   document,
   workspaceSlug,
-  isActive = false,
+  shouldNavigateOnArchive = false,
   buildDocumentHref,
   createOptimisticFavoriteDocument,
   getCopyLinkUrl,
@@ -341,7 +340,7 @@ export function useDocumentActions<
         documentDetailQueryOptions(document.id),
       );
 
-      const nextDocument = isActive
+      const nextDocument = shouldNavigateOnArchive
         ? await resolveArchiveDestination({
           document: latestDocument,
           queryClient,
@@ -349,13 +348,14 @@ export function useDocumentActions<
         })
         : null;
 
-      const nextRoute = isActive
+      const nextRoute = shouldNavigateOnArchive
         ? nextDocument
           ? buildDocumentHref(nextDocument)
-          : workspaceRoutes.detail(workspaceSlug)
+          : undefined
         : undefined;
+
       const previousRoute =
-        isActive && typeof window !== 'undefined'
+        shouldNavigateOnArchive && typeof window !== 'undefined'
           ? `${window.location.pathname}${window.location.search}${window.location.hash}`
           : undefined;
 

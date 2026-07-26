@@ -189,7 +189,7 @@ export function DocumentTreeNode({
               <DocumentTreeNodeActions
                 mode={actionMode}
                 document={document}
-                isActive={isActive}
+                shouldNavigateOnArchive={isActive}
                 workspaceSlug={workspaceSlug}
                 treeScope={treeScope}
               />

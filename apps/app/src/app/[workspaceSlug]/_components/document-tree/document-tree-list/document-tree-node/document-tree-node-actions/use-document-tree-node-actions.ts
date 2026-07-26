@@ -16,7 +16,7 @@ import { useCreateSubdocumentAction } from './use-create-subdocument-action';
 
 type UseDocumentTreeNodeActionArgs = {
   document: DocumentNavigationNode;
-  isActive: boolean;
+  shouldNavigateOnArchive: boolean;
   workspaceSlug: string;
   treeScope: DocumentTreeScope;
 };
@@ -47,7 +47,7 @@ function createOptimisticFavoriteDocument(
 
 export function useDocumentTreeNodeActions({
   document,
-  isActive,
+  shouldNavigateOnArchive,
   workspaceSlug,
   treeScope,
 }: UseDocumentTreeNodeActionArgs) {
@@ -80,7 +80,7 @@ export function useDocumentTreeNodeActions({
   } = useDocumentActions({
     document,
     workspaceSlug,
-    isActive,
+    shouldNavigateOnArchive,
     buildDocumentHref: (targetDocument) =>
       workspaceRoutes.document(
         workspaceSlug,

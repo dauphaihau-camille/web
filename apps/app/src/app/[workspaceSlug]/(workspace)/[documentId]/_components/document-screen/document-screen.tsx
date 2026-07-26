@@ -227,9 +227,10 @@ function DocumentScreenContent({
                 handleTitleBlur(event.currentTarget.value);
               }}
               readOnly={!canEditDocument}
+              disabled={isArchived}
               rows={1}
               wrap="soft"
-              className="min-h-[1lh] resize-none overflow-hidden rounded-none border-0 bg-transparent px-0 py-0 text-4xl leading-tight font-semibold break-words whitespace-pre-wrap shadow-none focus-visible:ring-0 md:text-5xl dark:bg-transparent"
+              className="min-h-[1lh] resize-none overflow-hidden rounded-none border-0 bg-transparent px-0 py-0 text-4xl leading-tight font-semibold break-words whitespace-pre-wrap shadow-none disabled:cursor-default disabled:bg-transparent disabled:opacity-100 focus-visible:ring-0 md:text-5xl dark:bg-transparent dark:disabled:bg-transparent"
             />
           </div>
         </div>
