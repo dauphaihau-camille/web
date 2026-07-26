@@ -14,6 +14,7 @@ import { cn } from '@shared/lib/utils';
 import { DocOperations } from './doc-operations/doc-operations';
 import { RelativeTimeText } from './doc-operations/relative-time-text';
 import { ShareButton } from './share-button/share-button';
+import { CollaboratorAvatarGroup } from './collaborator-avatar-group';
 
 type DocumentToolbarProps = {
   archiveCurrentDocument: () => void;
@@ -80,12 +81,13 @@ export function DocumentToolbar({
         isVisible ? 'opacity-100' : 'pointer-events-none opacity-0',
       )}
     >
-      <div className="hidden items-center gap-1 text-sm font-medium text-muted-foreground md:flex mr-2">
+      <div className="hidden items-center gap-1 text-sm font-medium text-muted-foreground md:flex mr-3">
         <RelativeTimeText
           fallback="recently"
           prefix="Edited"
           value={updatedAt}
         />
+        <CollaboratorAvatarGroup document={document} />
       </div>
       <ShareButton
         canManageAccess={canManageAccess}

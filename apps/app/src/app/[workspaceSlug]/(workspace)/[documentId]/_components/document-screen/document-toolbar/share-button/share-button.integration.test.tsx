@@ -12,6 +12,17 @@ import { mswServer } from '@shared/test/msw/server';
 import { ShareButton } from './share-button';
 
 const marketingHost = 'http://localhost:4001';
+
+type WorkspaceMemberFixture = {
+  display_name?: string;
+  email: string;
+  id: string;
+  joined_at: string;
+  role: string;
+  user_id: string;
+  version: number;
+};
+
 const documentFixture: Document = {
   id: 'doc-1',
   public_id: 'public-doc-1',
@@ -51,7 +62,7 @@ function renderShareButton(
       id: string;
     };
     invitations?: unknown[];
-    members?: unknown[];
+    members?: WorkspaceMemberFixture[];
   },
 ) {
   const collaborators = options?.collaborators ?? [];

@@ -31,6 +31,7 @@ export const documentOwnerUserSchema = z.object({
   id: z.string().min(1),
   email: z.string().email(),
   display_name: z.string().optional(),
+  avatar: z.string().optional(),
 });
 
 export const documentSchema = z.object({
@@ -62,6 +63,7 @@ export const documentCollaboratorUserSchema = z.object({
   id: z.string().min(1),
   email: z.string().email(),
   display_name: z.string().optional(),
+  avatar: z.string().optional(),
 });
 
 export const documentCollaboratorSchema = z.object({
