@@ -43,7 +43,7 @@ export default function WorkspaceError({
 
   return (
     <section className="flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-10 sm:px-6">
-      <Empty className="max-w-xl rounded-2xl border border-border bg-background shadow-sm">
+      <Empty className="max-w-xl">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <ServerCrash />

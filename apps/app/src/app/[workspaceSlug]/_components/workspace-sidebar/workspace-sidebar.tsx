@@ -63,7 +63,7 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
           fadeColor="var(--sidebar)"
           className="no-scrollbar min-h-0 flex-1 overflow-y-auto"
         >
-          <div className="flex min-h-full flex-col gap-0">
+          <div className="flex min-h-full flex-col gap-0 pb-20">
             {isInitialWorkspaceLoading
               ? (
                 <WorkspaceSidebarActionsSkeleton />

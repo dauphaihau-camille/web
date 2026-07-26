@@ -54,6 +54,7 @@ export function DocumentRouteScreen({
       refetchOnMount: false,
     },
   );
+
   const document = canonicalDocumentQuery.data ?? routeDocumentQuery.data;
 
   useEffect(() => {

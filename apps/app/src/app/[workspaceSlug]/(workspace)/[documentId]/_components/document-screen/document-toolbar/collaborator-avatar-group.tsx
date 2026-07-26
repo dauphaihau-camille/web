@@ -51,7 +51,7 @@ export function CollaboratorAvatarGroup({
   return (
     <AvatarGroup
       aria-label={getAvatarGroupLabel(participants)}
-      className="ml-2"
+      className="ml-2 cursor-default"
     >
       {visibleCollaborators.map((participant) => (
         <CollaboratorAvatar
