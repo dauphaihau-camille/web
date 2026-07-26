@@ -59,14 +59,17 @@ export function WorkspaceUserDropdown({
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const currentUserQuery = useCurrentUserQuery();
+
   const myWorkspacesQuery = useQuery({
     ...myWorkspaceListQueryOptions(),
     enabled: isOpen,
   });
+
   const currentUser = currentUserQuery.data;
   const workspaces = myWorkspacesQuery.data ?? [];
   const visibleWorkspaces = workspaces.slice(0, 3);
   const overflowWorkspaces = workspaces.slice(3);
+
   const workspaceInitial = (
     workspace?.name?.trim().charAt(0)
     || workspaceSlug.trim().charAt(0)
@@ -113,7 +116,7 @@ export function WorkspaceUserDropdown({
       <DropdownMenu onOpenChange={setIsOpen}>
         <DropdownMenuTrigger
           className={cn(
-            'flex w-full items-center gap-3 rounded-lg border border-transparent bg-transparent px-2 py-2 text-left outline-hidden transition-colors hover:bg-sidebar-accent/40 focus-visible:ring-2 focus-visible:ring-sidebar-ring',
+            'flex w-full items-center gap-3 border border-transparent bg-transparent px-4 py-2 text-left outline-hidden transition-colors hover:bg-sidebar-accent/50 data-popup-open:bg-sidebar-accent/50 focus-visible:ring-2 focus-visible:ring-sidebar-ring',
           )}
         >
           <>
@@ -127,7 +130,12 @@ export function WorkspaceUserDropdown({
                 {workspace.name}
               </p>
             </div>
-            <ChevronDownIcon className="size-4 text-sidebar-foreground/60" />
+            <ChevronDownIcon
+              className={cn(
+                'size-4 text-sidebar-foreground/60 transition-transform',
+                isOpen && 'rotate-180',
+              )}
+            />
           </>
         </DropdownMenuTrigger>
 
@@ -151,7 +159,9 @@ export function WorkspaceUserDropdown({
               </div>
             </DropdownMenuLabel>
           </DropdownMenuGroup>
+
           <DropdownMenuSeparator />
+
           <DropdownMenuGroup>
             <DropdownMenuLabel>Workspaces</DropdownMenuLabel>
             {myWorkspacesQuery.isLoading
@@ -214,9 +224,10 @@ export function WorkspaceUserDropdown({
               ? (
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
-                    <EllipsisIcon />
+                    <EllipsisIcon className="size-4" />
                     <span>More</span>
                   </DropdownMenuSubTrigger>
+
                   <DropdownMenuSubContent>
                     {overflowWorkspaces.map((userWorkspace) => {
                       const isCurrentWorkspace =
@@ -265,7 +276,9 @@ export function WorkspaceUserDropdown({
               <span>Create workspace</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
+
           <DropdownMenuSeparator />
+
           <DropdownMenuGroup>
             <DropdownMenuItem
               onClick={() =>
@@ -276,7 +289,9 @@ export function WorkspaceUserDropdown({
               <span>Settings</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
+
           <DropdownMenuSeparator />
+
           <DropdownMenuItem
             disabled={logoutMutation.isPending}
             onClick={() => {

@@ -23,6 +23,7 @@ import { SharedDocumentsGroup } from './shared-documents-group';
 import { TeamspacesGroup } from './teamspaces-group';
 import { WorkspaceSearchButton } from './workspace-search-button';
 import { WorkspaceTrashButton } from './workspace-trash-button/workspace-trash-button';
+import styles from './workspace-sidebar.module.css';
 
 export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
   const workspaceQuery = useWorkspaceQuery(workspaceSlug);
@@ -50,7 +51,7 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
       collapsible="none"
       className="h-svh min-h-0 self-stretch border-r border-sidebar-border bg-sidebar"
     >
-      <SidebarHeader className="gap-3 p-1">
+      <SidebarHeader className="gap-3 p-0">
         <WorkspaceUserDropdown
           workspaceSlug={workspaceSlug}
           workspace={workspaceQuery.data}
@@ -61,7 +62,7 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
         <ScrollFade
           direction="y"
           fadeColor="var(--sidebar)"
-          className="no-scrollbar min-h-0 flex-1 overflow-y-auto"
+          className={`${styles.sidebarScroller} min-h-0 flex-1 overflow-y-auto`}
         >
           <div className="flex min-h-full flex-col gap-0 pb-20">
             {isInitialWorkspaceLoading
