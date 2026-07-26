@@ -10,6 +10,7 @@ import {
 import {
   getDocument,
   getDocumentAccessSettings,
+  getWorkspaceRootDocuments,
   getWorkspaceChildDocuments,
   shareDocuments,
 } from './document.requests';
@@ -115,6 +116,39 @@ describe('document requests', () => {
     expect(apiGet).toHaveBeenCalledWith('documents/parent-1/children');
   });
 
+  it('normalizes null teamspace descriptions on workspace navigation responses', async () => {
+    vi.mocked(apiGet).mockResolvedValueOnce({
+      private_documents: {
+        items: [],
+        next_cursor: undefined,
+      },
+      shared_documents: {
+        items: [],
+        next_cursor: undefined,
+      },
+      teamspaces: [
+        {
+          id: 'teamspace-1',
+          name: 'Design',
+          description: null,
+          documents: {
+            items: [],
+            next_cursor: undefined,
+          },
+        },
+      ],
+    });
+
+    await expect(getWorkspaceRootDocuments('acme-product')).resolves.toMatchObject({
+      teamspaces: [
+        {
+          id: 'teamspace-1',
+          description: undefined,
+        },
+      ],
+    });
+  });
+
   it('shares a document with multiple users through the bulk endpoint', async () => {
     vi.mocked(apiPost).mockResolvedValueOnce({
       collaborators: [
@@ -146,7 +180,7 @@ describe('document requests', () => {
       failed: [
         {
           user_id: 'missing-user',
-          reason: 'workspace_user_not_found',
+          reason: 'user_not_found',
         },
       ],
     });
@@ -170,7 +204,7 @@ describe('document requests', () => {
       failed: [
         {
           user_id: 'missing-user',
-          reason: 'workspace_user_not_found',
+          reason: 'user_not_found',
         },
       ],
     });

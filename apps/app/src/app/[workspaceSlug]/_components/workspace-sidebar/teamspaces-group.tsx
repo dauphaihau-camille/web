@@ -13,10 +13,17 @@ import {
 import type { useWorkspaceDocumentRootQuery } from '@/domains/document';
 import type { TeamspaceDocumentNavigationGroup } from '@/domains/document';
 import { cn } from '@shared/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@shared/components/ui/tooltip';
 
 import { DocumentTreeList } from '../document-tree/document-tree-list/document-tree-list';
 import { DocumentTreeSkeleton } from '../workspace-skeleton/document-tree-skeleton';
+import { CreateDocumentButton } from '../create-document-button';
 import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
+import { CreateTeamspaceDialog } from '../create-teamspace-dialog';
 
 export function TeamspacesGroup({
   workspaceSlug,
@@ -27,43 +34,89 @@ export function TeamspacesGroup({
   rootQuery?: ReturnType<typeof useWorkspaceDocumentRootQuery>;
   canEditDocuments?: boolean;
 }) {
+  const [isCreateTeamspaceOpen, setIsCreateTeamspaceOpen] = useState(false);
+
+  const createTeamspaceButton = (
+    <CreateDocumentButton
+      ariaLabel="New teamspace"
+      onClick={() => setIsCreateTeamspaceOpen(true)}
+    />
+  );
+  const teamspaceActions = (
+    <Tooltip>
+      <TooltipTrigger delay={0} render={createTeamspaceButton} />
+      <TooltipContent side="bottom">New teamspace</TooltipContent>
+    </Tooltip>
+  );
+  const createTeamspaceDialog = (
+    <CreateTeamspaceDialog
+      open={isCreateTeamspaceOpen}
+      workspaceSlug={workspaceSlug}
+      onOpenChange={setIsCreateTeamspaceOpen}
+    />
+  );
+
   if (!rootQuery || rootQuery.isLoading) {
     return (
-      <CollapsibleSidebarGroup label="Teamspaces">
-        <DocumentTreeSkeleton animate />
-      </CollapsibleSidebarGroup>
+      <>
+        <CollapsibleSidebarGroup
+          label="Teamspaces"
+          actions={teamspaceActions}
+        >
+          <DocumentTreeSkeleton animate />
+        </CollapsibleSidebarGroup>
+        {createTeamspaceDialog}
+      </>
     );
   }
 
   if (rootQuery.isError || !rootQuery.data) {
     return (
-      <CollapsibleSidebarGroup label="Teamspaces">
-        <p className="px-2 py-1 text-xs text-muted-foreground">Teamspaces unavailable.</p>
-      </CollapsibleSidebarGroup>
+      <>
+        <CollapsibleSidebarGroup
+          label="Teamspaces"
+          actions={teamspaceActions}
+        >
+          <p className="px-2 py-1 text-xs text-muted-foreground">Teamspaces unavailable.</p>
+        </CollapsibleSidebarGroup>
+        {createTeamspaceDialog}
+      </>
     );
   }
 
   if (rootQuery.data.teamspaces.length === 0) {
     return (
-      <CollapsibleSidebarGroup label="Teamspaces">
-        <p className="px-2 py-1 text-xs text-muted-foreground">No teamspaces yet.</p>
-      </CollapsibleSidebarGroup>
+      <>
+        <CollapsibleSidebarGroup
+          label="Teamspaces"
+          actions={teamspaceActions}
+        >
+          <p className="px-2 py-1 text-xs text-muted-foreground">No teamspaces yet.</p>
+        </CollapsibleSidebarGroup>
+        {createTeamspaceDialog}
+      </>
     );
   }
 
   return (
-    <CollapsibleSidebarGroup label="Teamspaces">
-      <SidebarMenu className="space-y-0.5">
-        {rootQuery.data.teamspaces.map((teamspace) => (
-          <TeamspaceTreeSection
-            key={teamspace.id}
-            workspaceSlug={workspaceSlug}
-            teamspace={teamspace}
-            canEditDocuments={canEditDocuments}
-          />
-        ))}
-      </SidebarMenu>
-    </CollapsibleSidebarGroup>
+    <>
+      <CollapsibleSidebarGroup
+        label="Teamspaces"
+        actions={teamspaceActions}
+      >
+        <SidebarMenu className="space-y-0.5">
+          {rootQuery.data.teamspaces.map((teamspace) => (
+            <TeamspaceTreeSection
+              key={teamspace.id}
+              workspaceSlug={workspaceSlug}
+              teamspace={teamspace}
+              canEditDocuments={canEditDocuments}
+            />
+          ))}
+        </SidebarMenu>
+      </CollapsibleSidebarGroup>
+      {createTeamspaceDialog}
+    </>
   );
 }
 

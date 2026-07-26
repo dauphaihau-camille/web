@@ -35,6 +35,10 @@ vi.mock('../document-tree/document-tree-list/document-tree-list', () => ({
   ),
 }));
 
+vi.mock('../create-teamspace-dialog', () => ({
+  CreateTeamspaceDialog: () => null,
+}));
+
 function createRootQuery(data: WorkspaceDocumentNavigation) {
   return {
     data,
@@ -125,6 +129,7 @@ describe('TeamspacesGroup', () => {
     expect(screen.getByText('Engineering')).toBeInTheDocument();
     expect(screen.getByText('Architecture Decisions')).toBeInTheDocument();
     expect(screen.getByText('Product')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'New teamspace' })).toBeInTheDocument();
     expect(screen.queryByText('No documents yet.')).not.toBeInTheDocument();
     expect(screen.getAllByText('actions:full')).toHaveLength(1);
   });

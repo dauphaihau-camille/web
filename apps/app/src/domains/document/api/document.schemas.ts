@@ -167,7 +167,7 @@ export const archivedDocumentListPageSchema = z.object({
 export const teamspaceDocumentNavigationSchema = z.object({
   id: z.string().min(1),
   name: z.string(),
-  description: z.string().optional(),
+  description: z.string().nullable().optional().transform((value) => value ?? undefined),
   documents: documentNavigationPageSchema,
 });
 
