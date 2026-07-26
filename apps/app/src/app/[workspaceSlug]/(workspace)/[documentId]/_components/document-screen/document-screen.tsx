@@ -18,6 +18,7 @@ import { useDocumentEditorActions } from './_hooks/use-document-editor-actions';
 import { useDocumentTitle } from './_hooks/use-document-title';
 import { useDocumentChromeVisibility } from './_hooks/use-document-chrome-visibility';
 import { useDocumentCollaboration } from './_hooks/document-collaboration/use-document-collaboration';
+import { DocumentScreenBodySkeleton } from '../../../../_components/workspace-skeleton/document-screen-skeleton';
 
 const BlockNoteEditorLoader = createBlockNoteEditorLoader(
   () => import('./editor/blocknote-editor-client/blocknote-editor-client'),
@@ -194,79 +195,83 @@ function DocumentScreenContent({
         className="mx-auto max-w-2xl"
         style={{ paddingTop: `${110 + fixedHeaderOffset}px` }}
       >
-        <div className="space-y-3 px-[3.8rem]">
-          <div className="min-w-0 flex-1 space-y-2">
-            <Textarea
-              value={title}
-              onChange={(event) => {
-                if (!canEditDocument) {
-                  return;
-                }
-
-                hasLocalEditRef.current = true;
-                hideChrome();
-                const nextTitle = event.currentTarget.value.replace(/\s*\r?\n\s*/g, ' ');
-
-                if (nextTitle !== event.currentTarget.value) {
-                  event.currentTarget.value = nextTitle;
-                }
-
-                handleTitleChange(nextTitle);
-              }}
-              onKeyDown={(event) => {
-                if (event.key !== 'Enter') {
-                  return;
-                }
-                event.preventDefault();
-                event.currentTarget.blur();
-              }}
-              onBlur={(event) => {
-                if (!canEditDocument) {
-                  return;
-                }
-                handleTitleBlur(event.currentTarget.value);
-              }}
-              readOnly={!canEditDocument}
-              disabled={isArchived}
-              rows={1}
-              wrap="soft"
-              className="min-h-[1lh] resize-none overflow-hidden rounded-none border-0 bg-transparent px-0 py-0 text-4xl leading-tight font-semibold break-words whitespace-pre-wrap shadow-none disabled:cursor-default disabled:bg-transparent disabled:opacity-100 focus-visible:ring-0 md:text-5xl dark:bg-transparent dark:disabled:bg-transparent"
-            />
-          </div>
-        </div>
-
         {documentCollaboration.isReady
           ? (
-            <BlockNoteEditorLoader
-              key={documentId}
-              collaboration={documentCollaboration.collaboration}
-              documentId={documentId}
-              documentTitle={savedTitle}
-              workspaceSlug={workspaceSlug}
-              content={editorContent}
-              editable={canEditDocument}
-              suppressHoverControls={isSharePopoverOpen}
-              onCollaborativeContentChangeAction={handleDocumentContentInput}
-              documentOperations={{
-                isCollaborative: true,
-                isArchiving: documentToolbar.isArchiving,
-                archivingSubdocumentId: documentEditorActions.archivingSubdocumentId,
-                isDuplicating: documentToolbar.isDuplicating,
-                onArchive: documentToolbar.archiveCurrentDocument,
-                onArchiveSubdocument: documentEditorActions.archiveSubdocument,
-                onCopyLink: documentToolbar.copyLink,
-                onDuplicate: documentToolbar.duplicateDocument,
-              }}
-              onCreateSubdocAction={
-                canEditDocument ? documentEditorActions.createSubdocument : undefined
-              }
-            />
+            <>
+              <div className="space-y-3 px-[3.8rem]">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Textarea
+                    value={title}
+                    onChange={(event) => {
+                      if (!canEditDocument) {
+                        return;
+                      }
+
+                      hasLocalEditRef.current = true;
+                      hideChrome();
+                      const nextTitle = event.currentTarget.value.replace(/\s*\r?\n\s*/g, ' ');
+
+                      if (nextTitle !== event.currentTarget.value) {
+                        event.currentTarget.value = nextTitle;
+                      }
+
+                      handleTitleChange(nextTitle);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key !== 'Enter') {
+                        return;
+                      }
+                      event.preventDefault();
+                      event.currentTarget.blur();
+                    }}
+                    onBlur={(event) => {
+                      if (!canEditDocument) {
+                        return;
+                      }
+                      handleTitleBlur(event.currentTarget.value);
+                    }}
+                    readOnly={!canEditDocument}
+                    disabled={isArchived}
+                    rows={1}
+                    wrap="soft"
+                    className="min-h-[1lh] resize-none overflow-hidden rounded-none border-0 bg-transparent px-0 py-0 text-4xl leading-tight font-semibold break-words whitespace-pre-wrap shadow-none disabled:cursor-default disabled:bg-transparent disabled:opacity-100 focus-visible:ring-0 md:text-5xl dark:bg-transparent dark:disabled:bg-transparent"
+                  />
+                </div>
+              </div>
+
+              <BlockNoteEditorLoader
+                key={documentId}
+                collaboration={documentCollaboration.collaboration}
+                documentId={documentId}
+                documentTitle={savedTitle}
+                workspaceSlug={workspaceSlug}
+                content={editorContent}
+                editable={canEditDocument}
+                suppressHoverControls={isSharePopoverOpen}
+                onCollaborativeContentChangeAction={handleDocumentContentInput}
+                documentOperations={{
+                  isCollaborative: true,
+                  isArchiving: documentToolbar.isArchiving,
+                  archivingSubdocumentId: documentEditorActions.archivingSubdocumentId,
+                  isDuplicating: documentToolbar.isDuplicating,
+                  onArchive: documentToolbar.archiveCurrentDocument,
+                  onArchiveSubdocument: documentEditorActions.archiveSubdocument,
+                  onCopyLink: documentToolbar.copyLink,
+                  onDuplicate: documentToolbar.duplicateDocument,
+                }}
+                onCreateSubdocAction={
+                  canEditDocument ? documentEditorActions.createSubdocument : undefined
+                }
+              />
+            </>
           )
-          : (
-            <div className="px-[3.8rem] py-4 text-sm text-muted-foreground">
-              {documentCollaboration.error ?? 'Connecting editor...'}
-            </div>
-          )}
+          : documentCollaboration.error
+            ? (
+              <div className="px-[3.8rem] py-4 text-sm text-muted-foreground">
+                {documentCollaboration.error}
+              </div>
+            )
+            : <DocumentScreenBodySkeleton />}
       </div>
     </section>
   );

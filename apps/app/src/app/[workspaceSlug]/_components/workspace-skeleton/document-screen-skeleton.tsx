@@ -4,6 +4,9 @@ import { Skeleton } from '@shared/components/ui/skeleton';
 
 import motionStyles from '../_styles/cascade-enter.module.css';
 
+const DOCUMENT_SCREEN_TITLE_SKELETON_WIDTH = `${randomInteger(58, 86)}%`;
+const DOCUMENT_SCREEN_BODY_SKELETON_ROWS = createDocumentScreenBodySkeletonRows();
+
 export function DocumentScreenSkeleton({
   animate = false,
 }: {
@@ -38,29 +41,57 @@ export function DocumentScreenSkeleton({
       </div>
 
       <div className={contentClassName} style={contentStyle}>
-        <div className="space-y-3 px-[3.8rem]">
-          <div className="min-w-0 flex-1 space-y-2">
-            <Skeleton className="h-12 w-3/4 rounded-lg md:h-14" />
-          </div>
-        </div>
-
-        <div className="space-y-4 px-[3.8rem] pt-8">
-          {['91.6667%', '100%', '83.3333%', '75%', '100%', '66.6667%', '91.6667%', '58.3333%', '83.3333%'].map((width, index) => (
-            <Skeleton
-              key={`${width}-${index}`}
-              className={`h-5 ${animate ? motionStyles.cascadeEnter : ''}`}
-              style={
-                animate
-                  ? ({
-                    width,
-                    '--enter-delay': `${240 + (index * 70)}ms`,
-                  } as CSSProperties)
-                  : ({ width } as CSSProperties)
-              }
-            />
-          ))}
-        </div>
+        <DocumentScreenBodySkeleton animate={animate} />
       </div>
     </section>
   );
+}
+
+export function DocumentScreenBodySkeleton({
+  animate = false,
+}: {
+  animate?: boolean;
+}) {
+  return (
+    <>
+      <div className="space-y-3 px-[3.8rem]">
+        <div className="min-w-0 flex-1 space-y-2">
+          <Skeleton
+            className="h-12 rounded-lg md:h-14"
+            style={{ width: DOCUMENT_SCREEN_TITLE_SKELETON_WIDTH }}
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4 px-[3.8rem] pt-8">
+        {DOCUMENT_SCREEN_BODY_SKELETON_ROWS.map((row, index) => (
+          <Skeleton
+            key={row.id}
+            className={`h-5 ${animate ? motionStyles.cascadeEnter : ''}`}
+            style={
+              animate
+                ? ({
+                  width: row.width,
+                  '--enter-delay': `${240 + (index * 70)}ms`,
+                } as CSSProperties)
+                : ({ width: row.width } as CSSProperties)
+            }
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function createDocumentScreenBodySkeletonRows() {
+  const rowCount = randomInteger(6, 11);
+
+  return Array.from({ length: rowCount }, (unusedValue, index) => ({
+    id: `row-${index + 1}`,
+    width: `${randomInteger(54, 100)}%`,
+  }));
+}
+
+function randomInteger(min: number, max: number) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
