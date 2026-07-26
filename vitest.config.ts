@@ -10,6 +10,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(rootDir, 'apps/app/src'),
       '@shared': path.resolve(rootDir, 'packages/shared/src'),
+      'server-only': path.resolve(rootDir, 'packages/shared/src/test/server-only-stub.ts'),
     },
   },
   test: {
