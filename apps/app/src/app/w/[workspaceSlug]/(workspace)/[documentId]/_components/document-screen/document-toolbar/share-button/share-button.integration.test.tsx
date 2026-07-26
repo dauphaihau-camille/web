@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import type { ComponentProps } from 'react';
 
-import { OPEN_SHARE_EVENT } from '@/app/[workspaceSlug]/_components/workspace-shortcuts-provider';
+import { OPEN_SHARE_EVENT } from '@/app/w/[workspaceSlug]/_components/workspace-shortcuts-provider';
 import type { Document } from '@/domains/document';
 import { renderWithProviders } from '@shared/test/render';
 import { mswServer } from '@shared/test/msw/server';
@@ -157,7 +157,7 @@ function renderShareButton(
 
 describe('ShareButton integration', () => {
   beforeEach(() => {
-    window.history.replaceState({}, '', '/acme/doc-1');
+    window.history.replaceState({}, '', '/w/acme/doc-1');
   });
 
   it('opens from the workspace share shortcut event and publishes an unpublished document', async () => {

@@ -298,7 +298,7 @@ describe('TeamspacesGroup', () => {
           id: 'doc-1',
         }),
       ]));
-      expect(pushMock).toHaveBeenCalledWith('/acme/untitled-public-doc-2');
+      expect(pushMock).toHaveBeenCalledWith('/w/acme/untitled-public-doc-2');
     });
   });
 });

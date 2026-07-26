@@ -1,4 +1,5 @@
 const WORKSPACE_ENTRY_PATH = '/workspace';
+const WORKSPACE_ROUTE_PREFIX = '/w';
 const DOCUMENT_ID_SUFFIX_PATTERN = /([0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 const DOCUMENT_ID_PATTERN = /^([0-9a-f]{32}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 
@@ -32,19 +33,19 @@ export const workspaceRoutes = {
     return WORKSPACE_ENTRY_PATH;
   },
   detail(workspaceSlug: string) {
-    return `/${workspaceSlug}`;
+    return `${WORKSPACE_ROUTE_PREFIX}/${workspaceSlug}`;
   },
   document(workspaceSlug: string, documentId: string, documentTitle?: string) {
     if (!documentTitle) {
-      return `/${workspaceSlug}/${documentId}`;
+      return `${WORKSPACE_ROUTE_PREFIX}/${workspaceSlug}/${documentId}`;
     }
 
-    return `/${workspaceSlug}/${slugifyDocumentTitle(documentTitle)}-${documentId}`;
+    return `${WORKSPACE_ROUTE_PREFIX}/${workspaceSlug}/${slugifyDocumentTitle(documentTitle)}-${documentId}`;
   },
   settings(workspaceSlug: string) {
-    return `/${workspaceSlug}/settings`;
+    return `${WORKSPACE_ROUTE_PREFIX}/${workspaceSlug}/settings`;
   },
   settingsMembers(workspaceSlug: string) {
-    return `/${workspaceSlug}/settings/members`;
+    return `${WORKSPACE_ROUTE_PREFIX}/${workspaceSlug}/settings/members`;
   },
 } as const;

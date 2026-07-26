@@ -206,7 +206,7 @@ describe('LoginForm integration', () => {
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
 
     await waitFor(() => {
-      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/acme');
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/w/acme');
     });
   });
 
@@ -252,7 +252,7 @@ describe('LoginForm integration', () => {
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
 
     await waitFor(() => {
-      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/beta');
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/w/beta');
     });
   });
 
@@ -292,7 +292,7 @@ describe('LoginForm integration', () => {
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
 
     await waitFor(() => {
-      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/acme');
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/w/acme');
     });
   });
 

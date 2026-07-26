@@ -89,7 +89,7 @@ function renderUseDocumentTitle() {
 describe('useDocumentTitle', () => {
   beforeEach(() => {
     vi.useFakeTimers();
-    window.history.pushState(null, '', '/acme/quarterly-plan-public-doc-1');
+    window.history.pushState(null, '', '/w/acme/quarterly-plan-public-doc-1');
   });
 
   afterEach(() => {
@@ -112,21 +112,21 @@ describe('useDocumentTitle', () => {
     });
 
     expect(meta.get('title')).toBe('Quarterly plan');
-    expect(window.location.pathname).toBe('/acme/quarterly-plan-public-doc-1');
+    expect(window.location.pathname).toBe('/w/acme/quarterly-plan-public-doc-1');
 
     act(() => {
       vi.advanceTimersByTime(299);
     });
 
     expect(meta.get('title')).toBe('Quarterly plan');
-    expect(window.location.pathname).toBe('/acme/quarterly-plan-public-doc-1');
+    expect(window.location.pathname).toBe('/w/acme/quarterly-plan-public-doc-1');
 
     act(() => {
       vi.advanceTimersByTime(1);
     });
 
     expect(meta.get('title')).toBe('Renamed plan');
-    expect(window.location.pathname).toBe('/acme/renamed-plan-public-doc-1');
+    expect(window.location.pathname).toBe('/w/acme/renamed-plan-public-doc-1');
   });
 
   it('flushes a pending title change on blur', () => {
@@ -143,6 +143,6 @@ describe('useDocumentTitle', () => {
     });
 
     expect(meta.get('title')).toBe('Blurred plan');
-    expect(window.location.pathname).toBe('/acme/blurred-plan-public-doc-1');
+    expect(window.location.pathname).toBe('/w/acme/blurred-plan-public-doc-1');
   });
 });

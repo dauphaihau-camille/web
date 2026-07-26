@@ -174,7 +174,7 @@ describe('LoginForm alternate flows', () => {
     });
 
     await waitFor(() => {
-      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/acme');
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/w/acme');
     });
   });
 });

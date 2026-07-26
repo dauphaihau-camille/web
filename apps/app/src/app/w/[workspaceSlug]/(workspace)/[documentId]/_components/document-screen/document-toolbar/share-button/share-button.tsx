@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 
-import { OPEN_SHARE_EVENT } from '@/app/[workspaceSlug]/_components/workspace-shortcuts-provider';
+import { OPEN_SHARE_EVENT } from '@/app/w/[workspaceSlug]/_components/workspace-shortcuts-provider';
 import type { Document } from '@/domains/document';
 import {
   buttonVariants,

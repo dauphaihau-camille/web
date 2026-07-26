@@ -12,8 +12,8 @@ import { authRoutes, hasLoggedOutSearchParam, resolveWakeNextPath } from './auth
 
 describe('authRoutes', () => {
   it('builds a wake route with the next path', () => {
-    expect(authRoutes.wake('/signup?redirectTo=%2Facme')).toBe(
-      '/wake?next=%2Fsignup%3FredirectTo%3D%252Facme',
+    expect(authRoutes.wake('/signup?redirectTo=%2Fw%2Facme')).toBe(
+      '/wake?next=%2Fsignup%3FredirectTo%3D%252Fw%252Facme',
     );
   });
 
@@ -28,13 +28,13 @@ describe('hasLoggedOutSearchParam', () => {
   });
 
   it('ignores unrelated search params', () => {
-    expect(hasLoggedOutSearchParam(new URLSearchParams('redirectTo=/acme'))).toBe(false);
+    expect(hasLoggedOutSearchParam(new URLSearchParams('redirectTo=/w/acme'))).toBe(false);
   });
 });
 
 describe('resolveWakeNextPath', () => {
   it('returns the next path when it is an internal path', () => {
-    expect(resolveWakeNextPath('/acme?tab=members')).toBe('/acme?tab=members');
+    expect(resolveWakeNextPath('/w/acme?tab=members')).toBe('/w/acme?tab=members');
   });
 
   it('falls back for missing values', () => {

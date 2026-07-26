@@ -5,4 +5,4 @@ export {
   markCachedFavoriteDocumentHasChildren,
   restoreDocumentListSnapshot,
   type DocumentListSnapshot,
-} from '../../../../../../../domains/document/actions/document-action-cache';
+} from '../../../../../../../../domains/document/actions/document-action-cache';

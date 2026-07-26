@@ -6,7 +6,7 @@ import {
 import {
   COPY_LINK_EVENT,
   DUPLICATE_DOCUMENT_EVENT,
-} from '@/app/[workspaceSlug]/_components/workspace-shortcuts-provider';
+} from '@/app/w/[workspaceSlug]/_components/workspace-shortcuts-provider';
 import { buttonVariants } from '@shared/components/ui/button';
 import {
   Tooltip,

@@ -85,7 +85,7 @@ describe('CreateWorkspaceForm integration', () => {
         description: 'Shared docs and planning',
       });
       expect(onSuccess).toHaveBeenCalledTimes(1);
-      expect(pushMock).toHaveBeenCalledWith('/acme-product');
+      expect(pushMock).toHaveBeenCalledWith('/w/acme-product');
     });
   });
 

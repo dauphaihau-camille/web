@@ -17,7 +17,7 @@ const {
 }));
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/acme-product/private-doc-4ec5b7fac06c3796d684e145a7fcc1cc',
+  usePathname: () => '/w/acme-product/private-doc-4ec5b7fac06c3796d684e145a7fcc1cc',
   useRouter: () => ({
     replace: replaceMock,
   }),

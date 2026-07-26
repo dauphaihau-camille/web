@@ -114,7 +114,7 @@ describe('DocumentTreeNode integration', () => {
         document={parentDocument}
         workspaceSlug="acme"
         treeScope="private"
-        pathname="/acme/pub-parent-1"
+        pathname="/w/acme/pub-parent-1"
       />,
     );
 
@@ -152,7 +152,7 @@ describe('DocumentTreeNode integration', () => {
         document={parentDocument}
         workspaceSlug="acme"
         treeScope="favorites"
-        pathname="/acme/pub-parent-1"
+        pathname="/w/acme/pub-parent-1"
       />,
     );
 
@@ -169,7 +169,7 @@ describe('DocumentTreeNode integration', () => {
         document={parentDocument}
         workspaceSlug="acme"
         treeScope="private"
-        pathname="/acme/pub-parent-1"
+        pathname="/w/acme/pub-parent-1"
       />,
     );
 
@@ -188,7 +188,7 @@ describe('DocumentTreeNode integration', () => {
         document={parentDocument}
         workspaceSlug="acme"
         treeScope="private"
-        pathname="/acme"
+        pathname="/w/acme"
       />,
     );
 

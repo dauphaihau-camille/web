@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
 import { workspaceRoutes } from '@/domains/workspace';
 import { getDefaultWorkspaceServer } from '@/domains/workspace/api/workspace.server.requests';
+import { getWorkspaceDocumentRoute } from '@/app/w/[workspaceSlug]/(workspace)/workspace-default-route';
 
 import { CreateWorkspaceFlow } from '@/domains/workspace/components';
 
@@ -12,7 +13,7 @@ export default async function WorkspaceEntryPage() {
   const defaultWorkspace = await getDefaultWorkspaceServer();
 
   if (defaultWorkspace) {
-    redirect(workspaceRoutes.detail(defaultWorkspace.slug));
+    redirect(await getWorkspaceDocumentRoute(defaultWorkspace.slug));
   }
 
   return (

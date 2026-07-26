@@ -92,13 +92,13 @@ describe('WorkspacePage', () => {
 
     await expect(WorkspacePage({
       params: Promise.resolve({ workspaceSlug: 'missing-workspace' }),
-    })).rejects.toMatchObject({ path: '/acme/account-health-review-public-doc-1' });
+    })).rejects.toMatchObject({ path: '/w/acme/account-health-review-public-doc-1' });
 
-    expect(requireCurrentUserServerMock).toHaveBeenCalledWith('/missing-workspace');
+    expect(requireCurrentUserServerMock).toHaveBeenCalledWith('/w/missing-workspace');
     expect(getWorkspaceDefaultDocumentServerMock).toHaveBeenNthCalledWith(1, 'missing-workspace', null);
     expect(getWorkspaceDefaultDocumentServerMock).toHaveBeenNthCalledWith(2, 'acme', null);
     expect(getDefaultWorkspaceServerMock).toHaveBeenCalled();
-    expect(redirectMock).toHaveBeenCalledWith('/acme/account-health-review-public-doc-1');
+    expect(redirectMock).toHaveBeenCalledWith('/w/acme/account-health-review-public-doc-1');
     expect(createRootDocumentServerMock).not.toHaveBeenCalled();
   });
 
@@ -117,10 +117,10 @@ describe('WorkspacePage', () => {
 
     await expect(WorkspacePage({
       params: Promise.resolve({ workspaceSlug: 'missing-workspace' }),
-    })).rejects.toMatchObject({ path: '/acme/untitled-public-doc-2' });
+    })).rejects.toMatchObject({ path: '/w/acme/untitled-public-doc-2' });
 
     expect(createRootDocumentServerMock).toHaveBeenCalledWith({ workspace_id: 'acme' });
-    expect(redirectMock).toHaveBeenCalledWith('/acme/untitled-public-doc-2');
+    expect(redirectMock).toHaveBeenCalledWith('/w/acme/untitled-public-doc-2');
   });
 
   it('redirects unknown workspace slugs to workspace entry when there is no default workspace', async () => {

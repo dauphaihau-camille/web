@@ -183,7 +183,7 @@ describe('PrivateDocumentsGroup', () => {
           documentKeys.detail(createdDocumentFixture.public_id),
         ),
       ).toBeUndefined();
-      expect(pushMock).toHaveBeenCalledWith('/acme/untitled-public-doc-1');
+      expect(pushMock).toHaveBeenCalledWith('/w/acme/untitled-public-doc-1');
     });
   });
 
