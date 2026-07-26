@@ -9,6 +9,11 @@ import {
 } from '@/app/[workspaceSlug]/_components/workspace-shortcuts-provider';
 import { buttonVariants } from '@shared/components/ui/button';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@shared/components/ui/tooltip';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -73,15 +78,23 @@ export function DocOperations({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        className={cn(
-          buttonVariants({ variant: 'ghost', size: 'icon' }),
-          'text-muted-foreground',
-        )}
-      >
-        <EllipsisIcon className="size-4" />
-        <span className="sr-only">Open document actions</span>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger
+          delay={0}
+          render={
+            <DropdownMenuTrigger
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'icon' }),
+                'text-muted-foreground',
+              )}
+            >
+              <EllipsisIcon className="size-4" />
+              <span className="sr-only">Open document actions</span>
+            </DropdownMenuTrigger>
+          }
+        />
+        <TooltipContent>Delete, duplicate, and more...</TooltipContent>
+      </Tooltip>
 
       <DropdownMenuContent
         align="end"
