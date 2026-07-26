@@ -155,14 +155,6 @@ export function useCreateSubdocumentMutationImpl<
       );
 
       queryClient.setQueryData(
-        documentKeys.detail(nextChildDocument.id),
-        nextChildDocument,
-      );
-      queryClient.setQueryData(
-        documentKeys.detail(nextChildDocument.public_id),
-        nextChildDocument,
-      );
-      queryClient.setQueryData(
         documentKeys.detail(nextParentDocument.id),
         nextParentDocument,
       );

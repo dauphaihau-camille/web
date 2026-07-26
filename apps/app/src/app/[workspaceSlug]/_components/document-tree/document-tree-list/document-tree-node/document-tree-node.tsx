@@ -76,6 +76,7 @@ export function DocumentTreeNode({
   const expandedByWorkspace = useDocumentTreeExpansionStore(
     (state) => state.expandedByWorkspace,
   );
+
   const isExpanded =
     expandedByWorkspace[workspaceSlug]?.[treeScope]?.includes(document.id) ?? false;
 
@@ -104,12 +105,14 @@ export function DocumentTreeNode({
       documentDetailQueryOptions(document.public_id),
     );
   };
+
   const actionPaddingClassName =
     actionMode === 'hidden'
       ? ''
       : actionMode === 'full'
         ? 'group-hover/menu-sub-item:pr-14 group-has-[[aria-expanded=true]]/menu-sub-item:pr-14'
         : 'group-hover/menu-sub-item:pr-8 group-has-[[aria-expanded=true]]/menu-sub-item:pr-8';
+
   const handleTitleInteractionStart = (event: React.SyntheticEvent<HTMLDivElement>) => {
     setIsTitleInteracting(true);
     titleAutoScroll.scrollToEnd(event.currentTarget);

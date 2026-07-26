@@ -177,7 +177,12 @@ describe('PrivateDocumentsGroup', () => {
         queryClient.getQueryData<Document>(
           documentKeys.detail(createdDocumentFixture.id),
         ),
-      ).toEqual(createdDocumentFixture);
+      ).toBeUndefined();
+      expect(
+        queryClient.getQueryData<Document>(
+          documentKeys.detail(createdDocumentFixture.public_id),
+        ),
+      ).toBeUndefined();
       expect(pushMock).toHaveBeenCalledWith('/acme/untitled-public-doc-1');
     });
   });

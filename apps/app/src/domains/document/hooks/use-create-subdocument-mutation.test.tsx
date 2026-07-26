@@ -130,17 +130,10 @@ describe('useCreateSubdocumentMutation', () => {
       );
       expect(
         queryClient.getQueryData<Document>(documentKeys.detail(childDocument.id)),
-      ).toMatchObject({
-        id: childDocument.id,
-        breadcrumb: [
-          ...parentDocument.breadcrumb!,
-          {
-            id: parentDocument.id,
-            public_id: parentDocument.public_id,
-            title: parentDocument.title,
-          },
-        ],
-      });
+      ).toBeUndefined();
+      expect(
+        queryClient.getQueryData<Document>(documentKeys.detail(childDocument.public_id)),
+      ).toBeUndefined();
       expect(
         queryClient.getQueryData<DocumentNavigationPage>(
           documentKeys.childList('acme', parentDocument.id, 50),

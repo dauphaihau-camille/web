@@ -73,6 +73,7 @@ export function useCreateRootDocumentAction(
         queryClient,
         workspaceSlug,
       );
+
       const optimisticDocument = createOptimisticRootDocument(
         workspaceSlug,
         teamspaceId,
@@ -100,15 +101,13 @@ export function useCreateRootDocumentAction(
       }
 
       restoreDocumentListSnapshot(queryClient, context.previousDocumentLists);
+
       queryClient.removeQueries({
         queryKey: documentKeys.detail(context.optimisticDocumentId),
         exact: true,
       });
     },
     onSuccess: (document, _variables, context) => {
-      queryClient.setQueryData(documentKeys.detail(document.id), document);
-      queryClient.setQueryData(documentKeys.detail(document.public_id), document);
-
       replaceCreatedRootDocument(
         queryClient,
         workspaceSlug,

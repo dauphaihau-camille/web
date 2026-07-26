@@ -478,21 +478,10 @@ describe('useDocumentTreeNodeActions integration', () => {
       }));
       expect(
         queryClient.getQueryData<Document>(documentKeys.detail(childDocumentFixture.public_id)),
-      ).toEqual(expect.objectContaining({
-        id: childDocumentFixture.id,
-        breadcrumb: [
-          {
-            id: 'ancestor-1',
-            public_id: 'public-ancestor-1',
-            title: 'Workspace Home',
-          },
-          {
-            id: documentFixture.id,
-            public_id: documentFixture.public_id,
-            title: documentFixture.title,
-          },
-        ],
-      }));
+      ).toBeUndefined();
+      expect(
+        queryClient.getQueryData<Document>(documentKeys.detail(childDocumentFixture.id)),
+      ).toBeUndefined();
       expect(
         queryClient.getQueryData<FavoriteDocument[]>(
           favoriteKeys.workspaceList('acme'),
