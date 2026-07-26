@@ -1,5 +1,6 @@
 'use client';
 
+import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { PlusIcon } from 'lucide-react';
 
 import { LoadingIcon } from '@shared/components/loading-icon';
@@ -13,18 +14,26 @@ type CreateDocumentButtonProps = {
   iconClassName?: string;
   isPending?: boolean;
   onClick: () => void;
-};
+} & Omit<
+  ComponentPropsWithoutRef<typeof Button>,
+  'aria-label' | 'children' | 'className' | 'disabled' | 'onClick'
+>;
 
-export function CreateDocumentButton({
+export const CreateDocumentButton = forwardRef<
+  HTMLButtonElement,
+  CreateDocumentButtonProps
+>(function CreateDocumentButtonImpl({
   ariaLabel,
   className,
   disabled,
   iconClassName,
   isPending = false,
   onClick,
-}: CreateDocumentButtonProps) {
+  ...props
+}, ref) {
   return (
     <Button
+      ref={ref}
       type="button"
       variant="ghost"
       size="icon-xs"
@@ -35,6 +44,7 @@ export function CreateDocumentButton({
       aria-label={ariaLabel}
       disabled={disabled}
       onClick={onClick}
+      {...props}
     >
       {isPending
         ? (
@@ -45,4 +55,4 @@ export function CreateDocumentButton({
         )}
     </Button>
   );
-}
+});
