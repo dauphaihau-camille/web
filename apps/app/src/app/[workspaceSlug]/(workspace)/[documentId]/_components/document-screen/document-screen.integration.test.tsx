@@ -9,6 +9,12 @@ import { renderWithProviders } from '@shared/test/render';
 
 import { DocumentScreen } from './document-screen';
 
+const collaborationMock = vi.hoisted(() => ({
+  onDocumentUpdatedAtChange: undefined as
+    | ((updatedAt: string) => void)
+    | undefined,
+}));
+
 vi.mock('next/link', () => ({
   default: ({
     children,
@@ -22,12 +28,19 @@ vi.mock('next/link', () => ({
 vi.mock('@shared/components/editor/create-blocknote-editor-loader', () => ({
   createBlockNoteEditorLoader: () =>
     function MockBlockNoteEditorLoader({
+      onCollaborativeContentChangeAction,
       suppressHoverControls,
     }: {
+      onCollaborativeContentChangeAction?: () => void;
       suppressHoverControls?: boolean;
     }) {
       return (
-        <button type="button" data-testid="editor" data-suppress-hover-controls={String(Boolean(suppressHoverControls))}>
+        <button
+          type="button"
+          data-testid="editor"
+          data-suppress-hover-controls={String(Boolean(suppressHoverControls))}
+          onClick={onCollaborativeContentChangeAction}
+        >
           Editor
         </button>
       );
@@ -35,22 +48,31 @@ vi.mock('@shared/components/editor/create-blocknote-editor-loader', () => ({
 }));
 
 vi.mock('./_hooks/document-collaboration/use-document-collaboration', () => ({
-  useDocumentCollaboration: () => ({
-    canEdit: true,
-    collaboration: {
-      fragment: {},
-      provider: {
-        awareness: {},
-      },
-      user: {
-        name: 'Owner',
-        color: 'hsl(10 68% 48%)',
-      },
+  useDocumentCollaboration: (
+    _documentId: string,
+    options: {
+      onDocumentUpdatedAtChange?: (updatedAt: string) => void;
     },
-    document: {},
-    error: null,
-    isReady: true,
-  }),
+  ) => {
+    collaborationMock.onDocumentUpdatedAtChange = options.onDocumentUpdatedAtChange;
+
+    return {
+      canEdit: true,
+      collaboration: {
+        fragment: {},
+        provider: {
+          awareness: {},
+        },
+        user: {
+          name: 'Owner',
+          color: 'hsl(10 68% 48%)',
+        },
+      },
+      document: {},
+      error: null,
+      isReady: true,
+    };
+  },
 }));
 
 vi.mock('./_hooks/use-document-editor-actions', () => ({
@@ -105,14 +127,17 @@ vi.mock('./document-toolbar/document-toolbar', () => ({
   DocumentToolbar: ({
     isVisible = true,
     onShareOpenChange,
+    updatedAt,
   }: {
     isVisible?: boolean;
     onShareOpenChange?: (open: boolean) => void;
+    updatedAt: string;
   }) => (
     <div
       data-testid="document-toolbar"
       className={isVisible ? 'opacity-100' : 'pointer-events-none opacity-0'}
     >
+      <span data-testid="toolbar-updated-at">{updatedAt}</span>
       <button type="button" onClick={() => onShareOpenChange?.(true)}>
         Open share
       </button>
@@ -185,6 +210,7 @@ async function advanceRevealDelay() {
 describe('DocumentScreen chrome visibility', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    collaborationMock.onDocumentUpdatedAtChange = undefined;
   });
 
   afterEach(() => {
@@ -201,7 +227,7 @@ describe('DocumentScreen chrome visibility', () => {
 
     expectDocumentChromeVisible();
 
-    fireEvent.keyDown(titleInput, { key: 'A' });
+    fireEvent.change(titleInput, { target: { value: 'Quarterly plan A' } });
 
     expectDocumentChromeHidden();
 
@@ -210,7 +236,7 @@ describe('DocumentScreen chrome visibility', () => {
 
     expectDocumentChromeVisible();
 
-    fireEvent.keyDown(titleInput, { key: 'A' });
+    fireEvent.change(titleInput, { target: { value: 'Quarterly plan AB' } });
 
     expectDocumentChromeHidden();
   });
@@ -226,7 +252,9 @@ describe('DocumentScreen chrome visibility', () => {
     );
 
     fireEvent.focus(screen.getByRole('textbox'));
-    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'A' });
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Quarterly plan A' },
+    });
     fireEvent.pointerMove(container.firstElementChild as Element);
     await advanceRevealDelay();
 
@@ -237,6 +265,26 @@ describe('DocumentScreen chrome visibility', () => {
     expect(screen.getByTestId('editor')).toHaveAttribute(
       'data-suppress-hover-controls',
       'false',
+    );
+  });
+
+  it('updates the toolbar timestamp when collaboration save is acknowledged', () => {
+    renderDocumentScreen();
+
+    expect(screen.getByTestId('toolbar-updated-at')).toHaveTextContent(
+      '2026-01-01T00:00:00.000Z',
+    );
+
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: 'Quarterly plan A' },
+    });
+
+    act(() => {
+      collaborationMock.onDocumentUpdatedAtChange?.('2026-01-02T00:00:00.000Z');
+    });
+
+    expect(screen.getByTestId('toolbar-updated-at')).toHaveTextContent(
+      '2026-01-02T00:00:00.000Z',
     );
   });
 });

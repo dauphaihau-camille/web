@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useRef,
   useState,
 } from 'react';
 import { createBlockNoteEditorLoader } from '@shared/components/editor/create-blocknote-editor-loader';
@@ -54,13 +55,28 @@ function DocumentScreenContent({
   const documentId = document.id;
   const [editorContent, setEditorContent] = useState(document.content);
   const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
+  const [acknowledgedUpdatedAt, setAcknowledgedUpdatedAt] = useState<string | null>(null);
+  const hasLocalEditRef = useRef(false);
 
   const collaborationMode = document.collaboration?.mode ??
     (document.access?.can_edit && !document.archived_at ? 'edit' : 'view');
 
   const showPresence = Boolean(document.collaboration?.show_presence);
 
+  const displayUpdatedAt = getLatestTimestamp(
+    document.updated_at,
+    acknowledgedUpdatedAt,
+  );
+
+  const handleDocumentUpdatedAtChange = useCallback((updatedAt: string) => {
+    if (!hasLocalEditRef.current) {
+      return;
+    }
+    setAcknowledgedUpdatedAt(updatedAt);
+  }, []);
+
   const documentCollaboration = useDocumentCollaboration(documentId, {
+    onDocumentUpdatedAtChange: handleDocumentUpdatedAtChange,
     showPresence,
     workspaceId: document.workspace_id,
   });
@@ -78,7 +94,7 @@ function DocumentScreenContent({
     if (!canEditDocument) {
       return;
     }
-
+    hasLocalEditRef.current = true;
     hideChrome();
   }, [canEditDocument, hideChrome]);
 
@@ -113,6 +129,7 @@ function DocumentScreenContent({
   const statusBarHeight = 48;
 
   const publishedBarOffset = isArchived ? statusBarHeight : 0;
+
   const fixedHeaderOffset =
     (isPublished ? statusBarHeight : 0) +
     (isArchived ? statusBarHeight : 0);
@@ -161,7 +178,7 @@ function DocumentScreenContent({
             canEdit={canEditDocument}
             document={document}
             isVisible={isChromeVisible}
-            updatedAt={document.updated_at}
+            updatedAt={displayUpdatedAt}
             workspaceSlug={workspaceSlug}
             onShareOpenChange={setIsSharePopoverOpen}
             {...documentToolbar}
@@ -172,8 +189,6 @@ function DocumentScreenContent({
       <div
         className="mx-auto max-w-2xl"
         style={{ paddingTop: `${110 + fixedHeaderOffset}px` }}
-        onInputCapture={handleDocumentContentInput}
-        onKeyDownCapture={handleDocumentContentInput}
       >
         <div className="space-y-3 px-[3.8rem]">
           <div className="min-w-0 flex-1 space-y-2">
@@ -184,6 +199,7 @@ function DocumentScreenContent({
                   return;
                 }
 
+                hasLocalEditRef.current = true;
                 hideChrome();
                 const nextTitle = event.currentTarget.value.replace(/\s*\r?\n\s*/g, ' ');
 
@@ -225,6 +241,7 @@ function DocumentScreenContent({
               content={editorContent}
               editable={canEditDocument}
               suppressHoverControls={isSharePopoverOpen}
+              onCollaborativeContentChangeAction={handleDocumentContentInput}
               documentOperations={{
                 isCollaborative: true,
                 isArchiving: documentToolbar.isArchiving,
@@ -248,4 +265,14 @@ function DocumentScreenContent({
       </div>
     </section>
   );
+}
+
+function getLatestTimestamp(firstTimestamp: string, secondTimestamp: string | null) {
+  if (!secondTimestamp) {
+    return firstTimestamp;
+  }
+
+  return new Date(secondTimestamp).getTime() > new Date(firstTimestamp).getTime()
+    ? secondTimestamp
+    : firstTimestamp;
 }

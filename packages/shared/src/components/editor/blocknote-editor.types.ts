@@ -37,6 +37,7 @@ export type BlockNoteEditorProps = {
     slashCommandText?: string;
     content?: unknown[];
   }) => Promise<CreatedSubdoc>;
+  onCollaborativeContentChangeAction?: () => void;
   onSelectionChangeAction?: () => void;
   onStartContentChangeAction?: () => void;
 };

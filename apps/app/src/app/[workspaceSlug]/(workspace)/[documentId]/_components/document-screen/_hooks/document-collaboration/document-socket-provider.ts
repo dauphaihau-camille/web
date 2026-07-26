@@ -38,12 +38,16 @@ type ClientToServerEvents = {
   ) => void;
   'collab:update': (
     payload: CollaborationUpdatePayload,
-    callback?: (response: CollaborationResponse<{ sequence: number }>) => void,
+    callback?: (response: CollaborationResponse<{
+      sequence: number;
+      updatedAt: string;
+    }>) => void,
   ) => void;
 };
 
 type CollaborationUpdatePayload = {
   documentId: string;
+  updatedAt?: string;
   update: CollaborationBinary;
 };
 
@@ -66,6 +70,7 @@ type ProviderStatus = {
 };
 
 type DocumentSocketProviderOptions = {
+  onDocumentUpdatedAtChange?: (updatedAt: string) => void;
   showPresence: boolean;
 };
 
@@ -139,6 +144,10 @@ export class DocumentSocketProvider {
         toUint8Array(payload.update),
         SOCKET_COLLABORATION_ORIGIN,
       );
+
+      if (payload.updatedAt) {
+        this.options.onDocumentUpdatedAtChange?.(payload.updatedAt);
+      }
     });
 
     this.socket.on('collab:awareness', (payload) => {
@@ -265,7 +274,10 @@ export class DocumentSocketProvider {
       if (!response.ok) {
         this.error = response.error.message;
         this.emitStatus();
+        return;
       }
+
+      this.options.onDocumentUpdatedAtChange?.(response.data.updatedAt);
     });
   }
 

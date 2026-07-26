@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import { Awareness } from 'y-protocols/awareness';
 import * as Yjs from 'yjs';
@@ -15,6 +15,7 @@ import {
 import { DocumentSocketProvider } from './document-socket-provider';
 
 type UseDocumentCollaborationOptions = {
+  onDocumentUpdatedAtChange?: (updatedAt: string) => void;
   showPresence: boolean;
   workspaceId: string;
 };
@@ -24,6 +25,7 @@ export function useDocumentCollaboration(
   options: UseDocumentCollaborationOptions,
 ) {
   const currentUserQuery = useCurrentUserQuery();
+  const onDocumentUpdatedAtChangeRef = useRef(options.onDocumentUpdatedAtChange);
 
   const [resources] = useState(() => {
     const document = new Yjs.Doc();
@@ -40,6 +42,10 @@ export function useDocumentCollaboration(
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
   const currentUserId = currentUserQuery.data?.id;
+
+  useEffect(() => {
+    onDocumentUpdatedAtChangeRef.current = options.onDocumentUpdatedAtChange;
+  }, [options.onDocumentUpdatedAtChange]);
 
   useEffect(() => {
     setCanEdit(false);
@@ -77,6 +83,9 @@ export function useDocumentCollaboration(
       resources.document,
       resources.awareness,
       {
+        onDocumentUpdatedAtChange: (updatedAt) => {
+          onDocumentUpdatedAtChangeRef.current?.(updatedAt);
+        },
         showPresence: options.showPresence,
       },
     );

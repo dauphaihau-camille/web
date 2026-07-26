@@ -100,6 +100,7 @@ export function createBlockNoteEditorClient({
     editable = true,
     suppressHoverControls = false,
     documentOperations,
+    onCollaborativeContentChangeAction,
     onContentChangeAction,
     onCreateSubdocAction,
     onSelectionChangeAction,
@@ -418,6 +419,11 @@ export function createBlockNoteEditorClient({
           className={blockNoteViewClassName}
           onSelectionChange={onSelectionChangeAction}
           onChange={() => {
+            if (isEditable && collaboration) {
+              onCollaborativeContentChangeAction?.();
+              return;
+            }
+
             if (!isEditable || collaboration || !onContentChangeAction) {
               return;
             }

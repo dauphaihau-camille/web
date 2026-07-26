@@ -272,12 +272,7 @@ function escapeRegExp(value: string) {
 function formatRelativeTime(value: string) {
   const targetDate = new Date(value);
   const diffInSeconds = Math.round((targetDate.getTime() - Date.now()) / 1000);
-  const absoluteSeconds = Math.abs(diffInSeconds);
   const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
-
-  if (absoluteSeconds < 60) {
-    return formatter.format(diffInSeconds, 'second');
-  }
 
   const diffInMinutes = Math.round(diffInSeconds / 60);
 

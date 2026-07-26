@@ -1,6 +1,10 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 
 import { formatRelativeTime } from '../document-toolbar.utils';
 
@@ -15,11 +19,26 @@ export function RelativeTimeText({
   prefix,
   value,
 }: RelativeTimeTextProps) {
+  const [, setTick] = useState(0);
+
   const isMounted = useSyncExternalStore(
     () => () => {},
     () => true,
     () => false,
   );
+
+  // Refresh while mounted so relative timestamps age from "just now" to minutes/hours.
+  useEffect(() => {
+    if (!isMounted) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      setTick((tick) => tick + 1);
+    }, 60_000);
+
+    return () => window.clearInterval(intervalId);
+  }, [isMounted]);
 
   const text = isMounted ? formatRelativeTime(value) : fallback;
 

@@ -7,7 +7,7 @@ export function formatRelativeTime(value: string) {
   const formatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
   if (absoluteSeconds < 60) {
-    return formatter.format(diffInSeconds, 'second');
+    return 'just now';
   }
 
   const diffInMinutes = Math.round(diffInSeconds / 60);
