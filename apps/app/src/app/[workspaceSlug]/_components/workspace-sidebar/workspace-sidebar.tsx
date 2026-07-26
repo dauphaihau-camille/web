@@ -9,6 +9,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { ScrollFade } from '@/components/ui/scroll-fade';
 import { useWorkspaceDocumentRootQuery } from '@/domains/document';
 import { useWorkspaceFavoritesQuery } from '@/domains/favorite';
 import { useWorkspaceQuery } from '@/domains/workspace';
@@ -47,7 +48,7 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
   return (
     <Sidebar
       collapsible="none"
-      className="h-auto min-h-svh self-stretch border-r border-sidebar-border bg-sidebar"
+      className="h-svh min-h-0 self-stretch border-r border-sidebar-border bg-sidebar"
     >
       <SidebarHeader className="gap-3 p-1">
         <WorkspaceUserDropdown
@@ -56,51 +57,59 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
         />
       </SidebarHeader>
 
-      <SidebarContent>
-        {isInitialWorkspaceLoading
-          ? (
-            <WorkspaceSidebarActionsSkeleton />
-          )
-          : (
-            <SidebarGroup className="pt-0">
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem className="font-semibold">
-                    <WorkspaceSearchButton workspaceSlug={workspaceSlug} />
-                  </SidebarMenuItem>
-                  <SidebarMenuItem className="font-semibold">
-                    <WorkspaceTrashButton workspaceSlug={workspaceSlug} />
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          )}
+      <SidebarContent className="overflow-hidden">
+        <ScrollFade
+          direction="y"
+          fadeColor="var(--sidebar)"
+          className="no-scrollbar min-h-0 flex-1 overflow-y-auto"
+        >
+          <div className="flex min-h-full flex-col gap-0">
+            {isInitialWorkspaceLoading
+              ? (
+                <WorkspaceSidebarActionsSkeleton />
+              )
+              : (
+                <SidebarGroup className="pt-0">
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      <SidebarMenuItem className="font-semibold">
+                        <WorkspaceSearchButton workspaceSlug={workspaceSlug} />
+                      </SidebarMenuItem>
+                      <SidebarMenuItem className="font-semibold">
+                        <WorkspaceTrashButton workspaceSlug={workspaceSlug} />
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              )}
 
-        {isInitialSidebarLoading
-          ? (
-            <WorkspaceSidebarTreeSkeleton animate />
-          )
-          : (
-            <>
-              <FavoritesDocumentsGroup
-                workspaceSlug={workspaceSlug}
-                favoritesQuery={favoritesQuery}
-              />
-              <PrivateDocumentsGroup
-                workspaceSlug={workspaceSlug}
-                rootQuery={rootQuery}
-              />
-              <TeamspacesGroup
-                workspaceSlug={workspaceSlug}
-                rootQuery={rootQuery}
-                canEditDocuments={canEditTeamspaceDocuments}
-              />
-              <SharedDocumentsGroup
-                workspaceSlug={workspaceSlug}
-                rootQuery={rootQuery}
-              />
-            </>
-          )}
+            {isInitialSidebarLoading
+              ? (
+                <WorkspaceSidebarTreeSkeleton animate />
+              )
+              : (
+                <>
+                  <FavoritesDocumentsGroup
+                    workspaceSlug={workspaceSlug}
+                    favoritesQuery={favoritesQuery}
+                  />
+                  <PrivateDocumentsGroup
+                    workspaceSlug={workspaceSlug}
+                    rootQuery={rootQuery}
+                  />
+                  <TeamspacesGroup
+                    workspaceSlug={workspaceSlug}
+                    rootQuery={rootQuery}
+                    canEditDocuments={canEditTeamspaceDocuments}
+                  />
+                  <SharedDocumentsGroup
+                    workspaceSlug={workspaceSlug}
+                    rootQuery={rootQuery}
+                  />
+                </>
+              )}
+          </div>
+        </ScrollFade>
       </SidebarContent>
     </Sidebar>
   );
