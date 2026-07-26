@@ -5,6 +5,8 @@ import { documentKeys } from '@/domains/document';
 
 import {
   insertCreatedPrivateRootDocument,
+  insertCreatedRootDocument,
+  replaceCreatedRootDocument,
   updateCachedReferencedSubdocTitles,
 } from './document-query-cache';
 
@@ -50,6 +52,14 @@ const parentDocument: Document = {
   archived_at: undefined,
   created_at: '2026-01-01T00:00:00.000Z',
   updated_at: '2026-01-01T00:00:00.000Z',
+};
+
+const teamspaceRootDocument: Document = {
+  ...parentDocument,
+  id: 'teamspace-doc-1',
+  public_id: 'teamspace-public-1',
+  teamspace_id: 'teamspace-1',
+  title: 'Teamspace Home',
 };
 
 describe('updateCachedReferencedSubdocTitles', () => {
@@ -126,6 +136,137 @@ describe('insertCreatedPrivateRootDocument', () => {
           },
         ],
       },
+    });
+  });
+});
+
+describe('insertCreatedRootDocument', () => {
+  it('inserts teamspace root documents into the matching teamspace', () => {
+    const queryClient = new QueryClient();
+    const rootQueryKey = documentKeys.rootList('acme', 50);
+
+    queryClient.setQueryData(
+      rootQueryKey,
+      {
+        private_documents: {
+          items: [],
+        },
+        shared_documents: {
+          items: [],
+        },
+        teamspaces: [
+          {
+            id: 'teamspace-1',
+            name: 'Engineering',
+            documents: {
+              items: [],
+            },
+          },
+          {
+            id: 'teamspace-2',
+            name: 'Product',
+            documents: {
+              items: [],
+            },
+          },
+        ],
+      },
+    );
+
+    insertCreatedRootDocument(queryClient, 'acme', teamspaceRootDocument);
+
+    expect(
+      queryClient.getQueryData(rootQueryKey),
+    ).toMatchObject({
+      private_documents: {
+        items: [],
+      },
+      teamspaces: [
+        {
+          id: 'teamspace-1',
+          documents: {
+            items: [
+              {
+                id: teamspaceRootDocument.id,
+                title: teamspaceRootDocument.title,
+                teamspace_id: 'teamspace-1',
+                parent_document_id: undefined,
+              },
+            ],
+          },
+        },
+        {
+          id: 'teamspace-2',
+          documents: {
+            items: [],
+          },
+        },
+      ],
+    });
+  });
+});
+
+describe('replaceCreatedRootDocument', () => {
+  it('replaces optimistic teamspace root documents in the matching teamspace', () => {
+    const queryClient = new QueryClient();
+    const rootQueryKey = documentKeys.rootList('acme', 50);
+
+    queryClient.setQueryData(
+      rootQueryKey,
+      {
+        private_documents: {
+          items: [],
+        },
+        shared_documents: {
+          items: [],
+        },
+        teamspaces: [
+          {
+            id: 'teamspace-1',
+            name: 'Engineering',
+            documents: {
+              items: [
+                {
+                  id: 'optimistic-root-doc:acme:1',
+                  public_id: 'optimistic-root-doc:acme:1',
+                  title: 'Untitled',
+                  teamspace_id: 'teamspace-1',
+                  parent_document_id: undefined,
+                  sort_key: 1,
+                  has_children: false,
+                  has_content: false,
+                  is_favorite: false,
+                },
+              ],
+            },
+          },
+        ],
+      },
+    );
+
+    replaceCreatedRootDocument(
+      queryClient,
+      'acme',
+      'optimistic-root-doc:acme:1',
+      teamspaceRootDocument,
+    );
+
+    expect(
+      queryClient.getQueryData(rootQueryKey),
+    ).toMatchObject({
+      teamspaces: [
+        {
+          id: 'teamspace-1',
+          documents: {
+            items: [
+              {
+                id: teamspaceRootDocument.id,
+                public_id: teamspaceRootDocument.public_id,
+              },
+            ],
+          },
+        },
+      ],
     });
   });
 });

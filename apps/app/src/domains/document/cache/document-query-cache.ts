@@ -234,6 +234,14 @@ export function insertCreatedPrivateRootDocument(
   workspaceSlug: string,
   document: Document,
 ) {
+  insertCreatedRootDocument(queryClient, workspaceSlug, document);
+}
+
+export function insertCreatedRootDocument(
+  queryClient: QueryClient,
+  workspaceSlug: string,
+  document: Document,
+) {
   const documentNode = buildDocumentNavigationNode(document);
 
   for (const [
@@ -248,20 +256,54 @@ export function insertCreatedPrivateRootDocument(
 
     queryClient.setQueryData<WorkspaceDocumentNavigation>(queryKey, {
       ...currentNavigation,
-      private_documents: {
-        ...currentNavigation.private_documents,
-        items: [documentNode, ...currentNavigation.private_documents.items]
-          .filter(
-            (item, index, items) =>
-              items.findIndex((candidate) => candidate.id === item.id) === index,
-          )
-          .sort((left, right) => left.sort_key - right.sort_key),
-      },
+      ...(document.teamspace_id
+        ? {
+          teamspaces: currentNavigation.teamspaces.map((teamspace) =>
+            teamspace.id === document.teamspace_id
+              ? {
+                ...teamspace,
+                documents: {
+                  ...teamspace.documents,
+                  items: [documentNode, ...teamspace.documents.items]
+                    .filter(
+                      (item, index, items) =>
+                        items.findIndex((candidate) => candidate.id === item.id) === index,
+                    )
+                    .sort((left, right) => left.sort_key - right.sort_key),
+                },
+              }
+              : teamspace),
+        }
+        : {
+          private_documents: {
+            ...currentNavigation.private_documents,
+            items: [documentNode, ...currentNavigation.private_documents.items]
+              .filter(
+                (item, index, items) =>
+                  items.findIndex((candidate) => candidate.id === item.id) === index,
+              )
+              .sort((left, right) => left.sort_key - right.sort_key),
+          },
+        }),
     });
   }
 }
 
 export function replaceCreatedPrivateRootDocument(
+  queryClient: QueryClient,
+  workspaceSlug: string,
+  optimisticDocumentId: string,
+  document: Document,
+) {
+  replaceCreatedRootDocument(
+    queryClient,
+    workspaceSlug,
+    optimisticDocumentId,
+    document,
+  );
+}
+
+export function replaceCreatedRootDocument(
   queryClient: QueryClient,
   workspaceSlug: string,
   optimisticDocumentId: string,
@@ -282,15 +324,35 @@ export function replaceCreatedPrivateRootDocument(
 
     queryClient.setQueryData<WorkspaceDocumentNavigation>(queryKey, {
       ...currentNavigation,
-      private_documents: {
-        ...currentNavigation.private_documents,
-        items: [
-          documentNode,
-          ...currentNavigation.private_documents.items.filter(
-            (item) => item.id !== optimisticDocumentId && item.id !== documentNode.id,
-          ),
-        ].sort((left, right) => left.sort_key - right.sort_key),
-      },
+      ...(document.teamspace_id
+        ? {
+          teamspaces: currentNavigation.teamspaces.map((teamspace) =>
+            teamspace.id === document.teamspace_id
+              ? {
+                ...teamspace,
+                documents: {
+                  ...teamspace.documents,
+                  items: [
+                    documentNode,
+                    ...teamspace.documents.items.filter(
+                      (item) => item.id !== optimisticDocumentId && item.id !== documentNode.id,
+                    ),
+                  ].sort((left, right) => left.sort_key - right.sort_key),
+                },
+              }
+              : teamspace),
+        }
+        : {
+          private_documents: {
+            ...currentNavigation.private_documents,
+            items: [
+              documentNode,
+              ...currentNavigation.private_documents.items.filter(
+                (item) => item.id !== optimisticDocumentId && item.id !== documentNode.id,
+              ),
+            ].sort((left, right) => left.sort_key - right.sort_key),
+          },
+        }),
     });
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useId, useState } from 'react';
-import { ChevronRightIcon } from 'lucide-react';
+import { ChevronRightIcon, PlusIcon } from 'lucide-react';
 
 import {
   SidebarMenu,
@@ -18,12 +18,15 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
+import { LoadingIcon } from '@shared/components/loading-icon';
+import { buttonVariants } from '@shared/components/ui/button';
 
 import { DocumentTreeList } from '../document-tree/document-tree-list/document-tree-list';
 import { DocumentTreeSkeleton } from '../workspace-skeleton/document-tree-skeleton';
 import { CreateDocumentButton } from '../create-document-button';
 import { CollapsibleSidebarGroup } from './collapsible-sidebar-group';
 import { CreateTeamspaceDialog } from '../create-teamspace-dialog';
+import { useCreateRootDocumentAction } from './use-create-root-document-action';
 
 export function TeamspacesGroup({
   workspaceSlug,
@@ -133,12 +136,42 @@ function TeamspaceTreeSection({
   const [isExpanded, setIsExpanded] = useState(true);
   const teamspaceInitial = teamspace.name.trim().charAt(0).toUpperCase() || '?';
 
+  const {
+    createDocumentMutation,
+    handleCreateDocument,
+  } = useCreateRootDocumentAction(workspaceSlug, {
+    teamspaceId: teamspace.id,
+  });
+
   const hasDocuments =
     teamspace.documents.items.length > 0
     || Boolean(teamspace.documents.next_cursor);
 
   const canCollapse =
     teamspace.documents.items.some((document) => document.has_children);
+
+  const treeScope = `teamspace:${teamspace.id}` as const;
+
+  const createTeamspaceDocumentButton = (
+    <button
+      type="button"
+      aria-label={`Add document to ${teamspace.name}`}
+      className={cn(
+        buttonVariants({ variant: 'ghost', size: 'icon-xs' }),
+        'size-5 rounded-sm bg-transparent text-sidebar-foreground/70 hover:!bg-sidebar-accent-foreground/5 hover:text-sidebar-accent-foreground',
+      )}
+      disabled={createDocumentMutation.isPending}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        handleCreateDocument();
+      }}
+    >
+      {createDocumentMutation.isPending
+        ? <LoadingIcon className="size-4" />
+        : <PlusIcon className="size-4" />}
+    </button>
+  );
 
   return (
     <SidebarMenuItem>
@@ -150,6 +183,7 @@ function TeamspaceTreeSection({
             aria-expanded={canCollapse ? isExpanded : undefined}
             className={cn(
               'w-full pr-2 group-hover/menu-sub-item:bg-sidebar-accent group-hover/menu-sub-item:text-sidebar-accent-foreground group-focus-within/menu-sub-item:bg-sidebar-accent group-focus-within/menu-sub-item:text-sidebar-accent-foreground',
+              canEditDocuments ? 'group-hover/menu-sub-item:pr-8 group-focus-within/menu-sub-item:pr-8' : '',
               'focus-visible:ring-2 focus-visible:ring-sidebar-ring',
             )}
             onClick={() => {
@@ -185,6 +219,17 @@ function TeamspaceTreeSection({
             </span>
             <span className="font-semibold">{teamspace.name}</span>
           </SidebarMenuSubButton>
+
+          {canEditDocuments
+            ? (
+              <div className="absolute inset-y-0 right-1 z-20 flex items-center rounded pr-0.5 pl-1 opacity-0 transition-opacity group-hover/menu-sub-item:opacity-100 group-focus-within/menu-sub-item:opacity-100">
+                <Tooltip>
+                  <TooltipTrigger delay={0} render={createTeamspaceDocumentButton} />
+                  <TooltipContent side="bottom">Add a document inside</TooltipContent>
+                </Tooltip>
+              </div>
+            )
+            : null}
         </SidebarMenuSubItem>
       </SidebarMenuSub>
 
@@ -193,7 +238,7 @@ function TeamspaceTreeSection({
           <div id={contentId} className="pl-3 pt-1">
             <DocumentTreeList
               workspaceSlug={workspaceSlug}
-              treeScope={`teamspace:${teamspace.id}` as const}
+              treeScope={treeScope}
               items={teamspace.documents.items}
               emptyMessage="No documents yet."
               nextCursor={teamspace.documents.next_cursor}

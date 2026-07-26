@@ -9,8 +9,8 @@ import {
   type Document,
 } from '@/domains/document';
 import {
-  insertCreatedPrivateRootDocument,
-  replaceCreatedPrivateRootDocument,
+  insertCreatedRootDocument,
+  replaceCreatedRootDocument,
 } from '@/domains/document/cache/document-query-cache';
 import {
   getDocumentListSnapshot,
@@ -18,7 +18,10 @@ import {
 } from '@/domains/document/actions/document-action-cache';
 import { workspaceRoutes } from '@/domains/workspace';
 
-function createOptimisticRootDocument(workspaceSlug: string): Document {
+function createOptimisticRootDocument(
+  workspaceSlug: string,
+  teamspaceId?: string,
+): Document {
   const now = Date.now();
   const timestamp = new Date(now).toISOString();
 
@@ -28,7 +31,7 @@ function createOptimisticRootDocument(workspaceSlug: string): Document {
     version: 0,
     workspace_id: workspaceSlug,
     owner_user_id: 'optimistic-owner',
-    teamspace_id: undefined,
+    teamspace_id: teamspaceId,
     parent_document_id: undefined,
     title: 'Untitled',
     content_format: 'blocknote_v1',
@@ -45,12 +48,22 @@ type CreateRootDocumentMutationContext = {
   previousDocumentLists: ReturnType<typeof getDocumentListSnapshot>;
 };
 
-export function useCreateRootDocumentAction(workspaceSlug: string) {
+export function useCreateRootDocumentAction(
+  workspaceSlug: string,
+  options?: {
+    teamspaceId?: string;
+  },
+) {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const teamspaceId = options?.teamspaceId;
 
   const createDocumentMutation = useMutation({
-    mutationFn: () => createRootDocument({ workspace_id: workspaceSlug }),
+    mutationFn: () =>
+      createRootDocument({
+        workspace_id: workspaceSlug,
+        teamspace_id: teamspaceId,
+      }),
     onMutate: async (): Promise<CreateRootDocumentMutationContext> => {
       await queryClient.cancelQueries({
         queryKey: documentKeys.lists(workspaceSlug),
@@ -60,14 +73,17 @@ export function useCreateRootDocumentAction(workspaceSlug: string) {
         queryClient,
         workspaceSlug,
       );
-      const optimisticDocument = createOptimisticRootDocument(workspaceSlug);
+      const optimisticDocument = createOptimisticRootDocument(
+        workspaceSlug,
+        teamspaceId,
+      );
 
       queryClient.setQueryData(
         documentKeys.detail(optimisticDocument.id),
         optimisticDocument,
       );
 
-      insertCreatedPrivateRootDocument(
+      insertCreatedRootDocument(
         queryClient,
         workspaceSlug,
         optimisticDocument,
@@ -93,7 +109,7 @@ export function useCreateRootDocumentAction(workspaceSlug: string) {
       queryClient.setQueryData(documentKeys.detail(document.id), document);
       queryClient.setQueryData(documentKeys.detail(document.public_id), document);
 
-      replaceCreatedPrivateRootDocument(
+      replaceCreatedRootDocument(
         queryClient,
         workspaceSlug,
         context?.optimisticDocumentId ?? document.id,
