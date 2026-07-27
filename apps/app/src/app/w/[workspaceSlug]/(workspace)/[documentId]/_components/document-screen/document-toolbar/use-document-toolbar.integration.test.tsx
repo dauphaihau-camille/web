@@ -9,7 +9,6 @@ import {
   type WorkspaceDocumentNavigation,
   useDocumentQuery,
 } from '@/domains/document';
-import { workspaceRoutes } from '@/domains/workspace';
 import { mswServer } from '@shared/test/msw/server';
 
 import { useDocumentToolbar } from './use-document-toolbar';
@@ -186,7 +185,7 @@ describe('useDocumentToolbar integration', () => {
     await waitFor(() => {
       expect(result.current.documentQuery.data?.archived_at).toBeTruthy();
       expect(result.current.documentToolbar.isArchiving).toBe(true);
-      expect(replaceMock).toHaveBeenCalledWith(workspaceRoutes.detail('acme'));
+      expect(replaceMock).not.toHaveBeenCalled();
     });
 
     const archiveRequestResolver: () => void = resolveArchiveRequest ?? (() => {
