@@ -6,12 +6,14 @@ import type {
 
 export type ShareAccessRow =
   | {
+    avatar?: string;
     email: string;
     id: string;
     isOwner: true;
     name: string;
   }
   | {
+    avatar?: string;
     collaborator: DocumentCollaborator;
     email: string;
     id: string;
@@ -41,6 +43,7 @@ export function getShareAccessRows({
 
   if (ownerMember) {
     rows.push({
+      avatar: ownerMember.avatar,
       email: ownerMember.email,
       id: ownerMember.id,
       isOwner: true,
@@ -50,6 +53,7 @@ export function getShareAccessRows({
 
   for (const collaborator of collaborators) {
     rows.push({
+      avatar: collaborator.user.avatar,
       collaborator,
       email: collaborator.user.email,
       id: collaborator.user.id,

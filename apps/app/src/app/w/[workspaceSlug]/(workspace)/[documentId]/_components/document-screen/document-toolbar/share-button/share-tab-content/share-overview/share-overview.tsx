@@ -24,6 +24,7 @@ export function ShareOverview() {
       return (
         <MemberAccessRow
           key={row.id}
+          avatar={row.avatar}
           name={row.name}
           email={row.email}
           isCurrentUser={row.id === state.currentUserId}
@@ -40,6 +41,7 @@ export function ShareOverview() {
           accessSourceLabel={row.collaborator.access_source === 'inherited'
             ? 'inherited access'
             : undefined}
+          avatar={row.avatar}
           name={row.name}
           email={row.email}
           isCurrentUser={row.id === state.currentUserId}

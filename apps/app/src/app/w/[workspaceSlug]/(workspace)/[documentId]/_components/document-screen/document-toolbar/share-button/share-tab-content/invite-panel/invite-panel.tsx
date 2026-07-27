@@ -147,6 +147,7 @@ function renderAccessRow({
     return (
       <div key={row.id} onPointerEnter={onPointerEnter}>
         <MemberAccessRow
+          avatar={row.avatar}
           name={row.name}
           email={row.email}
           isCurrentUser={row.id === currentUserId}
@@ -164,6 +165,7 @@ function renderAccessRow({
           accessSourceLabel={row.collaborator.access_source === 'inherited'
             ? 'inherited access'
             : undefined}
+          avatar={row.avatar}
           name={row.name}
           email={row.email}
           isCurrentUser={row.id === currentUserId}

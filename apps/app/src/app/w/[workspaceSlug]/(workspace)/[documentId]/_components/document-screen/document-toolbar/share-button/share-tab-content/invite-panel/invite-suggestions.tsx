@@ -7,12 +7,8 @@ import type {
   InviteSuggestion,
   InviteSuggestionGroups,
 } from '../../_hooks/use-invite-composer';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from '@shared/components/ui/avatar';
 import { cn } from '@shared/lib/utils';
+import { PersonRowContent } from '../person-row-content';
 
 export function InviteSuggestions({
   activeSuggestionId,
@@ -39,6 +35,7 @@ export function InviteSuggestions({
             <p className="mb-1 pl-2 text-sm font-semibold text-muted-foreground">
               {hasInviteQuery ? 'Not invited to document' : 'Suggested'}
             </p>
+
             {suggestions.workspace.map((member) => (
               <button
                 key={member.id}
@@ -51,21 +48,12 @@ export function InviteSuggestions({
                 onClick={() => onAddInvitee(member)}
                 onPointerEnter={() => onSuggestionPointerEnter(member)}
               >
-                <WorkspaceAvatar
+                <PersonRowContent
                   avatar={member.avatar}
-                  displayName={member.displayName}
+                  label={member.displayName ?? member.email}
                   email={member.email}
+                  trailing={<ArrowUpLeftIcon className="size-4 shrink-0 text-muted-foreground" />}
                 />
-
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm font-medium text-foreground">
-                    {member.displayName ?? member.email}
-                  </span>
-                  <span className="block truncate text-xs text-muted-foreground font-medium">
-                    {member.email}
-                  </span>
-                </span>
-                <ArrowUpLeftIcon className="size-4 shrink-0 text-muted-foreground" />
               </button>
             ))}
           </section>
@@ -78,6 +66,7 @@ export function InviteSuggestions({
             <p className="mb-1 pl-2 text-sm font-semibold text-muted-foreground">
               Invite by email
             </p>
+
             {suggestions.external.map((member) => (
               <button
                 key={member.id}
@@ -90,14 +79,17 @@ export function InviteSuggestions({
                 onClick={() => onAddInvitee(member)}
                 onPointerEnter={() => onSuggestionPointerEnter(member)}
               >
-                <UserRoundPlusIcon className="size-5 shrink-0 text-muted-foreground" />
-
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm text-foreground">
-                    &ldquo;{member.email}&rdquo;
-                  </span>
-                </span>
-                <ArrowUpLeftIcon className="size-4 shrink-0 text-muted-foreground" />
+                <PersonRowContent
+                  label={member.email}
+                  labelClassName="font-normal"
+                  labelContent={(
+                    <>
+                      &ldquo;{member.email}&rdquo;
+                    </>
+                  )}
+                  leading={<UserRoundPlusIcon className="size-5 shrink-0 text-muted-foreground" />}
+                  trailing={<ArrowUpLeftIcon className="size-4 shrink-0 text-muted-foreground" />}
+                />
               </button>
             ))}
           </section>
@@ -105,36 +97,4 @@ export function InviteSuggestions({
         : null}
     </div>
   );
-}
-
-function WorkspaceAvatar({
-  avatar,
-  displayName,
-  email,
-}: {
-  avatar?: string;
-  displayName?: string;
-  email: string;
-}) {
-  const label = displayName ?? email;
-
-  return (
-    <Avatar className="size-8 shrink-0 border bg-background">
-      {avatar
-        ? (
-          <AvatarImage
-            alt=""
-            src={avatar}
-          />
-        )
-        : null}
-      <AvatarFallback className={cn(!avatar && 'bg-background')}>
-        {getInitial(label)}
-      </AvatarFallback>
-    </Avatar>
-  );
-}
-
-function getInitial(label: string) {
-  return label.trim()[0]?.toUpperCase() ?? '?';
 }

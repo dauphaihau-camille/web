@@ -69,6 +69,7 @@ export function ShareButton({
   const [isOpen, setIsOpen] = useState(false);
 
   const publicUrl = buildPublishedDocumentUrl(publishedPath);
+
   const handleOpenChange = useCallback((open: boolean) => {
     setIsOpen(open);
     onOpenChange?.(open);
