@@ -72,12 +72,17 @@ export function useShareTab({
     }
   };
 
+  const backToOverview = () => {
+    invite.resetInvitees();
+    setIsInviteMode(false);
+  };
+
   return {
     invitePanel: {
       actions: {
         addActiveInviteSuggestion: invite.addActiveInviteSuggestion,
         addInvitee: invite.addInvitee,
-        back: () => setIsInviteMode(false),
+        back: backToOverview,
         invite: () => {
           void inviteSelected();
         },

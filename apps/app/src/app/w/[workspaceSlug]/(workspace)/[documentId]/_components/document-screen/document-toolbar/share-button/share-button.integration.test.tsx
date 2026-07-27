@@ -299,12 +299,50 @@ describe('ShareButton integration', () => {
     await user.type(panelInviteInput, 'kim');
     await user.click(await screen.findByRole('button', { name: 'Kim Nguyen <kim@example.com>' }));
 
-    expect(await screen.findByText('kim@example.com')).toBeInTheDocument();
+    expect(await screen.findByText('Kim Nguyen')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Invite' }));
 
     expect(sharedUserIds).toEqual(['user-2:manage']);
     expect(await screen.findByText('Kim Nguyen')).toBeInTheDocument();
+  });
+
+  it('clears pending invitees when returning from invite mode', async () => {
+    renderShareButton(undefined, {
+      members: [
+        {
+          id: 'membership-1',
+          version: 1,
+          user_id: 'user-1',
+          email: 'owner@example.com',
+          display_name: 'Owner',
+          role: 'owner',
+          joined_at: '2026-01-01T00:00:00.000Z',
+        },
+        {
+          id: 'membership-2',
+          version: 1,
+          user_id: 'user-2',
+          email: 'kim@example.com',
+          display_name: 'Kim Nguyen',
+          role: 'member',
+          joined_at: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+    await user.type(await screen.findByPlaceholderText('Email or name'), 'kim');
+    await user.click(await screen.findByRole('button', { name: 'Kim Nguyen <kim@example.com>' }));
+
+    expect(screen.getByRole('button', { name: 'Invite' })).toBeEnabled();
+
+    await user.click(screen.getByRole('button', { name: 'Back to sharing' }));
+
+    expect(screen.queryByRole('button', { name: 'Back to sharing' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Invite' })).toBeDisabled();
+    expect(screen.getByPlaceholderText('Email or name')).toHaveValue('');
   });
 
   it('invites an unknown email as a pending document invitation', async () => {
