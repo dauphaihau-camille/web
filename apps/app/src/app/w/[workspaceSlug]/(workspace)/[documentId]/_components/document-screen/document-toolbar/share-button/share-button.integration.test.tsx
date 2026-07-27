@@ -1,4 +1,4 @@
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { within } from '@testing-library/dom';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
@@ -347,6 +347,14 @@ describe('ShareButton integration', () => {
 
   it('invites an unknown email as a pending document invitation', async () => {
     const sharedEmails: string[] = [];
+    let resolveShareRequest!: () => void;
+    let resolveShareResponse!: () => void;
+    const shareRequestStarted = new Promise<void>((resolve) => {
+      resolveShareRequest = resolve;
+    });
+    const shareResponse = new Promise<void>((resolve) => {
+      resolveShareResponse = resolve;
+    });
 
     mswServer.use(
       http.post(/\/documents\/doc-1\/shares\/?$/, async ({ request }) => {
@@ -361,6 +369,9 @@ describe('ShareButton integration', () => {
         sharedEmails.push(
           ...body.grants.map((grant) => `${grant.email}:${grant.permission}`),
         );
+        resolveShareRequest();
+
+        await shareResponse;
 
         return HttpResponse.json({
           collaborators: [],
@@ -389,13 +400,61 @@ describe('ShareButton integration', () => {
     await user.keyboard('{Enter}');
     await user.click(screen.getByRole('button', { name: 'Invite' }));
 
+    await shareRequestStarted;
     expect(sharedEmails).toEqual(['huongk1lk2clcla@yahoo.com:manage']);
     expect(await screen.findByText('huongk1lk2clcla@yahoo.com')).toBeInTheDocument();
     expect(screen.getByText('Invited')).toBeInTheDocument();
+
+    await act(async () => {
+      resolveShareResponse();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('huongk1lk2clcla@yahoo.com')).toBeInTheDocument();
+    });
+  });
+
+  it('rolls back an optimistic pending invitation when sharing fails', async () => {
+    let resolveShareResponse!: () => void;
+    const shareResponse = new Promise<void>((resolve) => {
+      resolveShareResponse = resolve;
+    });
+
+    mswServer.use(
+      http.post(/\/documents\/doc-1\/shares\/?$/, async () => {
+        await shareResponse;
+
+        return HttpResponse.json({ message: 'Share failed' }, { status: 500 });
+      }),
+    );
+    renderShareButton();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+    const inviteInput = await screen.findByPlaceholderText('Email or name');
+
+    await user.type(inviteInput, 'rollback@example.com');
+    await user.keyboard('{Enter}');
+    await user.click(screen.getByRole('button', { name: 'Invite' }));
+
+    expect(await screen.findByText('rollback@example.com')).toBeInTheDocument();
+    expect(screen.getByText('Invited')).toBeInTheDocument();
+
+    await act(async () => {
+      resolveShareResponse();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByText('rollback@example.com')).not.toBeInTheDocument();
+    });
   });
 
   it('shows pending invitations and updates their predefined permission', async () => {
     const invitationUpdates: string[] = [];
+    let resolveUpdateResponse!: () => void;
+    const updateResponse = new Promise<void>((resolve) => {
+      resolveUpdateResponse = resolve;
+    });
 
     mswServer.use(
       http.patch(/\/documents\/doc-1\/invitations\/invitation-1\/?$/, async ({ request }) => {
@@ -403,6 +462,8 @@ describe('ShareButton integration', () => {
           permission: string;
         };
         invitationUpdates.push(body.permission);
+
+        await updateResponse;
 
         return HttpResponse.json({
           id: 'invitation-1',
@@ -442,6 +503,59 @@ describe('ShareButton integration', () => {
 
     expect(invitationUpdates).toEqual(['view']);
     expect(await screen.findByRole('button', { name: 'Can view' })).toBeInTheDocument();
+
+    await act(async () => {
+      resolveUpdateResponse();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Can view' })).toBeInTheDocument();
+    });
+  });
+
+  it('optimistically removes a pending invitation and rolls it back when revoke fails', async () => {
+    let resolveRevokeResponse!: () => void;
+    const revokeResponse = new Promise<void>((resolve) => {
+      resolveRevokeResponse = resolve;
+    });
+
+    mswServer.use(
+      http.delete(/\/documents\/doc-1\/invitations\/invitation-1\/?$/, async () => {
+        await revokeResponse;
+
+        return HttpResponse.json({ message: 'Revoke failed' }, { status: 500 });
+      }),
+    );
+    renderShareButton(undefined, {
+      invitations: [
+        {
+          id: 'invitation-1',
+          document_id: 'doc-1',
+          email: 'huongk1lk2clcla@yahoo.com',
+          permission: 'comment',
+          invited_by_user_id: 'user-1',
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          status: 'pending',
+        },
+      ],
+    });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+    expect(await screen.findByText('huongk1lk2clcla@yahoo.com')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Can comment' }));
+    await user.click(await screen.findByText('Remove'));
+
+    expect(screen.queryByText('huongk1lk2clcla@yahoo.com')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveRevokeResponse();
+    });
+
+    expect(await screen.findByText('huongk1lk2clcla@yahoo.com')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Can comment' })).toBeInTheDocument();
   });
 
   it('shows the document owner even when the workspace member list omits them', async () => {
@@ -516,6 +630,10 @@ describe('ShareButton integration', () => {
 
   it('shows inherited collaborators and turns them into direct grants when changed', async () => {
     const directGrantUpdates: string[] = [];
+    let resolveGrantResponse!: () => void;
+    const grantResponse = new Promise<void>((resolve) => {
+      resolveGrantResponse = resolve;
+    });
 
     mswServer.use(
       http.post(/\/documents\/doc-1\/share\/?$/, async ({ request }) => {
@@ -524,6 +642,8 @@ describe('ShareButton integration', () => {
           user_id: string;
         };
         directGrantUpdates.push(`${body.user_id}:${body.permission}`);
+
+        await grantResponse;
 
         return HttpResponse.json({
           id: `child-grant-${body.user_id}`,
@@ -572,10 +692,72 @@ describe('ShareButton integration', () => {
 
     expect(directGrantUpdates).toEqual(['user-2:edit']);
     expect(await screen.findByRole('button', { name: 'Can edit' })).toBeInTheDocument();
+    expect(screen.queryByText('Parent document')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveGrantResponse();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Can edit' })).toBeInTheDocument();
+    });
+  });
+
+  it('optimistically removes a direct collaborator and rolls it back when revoke fails', async () => {
+    let resolveRevokeResponse!: () => void;
+    const revokeResponse = new Promise<void>((resolve) => {
+      resolveRevokeResponse = resolve;
+    });
+
+    mswServer.use(
+      http.delete(/\/documents\/doc-1\/collaborators\/user-2\/?$/, async () => {
+        await revokeResponse;
+
+        return HttpResponse.json({ message: 'Revoke failed' }, { status: 500 });
+      }),
+    );
+    renderShareButton(undefined, {
+      collaborators: [
+        {
+          id: 'grant-2',
+          document_id: 'doc-1',
+          user: {
+            id: 'user-2',
+            email: 'member@example.com',
+            display_name: 'Member',
+          },
+          permission: 'view',
+          granted_by_user_id: 'user-1',
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+          access_source: 'direct',
+        },
+      ],
+    });
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Share' }));
+    expect(await screen.findByText('Member')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Can view' }));
+    await user.click(await screen.findByText('Remove'));
+
+    expect(screen.queryByText('Member')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveRevokeResponse();
+    });
+
+    expect(await screen.findByText('Member')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Can view' })).toBeInTheDocument();
   });
 
   it('updates general access for everyone in the workspace', async () => {
     const updates: Array<string | null | undefined> = [];
+    let resolveUpdateResponse!: () => void;
+    const updateResponse = new Promise<void>((resolve) => {
+      resolveUpdateResponse = resolve;
+    });
 
     mswServer.use(
       http.patch(/\/documents\/doc-1\/access-settings\/?$/, async ({ request }) => {
@@ -583,6 +765,8 @@ describe('ShareButton integration', () => {
           workspace_member_permission?: string | null;
         };
         updates.push(body.workspace_member_permission);
+
+        await updateResponse;
 
         return HttpResponse.json({
           document_id: 'doc-1',
@@ -604,5 +788,17 @@ describe('ShareButton integration', () => {
     await user.click(workspaceAccessItem!);
 
     expect(updates).toEqual(['view']);
+    expect(
+      await screen.findByRole('button', { name: /Everyone at Acme Product/ }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Can view' })).toBeInTheDocument();
+
+    await act(async () => {
+      resolveUpdateResponse();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Everyone at Acme Product/ })).toBeInTheDocument();
+    });
   });
 });

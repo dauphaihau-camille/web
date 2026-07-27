@@ -50,7 +50,7 @@ export function MemberAccessRow({
             )
             : null}
         </p>
-        {email ? <p className="truncate text-[12px] text-muted-foreground">{email}</p> : null}
+        {email ? <p className="truncate text-[12px] text-muted-foreground font-medium">{email}</p> : null}
       </div>
       {onPermissionChange
         ? (

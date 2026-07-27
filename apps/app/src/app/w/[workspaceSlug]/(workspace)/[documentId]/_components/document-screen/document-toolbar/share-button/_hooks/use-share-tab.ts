@@ -23,16 +23,19 @@ export function useShareTab({
   workspaceSlug,
 }: UseShareTabOptions) {
   const [isInviteMode, setIsInviteMode] = useState(false);
+
   const access = useShareAccessQueries({
     canManageAccess,
     document,
     workspaceSlug,
   });
+
   const mutations = useShareAccessMutations({
     document,
     workspaceMemberPermission: access.workspaceMemberPermission,
     workspaceSlug,
   });
+
   const invite = useInviteComposer({
     canManageAccess,
     collaborators: access.collaborators,
@@ -48,13 +51,23 @@ export function useShareTab({
       return;
     }
 
-    const result = await mutations.shareInvitees(
+    const resultPromise = mutations.shareInvitees(
       invite.selectedInvitees,
       invite.invitePermission,
     );
 
     invite.resetInvitees();
     setIsInviteMode(false);
+
+    let result: Awaited<typeof resultPromise>;
+
+    try {
+      result = await resultPromise;
+    }
+    catch {
+      toast('Could not share document');
+      return;
+    }
 
     if (result.failed.length > 0) {
       toast(`${result.collaborators.length} invited, ${result.failed.length} failed`);
