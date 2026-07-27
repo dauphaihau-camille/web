@@ -1,6 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { IndexeddbPersistence } from 'y-indexeddb';
 import { Awareness } from 'y-protocols/awareness';
 import * as Yjs from 'yjs';
@@ -50,7 +55,6 @@ export function useDocumentCollaboration(
   const [canEdit, setCanEdit] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isReady, setIsReady] = useState(false);
-  const [activeMemberCount, setActiveMemberCount] = useState(0);
   const currentUserId = currentUserQuery.data?.id;
 
   useEffect(() => {
@@ -157,18 +161,17 @@ export function useDocumentCollaboration(
     resources,
   ]);
 
-  useEffect(() => {
-    const updateActiveMemberCount = () => {
-      setActiveMemberCount(getActiveMemberCount(resources.awareness.getStates()));
-    };
+  const activeMemberCount = useSyncExternalStore(
+    (onStoreChange) => {
+      resources.awareness.on('update', onStoreChange);
 
-    updateActiveMemberCount();
-    resources.awareness.on('update', updateActiveMemberCount);
-
-    return () => {
-      resources.awareness.off('update', updateActiveMemberCount);
-    };
-  }, [resources.awareness]);
+      return () => {
+        resources.awareness.off('update', onStoreChange);
+      };
+    },
+    () => getActiveMemberCount(resources.awareness.getStates()),
+    () => 0,
+  );
 
   useEffect(() => {
     const currentUser = currentUserQuery.data;
