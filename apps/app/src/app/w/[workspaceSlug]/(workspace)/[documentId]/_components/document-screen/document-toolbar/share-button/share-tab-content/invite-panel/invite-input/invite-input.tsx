@@ -46,7 +46,7 @@ export function InviteInput({
               {selectedInvitees.map((invitee) => (
                 <InviteeBadge
                   key={invitee.userId ?? invitee.email}
-                  email={invitee.email}
+                  invitee={invitee}
                   onRemove={() => onRemoveInvitee(invitee.userId ?? invitee.email)}
                 />
               ))}
@@ -59,6 +59,7 @@ export function InviteInput({
           </InputGroupAddon>
         )
         : null}
+
       <InputGroupInput
         autoFocus
         value={inviteQuery}
@@ -85,6 +86,7 @@ export function InviteInput({
           }
         }}
       />
+
       {!hasSelectedInvitees && hasInviteQuery
         ? (
           <InputGroupAddon align="inline-end" className="py-0">

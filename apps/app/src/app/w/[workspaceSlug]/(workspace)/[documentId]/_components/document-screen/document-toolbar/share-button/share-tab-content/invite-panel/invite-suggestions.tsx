@@ -2,12 +2,16 @@ import {
   ArrowUpLeftIcon,
   UserRoundPlusIcon,
 } from 'lucide-react';
-import { useState } from 'react';
 
 import type {
   InviteSuggestion,
   InviteSuggestionGroups,
 } from '../../_hooks/use-invite-composer';
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@shared/components/ui/avatar';
 import { cn } from '@shared/lib/utils';
 
 export function InviteSuggestions({
@@ -49,6 +53,7 @@ export function InviteSuggestions({
               >
                 <WorkspaceAvatar
                   avatar={member.avatar}
+                  displayName={member.displayName}
                   email={member.email}
                 />
 
@@ -56,7 +61,7 @@ export function InviteSuggestions({
                   <span className="block truncate text-sm font-medium text-foreground">
                     {member.displayName ?? member.email}
                   </span>
-                  <span className="block truncate text-xs text-muted-foreground">
+                  <span className="block truncate text-xs text-muted-foreground font-medium">
                     {member.email}
                   </span>
                 </span>
@@ -79,7 +84,7 @@ export function InviteSuggestions({
                 type="button"
                 aria-label={member.email}
                 className={cn(
-                  'flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
+                  'flex w-full items-center gap-1 rounded-md px-2 py-2 text-left text-sm hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
                   member.id === activeSuggestionId && 'bg-muted',
                 )}
                 onClick={() => onAddInvitee(member)}
@@ -104,33 +109,32 @@ export function InviteSuggestions({
 
 function WorkspaceAvatar({
   avatar,
+  displayName,
   email,
 }: {
   avatar?: string;
+  displayName?: string;
   email: string;
 }) {
-  const [hasAvatarError, setHasAvatarError] = useState(false);
-
-  if (avatar && !hasAvatarError) {
-    return (
-      <img
-        alt=""
-        className="size-8 shrink-0 rounded-full border bg-background object-cover"
-        src={avatar}
-        onError={() => setHasAvatarError(true)}
-      />
-    );
-  }
-
-  return <EmailInitial email={email} />;
-}
-
-function EmailInitial({ email }: { email: string }) {
-  const initial = email.trim()[0]?.toUpperCase() ?? '?';
+  const label = displayName ?? email;
 
   return (
-    <span className="flex size-8 shrink-0 items-center justify-center rounded-full border bg-background text-sm font-medium text-muted-foreground">
-      {initial}
-    </span>
+    <Avatar className="size-8 shrink-0 border bg-background">
+      {avatar
+        ? (
+          <AvatarImage
+            alt=""
+            src={avatar}
+          />
+        )
+        : null}
+      <AvatarFallback className={cn(!avatar && 'bg-background')}>
+        {getInitial(label)}
+      </AvatarFallback>
+    </Avatar>
   );
+}
+
+function getInitial(label: string) {
+  return label.trim()[0]?.toUpperCase() ?? '?';
 }

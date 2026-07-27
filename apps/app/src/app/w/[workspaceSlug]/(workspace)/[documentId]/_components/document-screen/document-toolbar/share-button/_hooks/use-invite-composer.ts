@@ -14,8 +14,10 @@ import {
 } from '@/domains/workspace';
 
 export type SelectedInvitee = {
+  avatar?: string;
   email: string;
   displayName?: string;
+  source: 'workspace' | 'external';
   userId?: string;
 };
 
@@ -169,9 +171,11 @@ export function useInviteComposer({
     setSelectedInvitees((invitees) => [
       ...invitees,
       {
+        avatar: invitee.avatar,
         userId: invitee.userId,
         email: invitee.email,
         displayName: invitee.displayName,
+        source: invitee.source,
       },
     ]);
     setInviteQuery('');
