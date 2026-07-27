@@ -307,7 +307,7 @@ export function useDocumentActions<
     onSettled: async () => {
       await Promise.all([
         queryClient.invalidateQueries({
-          queryKey: documentKeys.detail(document.id),
+          queryKey: [...documentKeys.all, 'detail'],
         }),
         queryClient.invalidateQueries({
           queryKey: documentKeys.lists(workspaceSlug),

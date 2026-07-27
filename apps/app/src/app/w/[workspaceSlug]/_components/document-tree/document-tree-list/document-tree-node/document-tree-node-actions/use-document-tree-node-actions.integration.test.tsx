@@ -340,6 +340,45 @@ describe('useDocumentTreeNodeActions integration', () => {
     });
   });
 
+  it('invalidates cached descendant details after archiving a parent', async () => {
+    archiveDocumentMock.mockResolvedValue({
+      ...documentFixture,
+      archived_at: '2026-01-02T00:00:00.000Z',
+    });
+    resolveArchiveDestinationMock.mockResolvedValue(nextDocumentFixture);
+
+    const { Wrapper, queryClient } = createWrapper();
+    queryClient.setQueryData(documentKeys.detail(documentFixture.id), documentFixture);
+    queryClient.setQueryData(documentKeys.detail(childDocumentFixture.id), childDocumentFixture);
+    queryClient.setQueryData(
+      documentKeys.rootList('acme', 10),
+      createNavigation([documentNodeFixture, nextDocumentFixture]),
+    );
+
+    const { result } = renderHook(
+      () =>
+        useDocumentTreeNodeActions({
+          document: documentNodeFixture,
+          shouldNavigateOnArchive: true,
+          workspaceSlug: 'acme',
+          treeScope: 'private',
+        }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.handleArchive();
+    });
+
+    await waitFor(() => {
+      expect(result.current.archiveDocumentMutation.isPending).toBe(false);
+      expect(
+        queryClient.getQueryState(documentKeys.detail(childDocumentFixture.id))
+          ?.isInvalidated,
+      ).toBe(true);
+    });
+  });
+
   it('restores the tree and route when the archive request fails', async () => {
     let rejectArchiveRequest: ((error: Error) => void) | null = null;
     const previousRoute = window.location.pathname;
