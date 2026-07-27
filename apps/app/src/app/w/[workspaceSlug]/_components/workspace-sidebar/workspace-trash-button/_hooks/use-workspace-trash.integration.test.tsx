@@ -218,4 +218,30 @@ describe('useWorkspaceTrash integration', () => {
     expect(result.current.searchValue).toBe('');
     expect(result.current.searchQueryValue).toBe('');
   });
+
+  it('clears search state when a document link closes the popover', async () => {
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(
+      () => useWorkspaceTrash({ workspaceSlug: 'acme' }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.handleOpenChange(true);
+      result.current.handleSearchChange('  roadmap  ');
+    });
+
+    await waitFor(() => {
+      expect(result.current.searchValue).toBe('  roadmap  ');
+      expect(result.current.searchQueryValue).toBe('roadmap');
+    });
+
+    act(() => {
+      result.current.handlePopoverLinkClick();
+    });
+
+    expect(result.current.searchValue).toBe('');
+    expect(result.current.searchQueryValue).toBe('');
+  });
 });

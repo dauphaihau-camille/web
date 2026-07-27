@@ -188,7 +188,7 @@ export function useWorkspaceTrash({
   };
 
   const handlePopoverLinkClick = () => {
-    setIsOpen(false);
+    handleOpenChange(false);
   };
 
   const handleRestoreDocument = ({
