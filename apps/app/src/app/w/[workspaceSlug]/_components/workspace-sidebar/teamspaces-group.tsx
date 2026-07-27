@@ -39,65 +39,33 @@ export function TeamspacesGroup({
 }) {
   const [isCreateTeamspaceOpen, setIsCreateTeamspaceOpen] = useState(false);
 
-  const createTeamspaceButton = (
-    <CreateDocumentButton
-      ariaLabel="New teamspace"
-      onClick={() => setIsCreateTeamspaceOpen(true)}
-    />
-  );
-  const teamspaceActions = (
-    <Tooltip>
-      <TooltipTrigger delay={0} render={createTeamspaceButton} />
-      <TooltipContent side="bottom">New teamspace</TooltipContent>
-    </Tooltip>
-  );
-  const createTeamspaceDialog = (
-    <CreateTeamspaceDialog
-      open={isCreateTeamspaceOpen}
-      workspaceSlug={workspaceSlug}
-      onOpenChange={setIsCreateTeamspaceOpen}
-    />
-  );
+  let teamspacesContent;
 
   if (!rootQuery || rootQuery.isLoading) {
-    return (
-      <>
-        <CollapsibleSidebarGroup
-          label="Teamspaces"
-          actions={teamspaceActions}
-        >
-          <DocumentTreeSkeleton animate />
-        </CollapsibleSidebarGroup>
-        {createTeamspaceDialog}
-      </>
+    teamspacesContent = <DocumentTreeSkeleton animate />;
+  }
+  else if (rootQuery.isError || !rootQuery.data) {
+    teamspacesContent = (
+      <p className="px-2 py-1 text-xs text-muted-foreground">Teamspaces unavailable.</p>
     );
   }
-
-  if (rootQuery.isError || !rootQuery.data) {
-    return (
-      <>
-        <CollapsibleSidebarGroup
-          label="Teamspaces"
-          actions={teamspaceActions}
-        >
-          <p className="px-2 py-1 text-xs text-muted-foreground">Teamspaces unavailable.</p>
-        </CollapsibleSidebarGroup>
-        {createTeamspaceDialog}
-      </>
+  else if (rootQuery.data.teamspaces.length === 0) {
+    teamspacesContent = (
+      <p className="px-2 py-1 text-xs text-muted-foreground">No teamspaces yet.</p>
     );
   }
-
-  if (rootQuery.data.teamspaces.length === 0) {
-    return (
-      <>
-        <CollapsibleSidebarGroup
-          label="Teamspaces"
-          actions={teamspaceActions}
-        >
-          <p className="px-2 py-1 text-xs text-muted-foreground">No teamspaces yet.</p>
-        </CollapsibleSidebarGroup>
-        {createTeamspaceDialog}
-      </>
+  else {
+    teamspacesContent = (
+      <SidebarMenu className="space-y-0.5">
+        {rootQuery.data.teamspaces.map((teamspace) => (
+          <TeamspaceTreeSection
+            key={teamspace.id}
+            workspaceSlug={workspaceSlug}
+            teamspace={teamspace}
+            canEditDocuments={canEditDocuments}
+          />
+        ))}
+      </SidebarMenu>
     );
   }
 
@@ -105,20 +73,29 @@ export function TeamspacesGroup({
     <>
       <CollapsibleSidebarGroup
         label="Teamspaces"
-        actions={teamspaceActions}
-      >
-        <SidebarMenu className="space-y-0.5">
-          {rootQuery.data.teamspaces.map((teamspace) => (
-            <TeamspaceTreeSection
-              key={teamspace.id}
-              workspaceSlug={workspaceSlug}
-              teamspace={teamspace}
-              canEditDocuments={canEditDocuments}
+        actions={
+          <Tooltip>
+            <TooltipTrigger
+              delay={0}
+              render={
+                <CreateDocumentButton
+                  ariaLabel="New teamspace"
+                  onClick={() => setIsCreateTeamspaceOpen(true)}
+                />
+              }
             />
-          ))}
-        </SidebarMenu>
+            <TooltipContent side="bottom">New teamspace</TooltipContent>
+          </Tooltip>
+        }
+      >
+        {teamspacesContent}
       </CollapsibleSidebarGroup>
-      {createTeamspaceDialog}
+
+      <CreateTeamspaceDialog
+        open={isCreateTeamspaceOpen}
+        workspaceSlug={workspaceSlug}
+        onOpenChange={setIsCreateTeamspaceOpen}
+      />
     </>
   );
 }
@@ -147,8 +124,7 @@ function TeamspaceTreeSection({
     teamspace.documents.items.length > 0
     || Boolean(teamspace.documents.next_cursor);
 
-  const canCollapse =
-    teamspace.documents.items.some((document) => document.has_children);
+  const canCollapse = hasDocuments;
 
   const treeScope = `teamspace:${teamspace.id}` as const;
 
@@ -182,7 +158,7 @@ function TeamspaceTreeSection({
             aria-controls={canCollapse ? contentId : undefined}
             aria-expanded={canCollapse ? isExpanded : undefined}
             className={cn(
-              'w-full pr-2 group-hover/menu-sub-item:bg-sidebar-accent group-hover/menu-sub-item:text-sidebar-accent-foreground group-focus-within/menu-sub-item:bg-sidebar-accent group-focus-within/menu-sub-item:text-sidebar-accent-foreground',
+              'w-full pr-2 group-hover/menu-sub-item:bg-sidebar-accent group-hover/menu-sub-item:text-sidebar-accent-foreground active:bg-transparent active:text-sidebar-foreground/70',
               canEditDocuments ? 'group-hover/menu-sub-item:pr-8 group-focus-within/menu-sub-item:pr-8' : '',
               'focus-visible:ring-2 focus-visible:ring-sidebar-ring',
             )}
@@ -190,7 +166,6 @@ function TeamspaceTreeSection({
               if (!canCollapse) {
                 return;
               }
-
               setIsExpanded((current) => !current);
             }}
           >

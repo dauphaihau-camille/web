@@ -24,22 +24,23 @@ export function PrivateDocumentsGroup({
     handleCreateDocument,
   } = useCreateRootDocumentAction(workspaceSlug);
 
-  const createPrivateDocumentButton = (
-    <CreateDocumentButton
-      ariaLabel="Create private document"
-      onClick={handleCreateDocument}
-      disabled={createDocumentMutation.isPending}
-      isPending={createDocumentMutation.isPending}
-    />
-  );
-
   return (
     <>
       <CollapsibleSidebarGroup
         label="Private"
         actions={
           <Tooltip>
-            <TooltipTrigger delay={0} render={createPrivateDocumentButton} />
+            <TooltipTrigger
+              delay={0}
+              render={
+                <CreateDocumentButton
+                  ariaLabel="Create private document"
+                  onClick={handleCreateDocument}
+                  disabled={createDocumentMutation.isPending}
+                  isPending={createDocumentMutation.isPending}
+                />
+              }
+            />
             <TooltipContent side="bottom">Add a document</TooltipContent>
           </Tooltip>
         }
