@@ -23,7 +23,6 @@ import { SharedDocumentsGroup } from './shared-documents-group';
 import { TeamspacesGroup } from './teamspaces-group';
 import { WorkspaceSearchButton } from './workspace-search-button';
 import { WorkspaceTrashButton } from './workspace-trash-button/workspace-trash-button';
-import styles from './workspace-sidebar.module.css';
 
 export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
   const workspaceQuery = useWorkspaceQuery(workspaceSlug);
@@ -62,7 +61,7 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
         <ScrollFade
           direction="y"
           fadeColor="var(--sidebar)"
-          className={`${styles.sidebarScroller} min-h-0 flex-1 overflow-y-auto`}
+          className="app-scrollbar min-h-0 flex-1 overflow-y-auto"
         >
           <div className="flex min-h-full flex-col gap-0 pb-20">
             {isInitialWorkspaceLoading

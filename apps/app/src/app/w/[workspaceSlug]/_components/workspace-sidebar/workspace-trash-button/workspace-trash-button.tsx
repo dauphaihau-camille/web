@@ -131,7 +131,7 @@ export function WorkspaceTrashButton({
               <ScrollFade
                 direction="y"
                 fadeColor="var(--sidebar)"
-                className="max-h-80 space-y-1 overflow-y-auto pr-2"
+                className="app-scrollbar max-h-80 space-y-1 overflow-y-auto pr-2"
               >
                 {items.map((document) => {
                   const isRestoring =

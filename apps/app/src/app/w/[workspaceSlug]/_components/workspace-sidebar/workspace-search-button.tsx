@@ -107,7 +107,7 @@ export function WorkspaceSearchButton({
         />
         <CommandList
           className={cn(
-            'flex h-full min-h-0 max-h-none flex-1 flex-col',
+            'app-scrollbar flex h-full min-h-0 max-h-none flex-1 flex-col',
             !searchQuery.isLoading && !hasResults && 'justify-center',
           )}
         >
