@@ -12,7 +12,10 @@ export type BlockNoteDocumentOperations = {
   onArchive: () => void;
   onArchiveSubdocument?: (documentId: string, content?: unknown[]) => Promise<void>;
   onCopyLink: () => void | Promise<void>;
-  onDuplicate: (documentId?: string) => void;
+  onDuplicate: (documentId?: string) => void | Promise<DuplicatedSubdoc | void>;
+  onDuplicateSubdocumentUndoMetadata?: (
+    metadata: DuplicatedSubdocUndoMetadata,
+  ) => void;
 };
 
 export type CreatedSubdoc = {
@@ -20,6 +23,22 @@ export type CreatedSubdoc = {
   public_id: string;
   title: string;
   content: unknown[];
+  published_document_id?: string;
+};
+
+export type DuplicatedSubdoc = CreatedSubdoc & {
+  workspace_id?: string;
+};
+
+export type DuplicatedSubdocUndoMetadata = {
+  anchorBlockId: string;
+  duplicatedSubdocumentId: string;
+  sourceSubdocumentId: string;
+};
+
+export type BlockNoteSessionUndoRedoBridge = {
+  redo: (context?: { preferredBlockId?: string }) => boolean | Promise<boolean>;
+  undo: (context?: { preferredBlockId?: string }) => boolean | Promise<boolean>;
 };
 
 export type BlockNoteEditorProps = {
@@ -38,6 +57,9 @@ export type BlockNoteEditorProps = {
     content?: unknown[];
   }) => Promise<CreatedSubdoc>;
   onCollaborativeContentChangeAction?: () => void;
+  onSessionUndoRedoBridgeChangeAction?: (
+    bridge: BlockNoteSessionUndoRedoBridge | null,
+  ) => void;
   onSelectionChangeAction?: () => void;
   onStartContentChangeAction?: () => void;
 };

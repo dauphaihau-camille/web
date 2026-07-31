@@ -5,8 +5,11 @@ import { useCallback, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 
 import {
+  archiveDocument,
+  documentDetailQueryOptions,
   useArchiveSubdocumentMutation,
   documentKeys,
+  restoreDocument,
   setRecentWorkspaceDocumentId,
   type Document,
   updateDocument,
@@ -17,10 +20,12 @@ import { updateCachedNavigationContentStatus } from '@/domains/document/cache/do
 
 import { useLatestWinsSaveQueue } from './use-latest-wins-save-queue';
 import { useDocumentDraftPersistence } from './use-document-draft-persistence';
+import type { CommandUndoMetadata } from './use-document-session-undo-redo';
 
 type UseDocumentEditorActionsOptions = {
   collaborationEnabled?: boolean;
   document: Document;
+  registerCommandUndoMetadata?: (metadata: CommandUndoMetadata) => void;
   workspaceSlug: string;
   onRestoreDraft: (content: unknown[]) => void;
 };
@@ -45,6 +50,7 @@ function mergeDocumentWithCachedDetail(
 export function useDocumentEditorActions({
   collaborationEnabled = false,
   document,
+  registerCommandUndoMetadata,
   workspaceSlug,
   onRestoreDraft,
 }: UseDocumentEditorActionsOptions) {
@@ -221,6 +227,14 @@ export function useDocumentEditorActions({
 
   const createSubdocument = async (input?: CreateSubdocumentInput) => {
     const result = await createSubdocumentMutation.mutateAsync(input);
+
+    if (input?.anchorBlockId) {
+      registerCommandUndoMetadata?.({
+        anchorBlockId: input.anchorBlockId,
+        type: 'createSubdocument',
+      });
+    }
+
     return result.child_document;
   };
 
@@ -229,6 +243,10 @@ export function useDocumentEditorActions({
 
     try {
       await awaitContentSaveIdle();
+      registerCommandUndoMetadata?.({
+        subdocumentId,
+        type: 'archiveSubdocument',
+      });
       await archiveSubdocumentMutation.mutateAsync({ subdocumentId, content });
     }
     finally {
@@ -236,9 +254,60 @@ export function useDocumentEditorActions({
     }
   };
 
+  const restoreArchivedSubdocument = async (subdocumentId: string) => {
+    const latestSubdocument = await queryClient.ensureQueryData(
+      documentDetailQueryOptions(subdocumentId),
+    );
+    const restoredSubdocument = await restoreDocument(
+      subdocumentId,
+      latestSubdocument.version,
+    );
+
+    queryClient.setQueryData<Document>(
+      documentKeys.detail(restoredSubdocument.id),
+      restoredSubdocument,
+    );
+
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: documentKeys.archivedList(workspaceSlug, 50),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: documentKeys.lists(workspaceSlug),
+      }),
+    ]);
+  };
+
+  const archiveRestoredSubdocument = async (subdocumentId: string) => {
+    const latestSubdocument = await queryClient.ensureQueryData(
+      documentDetailQueryOptions(subdocumentId),
+    );
+    const archivedSubdocument = await archiveDocument(
+      subdocumentId,
+      latestSubdocument.version,
+    );
+
+    queryClient.setQueryData<Document>(
+      documentKeys.detail(archivedSubdocument.id),
+      archivedSubdocument,
+    );
+
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: documentKeys.archivedList(workspaceSlug, 50),
+      }),
+      queryClient.invalidateQueries({
+        queryKey: documentKeys.lists(workspaceSlug),
+      }),
+    ]);
+  };
+
   return {
+    archiveRestoredSubdocument,
     archiveSubdocument,
-    archivingSubdocumentId: archiveSubdocumentMutation.variables?.subdocumentId ?? null,
+    archivingSubdocumentId: archiveSubdocumentMutation.isPending
+      ? archiveSubdocumentMutation.variables?.subdocumentId ?? null
+      : null,
     createSubdocument,
     markPendingLocalPersistence: () => {
       hasPendingLocalPersistenceRef.current = true;
@@ -256,5 +325,6 @@ export function useDocumentEditorActions({
 
       return queueContentSave(content);
     },
+    restoreArchivedSubdocument,
   };
 }

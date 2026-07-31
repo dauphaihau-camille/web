@@ -20,18 +20,22 @@ import {
 import { workspaceRoutes } from '@/domains/workspace';
 import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
 
+import { DOCUMENT_SYSTEM_SYNC_ORIGIN } from './use-document-session-undo-redo';
+
 type UseDocumentTitleArgs = {
   document: Document;
   workspaceSlug: string;
   collaborationDocument: Yjs.Doc;
+  editOrigin?: unknown;
 };
 
-const TITLE_COMMIT_DEBOUNCE_MS = 300;
+const TITLE_PROJECTION_DEBOUNCE_MS = 300;
 
 export function useDocumentTitle({
   document,
   workspaceSlug,
   collaborationDocument,
+  editOrigin,
 }: UseDocumentTitleArgs) {
   const queryClient = useQueryClient();
   const activeDraftDocumentId = useDocumentTitleDraftStore((state) => state.activeDocumentId);
@@ -46,81 +50,96 @@ export function useDocumentTitle({
     document.title,
   ));
 
+  const projectTitle = useCallback((nextTitle: string) => {
+    applyProjectedTitle({
+      document,
+      documentId,
+      nextTitle,
+      queryClient,
+      workspaceSlug,
+    });
+    setSavedTitle(nextTitle);
+  }, [document, documentId, queryClient, workspaceSlug]);
+
+  const {
+    run: scheduleTitleProjection,
+    cancel: cancelScheduledTitleProjection,
+    flush: flushScheduledTitleProjection,
+  } = useDebounceFn(projectTitle, {
+    wait: TITLE_PROJECTION_DEBOUNCE_MS,
+  });
+
   const commitTitle = useCallback((nextTitle: string) => {
     const normalizedTitle = getNormalizedTitle(nextTitle, document.title);
 
     if (meta.get('title') !== normalizedTitle) {
-      meta.set('title', normalizedTitle);
+      collaborationDocument.transact(() => {
+        meta.set('title', normalizedTitle);
+      }, editOrigin);
       return;
     }
 
-    applyProjectedTitle({
-      document,
-      documentId,
-      nextTitle: normalizedTitle,
-      queryClient,
-      workspaceSlug,
-    });
-    setSavedTitle(normalizedTitle);
-  }, [document, document.title, documentId, meta, queryClient, workspaceSlug]);
-
-  const {
-    run: scheduleTitleCommit,
-    cancel: cancelScheduledTitleCommit,
-  } = useDebounceFn(commitTitle, {
-    wait: TITLE_COMMIT_DEBOUNCE_MS,
-  });
+    projectTitle(normalizedTitle);
+  }, [
+    collaborationDocument,
+    document.title,
+    editOrigin,
+    meta,
+    projectTitle,
+  ]);
 
   useEffect(() => {
     const currentTitle = getNormalizedTitle(meta.get('title'), document.title);
 
     if (meta.get('title') !== currentTitle) {
-      meta.set('title', currentTitle);
+      collaborationDocument.transact(() => {
+        meta.set('title', currentTitle);
+      }, DOCUMENT_SYSTEM_SYNC_ORIGIN);
     }
 
-    applyProjectedTitle({
-      document,
-      documentId,
-      nextTitle: currentTitle,
-      queryClient,
-      workspaceSlug,
-    });
-    setSavedTitle(currentTitle);
+    projectTitle(currentTitle);
 
-    const handleMetaChange = () => {
+    const handleMetaChange = (_event: unknown, transaction: { origin: unknown }) => {
       const nextTitle = getNormalizedTitle(meta.get('title'), document.title);
 
       if (meta.get('title') !== nextTitle) {
-        meta.set('title', nextTitle);
+        collaborationDocument.transact(() => {
+          meta.set('title', nextTitle);
+        }, DOCUMENT_SYSTEM_SYNC_ORIGIN);
       }
 
-      applyProjectedTitle({
-        document,
-        documentId,
-        nextTitle,
-        queryClient,
-        workspaceSlug,
-      });
-      setSavedTitle(nextTitle);
+      if (transaction.origin === editOrigin) {
+        scheduleTitleProjection(nextTitle);
+        return;
+      }
+
+      cancelScheduledTitleProjection();
+      clearDraftTitle(documentId);
+      projectTitle(nextTitle);
     };
 
     meta.observe(handleMetaChange);
 
     return () => {
-      cancelScheduledTitleCommit();
+      cancelScheduledTitleProjection();
       meta.unobserve(handleMetaChange);
-      clearDraftTitle(documentId);
     };
   }, [
-    cancelScheduledTitleCommit,
+    cancelScheduledTitleProjection,
     clearDraftTitle,
+    collaborationDocument,
     document,
     document.title,
     documentId,
+    editOrigin,
     meta,
-    queryClient,
-    workspaceSlug,
+    projectTitle,
+    scheduleTitleProjection,
   ]);
+
+  useEffect(() => () => {
+    clearDraftTitle(documentId);
+  }, [clearDraftTitle, documentId]);
 
   const title = activeDraftDocumentId === documentId && activeDraftTitle !== null
     ? activeDraftTitle
@@ -128,13 +147,14 @@ export function useDocumentTitle({
 
   const handleTitleChange = (nextTitle: string) => {
     setDocumentTitleDraft(documentId, nextTitle);
-    scheduleTitleCommit(nextTitle);
+    commitTitle(nextTitle);
   };
 
   const handleTitleBlur = (nextTitle: string) => {
-    cancelScheduledTitleCommit();
+    cancelScheduledTitleProjection();
     clearDraftTitle(documentId);
     commitTitle(nextTitle);
+    flushScheduledTitleProjection();
   };
 
   return {

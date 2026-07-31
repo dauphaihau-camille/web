@@ -21,8 +21,17 @@ import {
 import type { BlockNoteDocumentOperations } from '../blocknote-editor.types';
 import { EditorSideMenuController } from './side-menu-controller';
 
+const {
+  unfreezeMenuMock,
+} = vi.hoisted(() => ({
+  unfreezeMenuMock: vi.fn(),
+}));
+
 const removeBlocksMock = vi.fn();
+const insertBlocksMock = vi.fn();
 const archiveSubdocumentMock = vi.fn(() => Promise.resolve());
+const focusMock = vi.fn();
+const transactMock = vi.fn((callback: () => void) => callback());
 const hoveredBlock = {
   id: 'block-1',
   type: 'paragraph',
@@ -81,13 +90,19 @@ vi.mock('@blocknote/react', async () => {
     blockDragStart: vi.fn(),
     freezeMenu: vi.fn(),
     setSelectedBlock: vi.fn(),
-    unfreezeMenu: vi.fn(),
+    unfreezeMenu: unfreezeMenuMock,
   };
   const Components = {
     Generic: {
       Menu: {
         Dropdown: MenuDropdown,
-        Item: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+        Item: ({
+          children,
+          onClick,
+        }: {
+          children: ReactNode;
+          onClick?: () => void;
+        }) => <button type="button" onClick={onClick}>{children}</button>,
         Root: MenuRoot,
         Trigger: MenuTrigger,
       },
@@ -118,10 +133,15 @@ vi.mock('@blocknote/react', async () => {
     blockTypeSelectItems: () => [],
     useBlockNoteEditor: () => ({
       document: [hoveredBlock],
+      focus: focusMock,
+      getBlock: (blockId: string) =>
+        hoveredBlock.id === blockId ? hoveredBlock : undefined,
       getSelection: () => undefined,
       getTextCursorPosition: () => ({ block: hoveredBlock }),
       isEditable: true,
+      insertBlocks: insertBlocksMock,
       removeBlocks: removeBlocksMock,
+      transact: transactMock,
     }),
     useComponentsContext: () => Components,
     useDictionary: () => ({
@@ -157,7 +177,11 @@ describe('EditorSideMenuController', () => {
 
   beforeEach(() => {
     archiveSubdocumentMock.mockClear();
+    focusMock.mockClear();
+    insertBlocksMock.mockReset();
     removeBlocksMock.mockReset();
+    transactMock.mockClear();
+    unfreezeMenuMock.mockClear();
     hoveredBlock.type = 'paragraph';
     hoveredBlock.props = {};
   });
@@ -231,6 +255,36 @@ describe('EditorSideMenuController', () => {
     );
   });
 
+  it('returns focus to the editor after archiving a collaborative document block', async () => {
+    hoveredBlock.type = 'subdoc';
+    hoveredBlock.props = { documentId: 'subdoc-1' };
+
+    render(
+      <EditorSideMenuController
+        documentOperations={createDocumentOperations({
+          isCollaborative: true,
+        })}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open block menu' }));
+    fireEvent.keyDown(document, { key: 'Delete' });
+
+    await vi.waitFor(() => {
+      expect(removeBlocksMock).toHaveBeenCalledWith([
+        {
+          children: [],
+          content: [],
+          id: 'block-1',
+          props: { documentId: 'subdoc-1' },
+          type: 'subdoc',
+        },
+      ]);
+    });
+    expect(transactMock).toHaveBeenCalledTimes(1);
+    expect(focusMock).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps the drag-handle menu open when document operations change', () => {
     const { rerender } = render(
       <EditorSideMenuController
@@ -248,5 +302,108 @@ describe('EditorSideMenuController', () => {
     );
 
     expect(screen.getByRole('menu')).toBeVisible();
+  });
+
+  it('inserts a duplicated document block after the hovered document block in collaborative mode', async () => {
+    const duplicateDocument = vi.fn().mockResolvedValue({
+      id: 'subdoc-copy-1',
+      public_id: 'public-subdoc-copy-1',
+      workspace_id: 'workspace-1',
+      title: 'Duplicated subdoc',
+      content: [{ id: 'content-block-1' }],
+    });
+    const onDuplicateSubdocumentUndoMetadata = vi.fn();
+    hoveredBlock.type = 'subdoc';
+    hoveredBlock.props = {
+      documentId: 'subdoc-1',
+      workspaceId: 'workspace-1',
+    };
+
+    render(
+      <EditorSideMenuController
+        documentOperations={createDocumentOperations({
+          isCollaborative: true,
+          onDuplicate: duplicateDocument,
+          onDuplicateSubdocumentUndoMetadata,
+        })}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open block menu' }));
+    fireEvent.click(screen.getByText('Duplicate'));
+
+    await vi.waitFor(() => {
+      expect(insertBlocksMock).toHaveBeenCalledWith(
+        [{
+          type: 'subdoc',
+          props: {
+            documentId: 'subdoc-copy-1',
+            publicId: 'public-subdoc-copy-1',
+            workspaceId: 'workspace-1',
+            publishedDocumentId: '',
+            title: 'Duplicated subdoc',
+            hasContent: true,
+          },
+        }],
+        hoveredBlock,
+        'after',
+      );
+    });
+    expect(onDuplicateSubdocumentUndoMetadata).toHaveBeenCalledWith({
+      anchorBlockId: 'block-1',
+      duplicatedSubdocumentId: 'subdoc-copy-1',
+      sourceSubdocumentId: 'subdoc-1',
+    });
+    expect(
+      onDuplicateSubdocumentUndoMetadata.mock.invocationCallOrder[0],
+    ).toBeLessThan(transactMock.mock.invocationCallOrder[0]);
+    expect(focusMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('duplicates the hovered document block from the keyboard shortcut', async () => {
+    const duplicateDocument = vi.fn().mockResolvedValue({
+      id: 'subdoc-copy-1',
+      public_id: 'public-subdoc-copy-1',
+      workspace_id: 'workspace-1',
+      title: 'Duplicated subdoc',
+      content: [],
+    });
+    hoveredBlock.type = 'subdoc';
+    hoveredBlock.props = {
+      documentId: 'subdoc-1',
+      workspaceId: 'workspace-1',
+    };
+
+    render(
+      <EditorSideMenuController
+        documentOperations={createDocumentOperations({
+          isCollaborative: true,
+          onDuplicate: duplicateDocument,
+        })}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open block menu' }));
+    fireEvent.keyDown(document, { key: 'd', metaKey: true });
+
+    await vi.waitFor(() => {
+      expect(duplicateDocument).toHaveBeenCalledWith('subdoc-1');
+      expect(insertBlocksMock).toHaveBeenCalledWith(
+        [{
+          type: 'subdoc',
+          props: {
+            documentId: 'subdoc-copy-1',
+            publicId: 'public-subdoc-copy-1',
+            workspaceId: 'workspace-1',
+            publishedDocumentId: '',
+            title: 'Duplicated subdoc',
+            hasContent: false,
+          },
+        }],
+        hoveredBlock,
+        'after',
+      );
+    });
+    expect(unfreezeMenuMock).toHaveBeenCalled();
   });
 });

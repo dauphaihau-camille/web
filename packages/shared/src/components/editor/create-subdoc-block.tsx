@@ -52,12 +52,6 @@ const subdocBlockConfig = {
   content: 'none' as const,
 };
 
-function getPublicHref(publishedDocumentId: string) {
-  return publishedDocumentId.length > 0
-    ? `/share/${publishedDocumentId}`
-    : null;
-}
-
 export function createSubdocBlock({
   resolvePrivateHref,
   useWorkspaceSlug,
@@ -79,6 +73,7 @@ export function createSubdocBlock({
 
     const resolvedTitle = title || 'Untitled';
     const publicTarget = getPublicHref(publishedDocumentId);
+
     const privateTarget = resolvePrivateHref({
       documentId,
       publicId,
@@ -88,6 +83,7 @@ export function createSubdocBlock({
       hasContent,
       workspaceSlug,
     });
+
     const targetHref = publicTarget ?? privateTarget;
     const DocumentIcon = hasContent ? FileTextIcon : FileIcon;
 
@@ -139,4 +135,13 @@ export function createSubdocBlock({
       );
     },
   });
+}
+
+
+// ---------- Private helpers ----------
+
+function getPublicHref(publishedDocumentId: string) {
+  return publishedDocumentId.length > 0
+    ? `/share/${publishedDocumentId}`
+    : null;
 }

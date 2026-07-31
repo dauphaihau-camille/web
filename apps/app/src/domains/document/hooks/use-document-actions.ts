@@ -331,7 +331,7 @@ export function useDocumentActions<
   };
 
   const handleDuplicate = (targetDocumentId?: string) => {
-    void duplicateDocumentMutation.mutateAsync(targetDocumentId ?? document.id);
+    return duplicateDocumentMutation.mutateAsync(targetDocumentId ?? document.id);
   };
 
   const handleArchive = () => {

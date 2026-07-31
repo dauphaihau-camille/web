@@ -3,6 +3,7 @@ import {
   fireEvent,
   screen,
 } from '@testing-library/react';
+import * as Yjs from 'yjs';
 
 import type { Document } from '@/domains/document';
 import { renderWithProviders } from '@shared/test/render';
@@ -10,6 +11,7 @@ import { renderWithProviders } from '@shared/test/render';
 import { DocumentScreen } from './document-screen';
 
 const collaborationMock = vi.hoisted(() => ({
+  document: undefined as Yjs.Doc | undefined,
   onDocumentUpdatedAtChange: undefined as
     | ((updatedAt: string) => void)
     | undefined,
@@ -55,6 +57,7 @@ vi.mock('./_hooks/document-collaboration/use-document-collaboration', () => ({
     },
   ) => {
     collaborationMock.onDocumentUpdatedAtChange = options.onDocumentUpdatedAtChange;
+    collaborationMock.document ??= new Yjs.Doc();
 
     return {
       canEdit: true,
@@ -68,7 +71,7 @@ vi.mock('./_hooks/document-collaboration/use-document-collaboration', () => ({
           color: 'hsl(10 68% 48%)',
         },
       },
-      document: {},
+      document: collaborationMock.document,
       error: null,
       isReady: true,
     };
@@ -210,6 +213,7 @@ async function advanceRevealDelay() {
 describe('DocumentScreen chrome visibility', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    collaborationMock.document = new Yjs.Doc();
     collaborationMock.onDocumentUpdatedAtChange = undefined;
   });
 

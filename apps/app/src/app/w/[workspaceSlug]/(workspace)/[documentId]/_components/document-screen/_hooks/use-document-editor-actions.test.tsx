@@ -19,17 +19,23 @@ import { documentKeys } from '@/domains/document/api/document.keys';
 import { useDocumentEditorActions } from './use-document-editor-actions';
 
 const {
+  archiveDocumentMock,
   archiveSubdocumentMutateAsyncMock,
   createSubdocumentMutateAsyncMock,
+  restoreDocumentMock,
   setRecentWorkspaceDocumentIdMock,
   updateDocumentMock,
   useDocumentDraftPersistenceMock,
+  useArchiveSubdocumentMutationMock,
 } = vi.hoisted(() => ({
+  archiveDocumentMock: vi.fn(),
   archiveSubdocumentMutateAsyncMock: vi.fn(),
   createSubdocumentMutateAsyncMock: vi.fn(),
+  restoreDocumentMock: vi.fn(),
   setRecentWorkspaceDocumentIdMock: vi.fn(),
   updateDocumentMock: vi.fn(),
   useDocumentDraftPersistenceMock: vi.fn(),
+  useArchiveSubdocumentMutationMock: vi.fn(),
 }));
 
 vi.mock('sonner', () => ({
@@ -38,13 +44,19 @@ vi.mock('sonner', () => ({
 
 vi.mock('@/domains/document', () => {
   return {
+    archiveDocument: archiveDocumentMock,
+    documentDetailQueryOptions: (documentId: string) => ({
+      queryKey: documentKeys.detail(documentId),
+      queryFn: () => Promise.resolve({
+        id: documentId,
+        version: 9,
+      }),
+    }),
     documentKeys,
+    restoreDocument: restoreDocumentMock,
     setRecentWorkspaceDocumentId: setRecentWorkspaceDocumentIdMock,
     updateDocument: updateDocumentMock,
-    useArchiveSubdocumentMutation: vi.fn(() => ({
-      mutateAsync: archiveSubdocumentMutateAsyncMock,
-      variables: undefined,
-    })),
+    useArchiveSubdocumentMutation: useArchiveSubdocumentMutationMock,
     useCreateSubdocumentMutation: vi.fn(() => ({
       mutateAsync: createSubdocumentMutateAsyncMock,
     })),
@@ -120,6 +132,23 @@ describe('useDocumentEditorActions', () => {
       },
     });
     archiveSubdocumentMutateAsyncMock.mockResolvedValue(undefined);
+    useArchiveSubdocumentMutationMock.mockReturnValue({
+      isPending: false,
+      mutateAsync: archiveSubdocumentMutateAsyncMock,
+      variables: undefined,
+    });
+    archiveDocumentMock.mockResolvedValue({
+      ...documentFixture,
+      id: 'doc-2',
+      version: 10,
+      archived_at: '2026-01-01T00:00:00.000Z',
+    });
+    restoreDocumentMock.mockResolvedValue({
+      ...documentFixture,
+      id: 'doc-2',
+      version: 10,
+      archived_at: undefined,
+    });
     useDocumentDraftPersistenceMock.mockReturnValue({
       persistLocalDraft: vi.fn().mockResolvedValue(undefined),
       markRemoteSaveStarted: vi.fn().mockResolvedValue(undefined),
@@ -218,5 +247,69 @@ describe('useDocumentEditorActions', () => {
       markRemoteSaveStarted.mock.invocationCallOrder[0],
     );
     expect(markRemoteSaveSucceeded).toHaveBeenCalledTimes(1);
+  });
+
+  it('only reports the archiving subdocument while the archive mutation is pending', () => {
+    const { Wrapper } = createWrapper();
+
+    useArchiveSubdocumentMutationMock.mockReturnValue({
+      isPending: true,
+      mutateAsync: archiveSubdocumentMutateAsyncMock,
+      variables: {
+        subdocumentId: 'doc-2',
+      },
+    });
+
+    const { result, rerender } = renderHook(
+      () => useDocumentEditorActions({
+        document: documentFixture,
+        workspaceSlug: 'acme',
+        onRestoreDraft: vi.fn(),
+      }),
+      { wrapper: Wrapper },
+    );
+
+    expect(result.current.archivingSubdocumentId).toBe('doc-2');
+
+    useArchiveSubdocumentMutationMock.mockReturnValue({
+      isPending: false,
+      mutateAsync: archiveSubdocumentMutateAsyncMock,
+      variables: {
+        subdocumentId: 'doc-2',
+      },
+    });
+
+    rerender();
+
+    expect(result.current.archivingSubdocumentId).toBeNull();
+  });
+
+  it('registers archive undo metadata before starting the archive mutation', async () => {
+    const registerCommandUndoMetadata = vi.fn();
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(
+      () => useDocumentEditorActions({
+        document: documentFixture,
+        registerCommandUndoMetadata,
+        workspaceSlug: 'acme',
+        onRestoreDraft: vi.fn(),
+      }),
+      { wrapper: Wrapper },
+    );
+
+    await act(async () => {
+      await result.current.archiveSubdocument('doc-2', [
+        { type: 'paragraph', content: 'next parent content' },
+      ]);
+    });
+
+    expect(registerCommandUndoMetadata).toHaveBeenCalledWith({
+      subdocumentId: 'doc-2',
+      type: 'archiveSubdocument',
+    });
+    expect(registerCommandUndoMetadata.mock.invocationCallOrder[0]).toBeLessThan(
+      archiveSubdocumentMutateAsyncMock.mock.invocationCallOrder[0],
+    );
   });
 });

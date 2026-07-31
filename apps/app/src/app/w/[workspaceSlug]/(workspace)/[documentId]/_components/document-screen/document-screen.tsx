@@ -1,10 +1,5 @@
 'use client';
 
-import {
-  useCallback,
-  useRef,
-  useState,
-} from 'react';
 import { createBlockNoteEditorLoader } from '@shared/components/editor/create-blocknote-editor-loader';
 import type { Document } from '@/domains/document';
 import { Textarea } from '@shared/components/ui/textarea';
@@ -14,10 +9,9 @@ import { DocumentToolbar } from './document-toolbar/document-toolbar';
 import { useDocumentToolbar } from './document-toolbar/use-document-toolbar';
 import { ArchivedDocumentBar } from './archived-document-bar';
 import { PublishedDocumentBar } from './published-document-bar';
-import { useDocumentEditorActions } from './_hooks/use-document-editor-actions';
 import { useDocumentTitle } from './_hooks/use-document-title';
-import { useDocumentChromeVisibility } from './_hooks/use-document-chrome-visibility';
-import { useDocumentCollaboration } from './_hooks/document-collaboration/use-document-collaboration';
+import { DOCUMENT_LOCAL_EDIT_ORIGIN } from './_hooks/use-document-session-undo-redo';
+import { useDocumentScreenState } from './_hooks/use-document-screen-state';
 import { DocumentScreenBodySkeleton } from '../../../../_components/workspace-skeleton/document-screen-skeleton';
 
 const BlockNoteEditorLoader = createBlockNoteEditorLoader(
@@ -47,69 +41,33 @@ function DocumentScreenContent({
   document: Document;
   workspaceSlug: string;
 }) {
-  const {
-    hideChrome,
-    isChromeVisible,
-    revealChrome,
-  } = useDocumentChromeVisibility();
-
-  const documentId = document.id;
-  const [editorContent, setEditorContent] = useState(document.content);
-  const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
-  const [acknowledgedUpdatedAt, setAcknowledgedUpdatedAt] = useState<string | null>(null);
-  const hasLocalEditRef = useRef(false);
-
-  const collaborationMode = document.collaboration?.mode ??
-    (document.access?.can_edit && !document.archived_at ? 'edit' : 'view');
-
-  const showPresence = Boolean(document.collaboration?.show_presence);
-
-  const displayUpdatedAt = getLatestTimestamp(
-    document.updated_at,
-    acknowledgedUpdatedAt,
-  );
-
-  const handleDocumentUpdatedAtChange = useCallback((updatedAt: string) => {
-    if (!hasLocalEditRef.current) {
-      return;
-    }
-    setAcknowledgedUpdatedAt(updatedAt);
-  }, []);
-
-  const documentCollaboration = useDocumentCollaboration(documentId, {
-    onDocumentUpdatedAtChange: handleDocumentUpdatedAtChange,
-    showPresence,
-    workspaceId: document.workspace_id,
-  });
-
-  const canEditDocument =
-    documentCollaboration.isReady
-    && collaborationMode === 'edit'
-    && documentCollaboration.canEdit;
-
-  const handleRestoreDraft = useCallback((content: unknown[]) => {
-    setEditorContent(content);
-  }, []);
-
-  const handleDocumentContentInput = useCallback(() => {
-    if (!canEditDocument) {
-      return;
-    }
-    hasLocalEditRef.current = true;
-    hideChrome();
-  }, [canEditDocument, hideChrome]);
-
-  const documentEditorActions = useDocumentEditorActions({
-    collaborationEnabled: true,
-    document,
-    workspaceSlug,
-    onRestoreDraft: handleRestoreDraft,
-  });
-
   const documentToolbar = useDocumentToolbar({
     workspaceSlug,
     document,
   });
+
+  const {
+    bodyEditorRef,
+    canEditDocument,
+    displayUpdatedAt,
+    documentCollaboration,
+    documentEditorActions,
+    documentSessionUndoRedo,
+    editorContent,
+    handleDocumentContentInput,
+    handleSessionUndoRedoBridgeChange,
+    isChromeVisible,
+    isSharePopoverOpen,
+    markLocalEdit,
+    revealChrome,
+    setIsSharePopoverOpen,
+    titleInputRef,
+  } = useDocumentScreenState({
+    document,
+    workspaceSlug,
+  });
+
+  const documentId = document.id;
 
   const {
     displayTitle,
@@ -120,6 +78,7 @@ function DocumentScreenContent({
   } = useDocumentTitle({
     collaborationDocument: documentCollaboration.document,
     document,
+    editOrigin: DOCUMENT_LOCAL_EDIT_ORIGIN,
     workspaceSlug,
   });
 
@@ -127,7 +86,9 @@ function DocumentScreenContent({
     documentToolbar.publishStatus?.published_document_id,
   );
   const isArchived = Boolean(document.archived_at);
+
   const statusBarHeight = 48;
+
   const showCollaborators =
     document.collaboration?.enabled === true
     && documentCollaboration.activeMemberCount >= 2;
@@ -201,14 +162,14 @@ function DocumentScreenContent({
               <div className="space-y-3 px-[3.8rem]">
                 <div className="min-w-0 flex-1 space-y-2">
                   <Textarea
+                    ref={titleInputRef}
                     value={title}
                     onChange={(event) => {
                       if (!canEditDocument) {
                         return;
                       }
 
-                      hasLocalEditRef.current = true;
-                      hideChrome();
+                      markLocalEdit();
                       const nextTitle = event.currentTarget.value.replace(/\s*\r?\n\s*/g, ' ');
 
                       if (nextTitle !== event.currentTarget.value) {
@@ -239,30 +200,39 @@ function DocumentScreenContent({
                 </div>
               </div>
 
-              <BlockNoteEditorLoader
-                key={documentId}
-                collaboration={documentCollaboration.collaboration}
-                documentId={documentId}
-                documentTitle={savedTitle}
-                workspaceSlug={workspaceSlug}
-                content={editorContent}
-                editable={canEditDocument}
-                suppressHoverControls={isSharePopoverOpen}
-                onCollaborativeContentChangeAction={handleDocumentContentInput}
-                documentOperations={{
-                  isCollaborative: true,
-                  isArchiving: documentToolbar.isArchiving,
-                  archivingSubdocumentId: documentEditorActions.archivingSubdocumentId,
-                  isDuplicating: documentToolbar.isDuplicating,
-                  onArchive: documentToolbar.archiveCurrentDocument,
-                  onArchiveSubdocument: documentEditorActions.archiveSubdocument,
-                  onCopyLink: documentToolbar.copyLink,
-                  onDuplicate: documentToolbar.duplicateDocument,
-                }}
-                onCreateSubdocAction={
-                  canEditDocument ? documentEditorActions.createSubdocument : undefined
-                }
-              />
+              <div ref={bodyEditorRef}>
+                <BlockNoteEditorLoader
+                  key={documentId}
+                  collaboration={documentCollaboration.collaboration}
+                  documentId={documentId}
+                  documentTitle={savedTitle}
+                  workspaceSlug={workspaceSlug}
+                  content={editorContent}
+                  editable={canEditDocument}
+                  suppressHoverControls={isSharePopoverOpen}
+                  onCollaborativeContentChangeAction={handleDocumentContentInput}
+                  onSessionUndoRedoBridgeChangeAction={handleSessionUndoRedoBridgeChange}
+                  documentOperations={{
+                    isCollaborative: true,
+                    isArchiving: documentToolbar.isArchiving,
+                    archivingSubdocumentId: documentEditorActions.archivingSubdocumentId,
+                    isDuplicating: documentToolbar.isDuplicating,
+                    onArchive: documentToolbar.archiveCurrentDocument,
+                    onArchiveSubdocument: documentEditorActions.archiveSubdocument,
+                    onCopyLink: documentToolbar.copyLink,
+                    onDuplicate: documentToolbar.duplicateDocument,
+                    onDuplicateSubdocumentUndoMetadata: (metadata) => {
+                      documentSessionUndoRedo.registerCommandUndoMetadata({
+                        ...metadata,
+                        type: 'duplicateSubdocument',
+                      });
+                    },
+                  }}
+                  onCreateSubdocAction={
+                    canEditDocument ? documentEditorActions.createSubdocument : undefined
+                  }
+                />
+              </div>
             </>
           )
           : documentCollaboration.error
@@ -275,14 +245,4 @@ function DocumentScreenContent({
       </div>
     </section>
   );
-}
-
-function getLatestTimestamp(firstTimestamp: string, secondTimestamp: string | null) {
-  if (!secondTimestamp) {
-    return firstTimestamp;
-  }
-
-  return new Date(secondTimestamp).getTime() > new Date(firstTimestamp).getTime()
-    ? secondTimestamp
-    : firstTimestamp;
 }

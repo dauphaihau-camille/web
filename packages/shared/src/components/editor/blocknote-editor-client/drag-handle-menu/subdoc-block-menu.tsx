@@ -15,6 +15,7 @@ type SubdocBlockMenuProps = {
   isArchivingSubdocument: boolean;
   subdocumentId: string | null;
   onArchive: () => void;
+  onDuplicate: () => void;
 };
 
 export function SubdocBlockMenu({
@@ -22,6 +23,7 @@ export function SubdocBlockMenu({
   isArchivingSubdocument,
   subdocumentId,
   onArchive,
+  onDuplicate,
 }: SubdocBlockMenuProps) {
   const Components = useComponentsContext();
 
@@ -37,8 +39,7 @@ export function SubdocBlockMenu({
           if (documentOperations.isDuplicating || !subdocumentId) {
             return;
           }
-
-          documentOperations.onDuplicate(subdocumentId);
+          onDuplicate();
         }}
       >
         <MenuRow

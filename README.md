@@ -18,6 +18,14 @@ Frontend monorepo for `camille-v2`.
 - **Schema-backed request typing** - request and response shapes are modeled with Zod-backed schemas and per-domain API types
 - **Client state split by responsibility** - TanStack Query handles server state while focused local UI state uses small Zustand stores where persistence or cross-component coordination is needed
 
+### Rendering Strategies
+
+- **`apps/marketing` favors static-first rendering** for the public landing page and navigation, keeping anonymous marketing traffic cheap and cache-friendly
+- **`apps/marketing` uses server rendering for `/share/[publishedDocumentId]`** because each shared document depends on request-time API data and must handle revoked, private, or missing documents with `notFound()`
+- **`apps/app` uses server rendering for route decisions** such as `/`, `/w`, workspace slug validation, protected document routes, and login redirects
+- **`apps/app` uses client rendering for interactive product state** including document editing, workspace sidebars, optimistic mutations, autosave queues, dialogs, keyboard shortcuts, and settings forms
+- **Both apps use App Router boundaries** for layouts, loading states, not-found handling, and provider composition
+
 ### Product Surface
 
 - **Workspace application shell** - the main app includes authenticated workspace routing, shared shell components, and per-workspace layouts
