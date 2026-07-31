@@ -124,7 +124,7 @@ function TeamspaceTreeSection({
     teamspace.documents.items.length > 0
     || Boolean(teamspace.documents.next_cursor);
 
-  const canCollapse = hasDocuments;
+  const canCollapse = teamspace.documents.items.some((document) => document.has_children);
 
   const treeScope = `teamspace:${teamspace.id}` as const;
 
