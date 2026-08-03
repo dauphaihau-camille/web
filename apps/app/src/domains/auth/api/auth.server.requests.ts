@@ -21,12 +21,6 @@ async function buildCurrentUserRequestError(response: Response) {
   return new Error(`Failed to load the current user. Status: ${response.status}.${details}`);
 }
 
-async function hasCurrentUserSessionServer() {
-  const cookieStore = await cookies();
-
-  return cookieStore.has(ACCESS_COOKIE_NAME) || cookieStore.has(REFRESH_COOKIE_NAME);
-}
-
 export async function getCurrentUserServer(): Promise<CurrentUser | null> {
   const response = await apiServerRequest('auth/me');
 
@@ -66,4 +60,10 @@ export async function requireCurrentUserServer(redirectTo: string): Promise<void
       redirectTo,
     },
   }, 'Completed current user session check on the app server');
+}
+
+async function hasCurrentUserSessionServer() {
+  const cookieStore = await cookies();
+
+  return cookieStore.has(ACCESS_COOKIE_NAME) || cookieStore.has(REFRESH_COOKIE_NAME);
 }

@@ -15,6 +15,8 @@ const WAKE_PATH = '/wake';
 const OAUTH_POPUP_PATH = '/oauth/popup';
 const NEXT_ASSET_PATH = '/_next';
 
+type SessionStatus = 'authenticated' | 'unauthenticated' | 'unavailable';
+
 export default async function proxy(request: NextRequest) {
   if (!shouldCheckBackendAvailability(request.nextUrl.pathname)) {
     return NextResponse.next();
@@ -24,7 +26,9 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(authRoutes.wake(getRequestedPath(request)), request.url));
   }
 
-  if (!isAuthenticatedRedirectPage(request.nextUrl.pathname)) {
+  const isProtectedPage = isProtectedAppPage(request.nextUrl.pathname);
+
+  if (!isAuthenticatedRedirectPage(request.nextUrl.pathname) && !isProtectedPage) {
     return NextResponse.next();
   }
 
@@ -32,9 +36,27 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const isAuthenticated = await hasAuthenticatedSession(request);
+  const sessionStatus = await getSessionStatus(request);
 
-  if (!isAuthenticated) {
+  if (sessionStatus === 'unavailable') {
+    return NextResponse.redirect(new URL(authRoutes.wake(getRequestedPath(request)), request.url));
+  }
+
+  if (isProtectedPage && sessionStatus === 'unauthenticated') {
+    return redirectToLoginAndClearAuthCookies(request);
+  }
+
+  if (sessionStatus === 'unauthenticated') {
+    const response = NextResponse.next();
+
+    if (hasAuthCookies(request)) {
+      clearAuthCookies(response);
+    }
+
+    return response;
+  }
+
+  if (isProtectedPage) {
     return NextResponse.next();
   }
 
@@ -73,6 +95,12 @@ function isAuthenticatedRedirectPage(pathname: string) {
   return pathname === MARKETING_HOME_PATH || isAuthPage(pathname);
 }
 
+function isProtectedAppPage(pathname: string) {
+  return pathname === workspaceRoutes.entry()
+    || pathname === '/w'
+    || pathname.startsWith('/w/');
+}
+
 function hasAuthCookies(request: NextRequest) {
   return request.cookies.has(ACCESS_COOKIE_NAME) || request.cookies.has(REFRESH_COOKIE_NAME);
 }
@@ -87,6 +115,31 @@ function getAuthenticatedRedirectPath(request: NextRequest) {
   const redirectPath = getPostLoginRedirectTarget(requestedTarget);
 
   return isAuthPage(redirectPath) ? workspaceRoutes.entry() : redirectPath;
+}
+
+function redirectToLoginAndClearAuthCookies(request: NextRequest) {
+  const response = NextResponse.redirect(
+    new URL(authRoutes.login(getRequestedPath(request)), request.url),
+  );
+
+  clearAuthCookies(response);
+
+  return response;
+}
+
+function clearAuthCookies(response: NextResponse) {
+  response.cookies.set(ACCESS_COOKIE_NAME, '', {
+    httpOnly: true,
+    maxAge: 0,
+    path: '/',
+    sameSite: 'lax',
+  });
+  response.cookies.set(REFRESH_COOKIE_NAME, '', {
+    httpOnly: true,
+    maxAge: 0,
+    path: '/',
+    sameSite: 'lax',
+  });
 }
 
 async function isApiHealthy(request: NextRequest) {
@@ -113,15 +166,15 @@ async function isApiHealthy(request: NextRequest) {
   }
 }
 
-async function hasAuthenticatedSession(request: NextRequest) {
+async function getSessionStatus(request: NextRequest): Promise<SessionStatus> {
   if (!hasAuthCookies(request)) {
-    return false;
+    return 'unauthenticated';
   }
 
   const apiBaseUrl = publicEnv.apiBaseUrl;
 
   if (!apiBaseUrl) {
-    return true;
+    return 'authenticated';
   }
 
   try {
@@ -135,12 +188,12 @@ async function hasAuthenticatedSession(request: NextRequest) {
     });
 
     if (response.status === 401) {
-      return false;
+      return 'unauthenticated';
     }
 
-    return response.ok;
+    return response.ok ? 'authenticated' : 'unavailable';
   }
   catch {
-    return false;
+    return 'unavailable';
   }
 }
