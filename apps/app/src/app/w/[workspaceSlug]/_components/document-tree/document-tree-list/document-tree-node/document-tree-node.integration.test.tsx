@@ -106,7 +106,7 @@ describe('DocumentTreeNode integration', () => {
     );
   });
 
-  it('enables the children query and renders sorted child documents after expand', async () => {
+  it('enables the children query and renders child documents in sort key order after expand', async () => {
     const user = userEvent.setup();
 
     renderWithProviders(
@@ -141,7 +141,7 @@ describe('DocumentTreeNode integration', () => {
 
     const childTitles = screen.getAllByText(/child$/i).map((node) => node.textContent);
 
-    expect(childTitles).toEqual(['Newest child', 'Alpha child']);
+    expect(childTitles).toEqual(['Alpha child', 'Newest child']);
   });
 
   it('isolates expansion for the same document across tree scopes', async () => {

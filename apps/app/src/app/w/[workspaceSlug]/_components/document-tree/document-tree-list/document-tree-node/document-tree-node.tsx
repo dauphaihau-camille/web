@@ -92,7 +92,7 @@ export function DocumentTreeNode({
     },
   );
   const orderedChildDocuments = [...(childrenQuery.data?.items ?? [])].sort(
-    (left, right) => right.sort_key - left.sort_key,
+    (left, right) => left.sort_key - right.sort_key,
   );
 
   const displayTitle =
