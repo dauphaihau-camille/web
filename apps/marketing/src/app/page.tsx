@@ -1,4 +1,4 @@
-// import Image from 'next/image';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 
@@ -13,7 +13,7 @@ export default function HomePage() {
       <div className="mx-auto max-w-6xl">
         <Navigate />
 
-        <div className="mx-auto max-w-lg py-20 text-center md:py-28">
+        <div className="mx-auto max-w-lg py-20 text-center md:pt-28">
           <h1 className="mb-4 px-12 text-5xl font-bold">
             The simplest way to keep notes
           </h1>
@@ -31,15 +31,14 @@ export default function HomePage() {
           </Link>
         </div>
 
-        {/*<Image
-          src="/marketing/app.png"
-          width={1200}
-          height={1200}
-          style={{ boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px' }}
-          alt="app"
+        <Image
+          src="/marketing/app-workspace.png"
+          width={3383}
+          height={2125}
+          alt="Camille app workspace"
           quality={100}
           priority
-        />*/}
+        />
       </div>
     </main>
   );
