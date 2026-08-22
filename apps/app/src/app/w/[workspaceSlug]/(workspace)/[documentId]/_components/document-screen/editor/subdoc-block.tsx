@@ -5,14 +5,6 @@ import { useParams } from 'next/navigation';
 import { createSubdocBlock } from '@shared/components/editor/create-subdoc-block';
 import { workspaceRoutes } from '@/domains/workspace';
 
-function useWorkspaceSlug() {
-  const params = useParams<{ workspaceSlug?: string }>();
-
-  return typeof params.workspaceSlug === 'string'
-    ? params.workspaceSlug
-    : undefined;
-}
-
 export const subdocBlock = createSubdocBlock({
   useWorkspaceSlug,
   resolvePrivateHref: ({
@@ -33,3 +25,11 @@ export const subdocBlock = createSubdocBlock({
       : null;
   },
 });
+
+function useWorkspaceSlug() {
+  const params = useParams<{ workspaceSlug?: string }>();
+
+  return typeof params.workspaceSlug === 'string'
+    ? params.workspaceSlug
+    : undefined;
+}

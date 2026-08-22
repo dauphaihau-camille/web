@@ -20,19 +20,6 @@ type WorkspaceShortcutsContextValue = {
 
 export const WorkspaceShortcutsContext = createContext<WorkspaceShortcutsContextValue | null>(null);
 
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) {
-    return false;
-  }
-
-  return (
-    target.isContentEditable
-    || target.tagName === 'INPUT'
-    || target.tagName === 'TEXTAREA'
-    || target.tagName === 'SELECT'
-  );
-}
-
 export function WorkspaceShortcutsProvider({
   children,
 }: {
@@ -167,5 +154,18 @@ export function WorkspaceShortcutsProvider({
     >
       {children}
     </WorkspaceShortcutsContext.Provider>
+  );
+}
+
+function isTypingTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  return (
+    target.isContentEditable
+    || target.tagName === 'INPUT'
+    || target.tagName === 'TEXTAREA'
+    || target.tagName === 'SELECT'
   );
 }

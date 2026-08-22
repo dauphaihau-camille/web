@@ -22,15 +22,11 @@ import { useLoginForm, type AuthFormMode } from '../_hooks/use-login-form';
 const authCopy = {
   login: {
     title: 'Log in',
-    description:
-      'Enter your email and we\'ll send you a code to continue in Camille.',
     alternateCtaLabel: 'Sign up',
     alternateCtaText: 'New user?',
   },
   signup: {
     title: 'Create your account',
-    description:
-      'Enter your details and we\'ll send you a code to get started in Camille.',
     alternateCtaLabel: 'Log in',
     alternateCtaText: 'Already have an account?',
   },
@@ -74,7 +70,6 @@ export function AuthForm({ mode }: { mode: AuthFormMode }) {
     <div className="mx-auto flex w-full max-w-sm flex-col justify-center space-y-6 px-4 py-28">
       <div className="flex flex-col space-y-2 text-center">
         <h1 className="text-5xl font-semibold tracking-tight">{copy.title}</h1>
-        <p className="text-sm text-muted-foreground">{copy.description}</p>
       </div>
       <div className="grid gap-6">
         {emailChallenge

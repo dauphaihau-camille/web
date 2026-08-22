@@ -19,43 +19,6 @@ const HIDDEN_SLASH_MENU_TITLES = [
   'File',
 ];
 
-function getInlineText(value: unknown) {
-  if (!Array.isArray(value) || value.length === 0) {
-    return '';
-  }
-
-  return value.map((item) => {
-    if (!item || typeof item !== 'object' || Array.isArray(item)) {
-      return '';
-    }
-
-    const text = (item as { text?: unknown }).text;
-    return typeof text === 'string' ? text : '';
-  }).join('');
-}
-
-function shouldReplaceSlashAnchorBlock(
-  block: Block,
-  slashCommandText: string,
-) {
-  if (block.type !== 'paragraph') {
-    return false;
-  }
-
-  const inlineText = getInlineText((block as { content?: unknown }).content).trim();
-  const hasChildren = Array.isArray(block.children) && block.children.length > 0;
-
-  if (hasChildren) {
-    return false;
-  }
-
-  if (inlineText === slashCommandText.trim()) {
-    return true;
-  }
-
-  return inlineText.length === 0;
-}
-
 export const BlockNoteEditorClient = createBlockNoteEditorClient({
   SlashMenuComponent: SlashMenu,
   externalSubdocCreatedEventName: DOCUMENT_SUBDOC_CREATED_EVENT,
@@ -183,3 +146,40 @@ export const BlockNoteEditorClient = createBlockNoteEditorClient({
       });
   },
 });
+
+function getInlineText(value: unknown) {
+  if (!Array.isArray(value) || value.length === 0) {
+    return '';
+  }
+
+  return value.map((item) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      return '';
+    }
+
+    const text = (item as { text?: unknown }).text;
+    return typeof text === 'string' ? text : '';
+  }).join('');
+}
+
+function shouldReplaceSlashAnchorBlock(
+  block: Block,
+  slashCommandText: string,
+) {
+  if (block.type !== 'paragraph') {
+    return false;
+  }
+
+  const inlineText = getInlineText((block as { content?: unknown }).content).trim();
+  const hasChildren = Array.isArray(block.children) && block.children.length > 0;
+
+  if (hasChildren) {
+    return false;
+  }
+
+  if (inlineText === slashCommandText.trim()) {
+    return true;
+  }
+
+  return inlineText.length === 0;
+}
