@@ -9,11 +9,11 @@ import { cn } from '@shared/lib/utils';
 
 export default function HomePage() {
   return (
-    <main className="px-4 sm:px-6">
+    <main className="px-4 sm:px-6 pb-20">
       <div className="mx-auto max-w-6xl">
         <Navigate />
 
-        <div className="mx-auto max-w-lg py-20 text-center md:pt-28">
+        <div className="mx-auto max-w-lg pt-20 text-center md:pt-28">
           <h1 className="mb-4 px-12 text-5xl font-bold">
             The simplest way to keep notes
           </h1>
@@ -36,8 +36,8 @@ export default function HomePage() {
           width={3383}
           height={2125}
           alt="Camille app workspace"
-          quality={100}
           priority
+          className='mt-10'
         />
       </div>
     </main>
