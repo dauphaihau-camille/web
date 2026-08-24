@@ -2,7 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronLeftIcon, Settings2Icon, UsersIcon } from 'lucide-react';
+import {
+  ChevronLeftIcon,
+  CreditCardIcon,
+  Settings2Icon,
+  UsersIcon,
+} from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
@@ -30,6 +35,11 @@ const workspaceSettingsItems = [
     label: 'Members',
     disabled: true,
     unavailableMessage: 'Feature not available',
+  },
+  {
+    getHref: workspaceRoutes.settingsBilling,
+    icon: CreditCardIcon,
+    label: 'Billing',
   },
 ];
 

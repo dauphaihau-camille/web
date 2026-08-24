@@ -48,4 +48,7 @@ export const workspaceRoutes = {
   settingsMembers(workspaceSlug: string) {
     return `${WORKSPACE_ROUTE_PREFIX}/${workspaceSlug}/settings/members`;
   },
+  settingsBilling(workspaceSlug: string) {
+    return `${WORKSPACE_ROUTE_PREFIX}/${workspaceSlug}/settings/billing`;
+  },
 } as const;
