@@ -28,6 +28,7 @@ import {
   type DocumentSubdocCreatedEventDetail,
 } from '@/domains/document/document-subdoc-created-event';
 import type * as DocumentRequests from '@/domains/document/api/document.requests';
+import type * as SubscriptionDomain from '@/domains/subscription';
 import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
 import type * as DocumentTreeNodeActionHelpers from './document-tree-node-action-helpers';
 
@@ -41,6 +42,7 @@ const {
   createSubdocumentCommandMock,
   favoriteDocumentMock,
   unfavoriteDocumentMock,
+  getWorkspaceBlockLimitReachedDataMock,
   documentDetailQueryOptionsMock,
   resolveArchiveDestinationMock,
 } = vi.hoisted(() => ({
@@ -51,6 +53,7 @@ const {
   createSubdocumentCommandMock: vi.fn(),
   favoriteDocumentMock: vi.fn(),
   unfavoriteDocumentMock: vi.fn(),
+  getWorkspaceBlockLimitReachedDataMock: vi.fn(),
   documentDetailQueryOptionsMock: vi.fn(),
   resolveArchiveDestinationMock: vi.fn(),
 }));
@@ -98,6 +101,17 @@ vi.mock('@/domains/favorite', async () => {
     ...actual,
     favoriteDocument: favoriteDocumentMock,
     unfavoriteDocument: unfavoriteDocumentMock,
+  };
+});
+
+vi.mock('@/domains/subscription', async () => {
+  const actual = await vi.importActual<typeof SubscriptionDomain>(
+    '@/domains/subscription',
+  );
+
+  return {
+    ...actual,
+    getWorkspaceBlockLimitReachedData: getWorkspaceBlockLimitReachedDataMock,
   };
 });
 
@@ -239,6 +253,8 @@ describe('useDocumentTreeNodeActions integration', () => {
     createSubdocumentCommandMock.mockReset();
     favoriteDocumentMock.mockReset();
     unfavoriteDocumentMock.mockReset();
+    getWorkspaceBlockLimitReachedDataMock.mockReset();
+    getWorkspaceBlockLimitReachedDataMock.mockReturnValue(null);
     documentDetailQueryOptionsMock.mockReset();
     resolveArchiveDestinationMock.mockReset();
     useDocumentTreeExpansionStore.setState({
@@ -735,6 +751,94 @@ describe('useDocumentTreeNodeActions integration', () => {
         }),
       ]);
     });
+  });
+
+  it('shows an upgrade toast when sidebar subdocument creation hits the workspace block limit', async () => {
+    let rejectCreateRequest: ((error: Error) => void) | undefined;
+    const blockLimitError = new Error('block limit reached');
+
+    getWorkspaceBlockLimitReachedDataMock.mockReturnValue({
+      block_count: 1_200,
+      block_limit: 1_000,
+      code: 'workspace_block_limit_reached',
+      message: 'Workspace block limit reached.',
+      plan: 'free',
+      upgrade_available: true,
+    });
+    createSubdocumentCommandMock.mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          rejectCreateRequest = reject;
+        }),
+    );
+
+    const { Wrapper, queryClient } = createWrapper();
+    queryClient.setQueryData(documentKeys.detail(documentFixture.id), documentFixture);
+    queryClient.setQueryData(
+      documentKeys.rootList('acme', 10),
+      createNavigation([documentNodeFixture]),
+    );
+    queryClient.setQueryData(
+      documentKeys.childList('acme', documentFixture.id, 10),
+      {
+        items: [],
+        next_cursor: undefined,
+      },
+    );
+    queryClient.setQueryData<FavoriteDocument[]>(
+      favoriteKeys.workspaceList('acme'),
+      [favoriteFixture],
+    );
+
+    const { result } = renderHook(
+      () =>
+        useDocumentTreeNodeActions({
+          document: documentNodeFixture,
+          shouldNavigateOnArchive: true,
+          workspaceSlug: 'acme',
+          treeScope: 'private',
+        }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.handleCreateSubdocument();
+    });
+
+    await waitFor(() => {
+      expect(
+        queryClient.getQueryData<{ items: DocumentNavigationNode[] }>(
+          documentKeys.childList('acme', documentFixture.id, 10),
+        )?.items,
+      ).toHaveLength(1);
+    });
+
+    if (!rejectCreateRequest) {
+      throw new Error('Create subdocument request did not start');
+    }
+
+    rejectCreateRequest(blockLimitError);
+
+    await waitFor(() => {
+      expect(getWorkspaceBlockLimitReachedDataMock).toHaveBeenCalledWith(
+        blockLimitError,
+      );
+      expect(toastMock).toHaveBeenCalledWith('Block limit reached', {
+        action: {
+          label: 'Upgrade',
+          onClick: expect.any(Function),
+        },
+      });
+    });
+
+    const toastOptions = toastMock.mock.calls.find(([title]) =>
+      title === 'Block limit reached')?.[1];
+
+    toastOptions.action.onClick();
+
+    expect(pushMock).toHaveBeenCalledWith(
+      workspaceRoutes.settingsBilling('acme'),
+    );
   });
 
   it('optimistically adds a document to favorites before the request resolves', async () => {

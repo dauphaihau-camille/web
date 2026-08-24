@@ -9,6 +9,7 @@ import {
 import { useDebounceFn } from 'ahooks';
 
 import type { BlockNoteEditorProps } from '../../blocknote-editor.types';
+import { countContentBlocks } from '../../count-content-blocks';
 import type { BlockNoteClientEditor } from '../create-blocknote-editor-client.types';
 
 export function useEditorSaveController({
@@ -33,6 +34,7 @@ export function useEditorSaveController({
   const [, setIsSaving] = useState(false);
   const [, setSaveError] = useState<string | null>(null);
   const lastSerializedContentRef = useRef(JSON.stringify(normalizedContent));
+  const isRestoringRejectedContentRef = useRef(false);
   const isSlashMenuOpenRef = useRef(false);
   const isSelectingSlashMenuItemRef = useRef(false);
   const isExecutingSlashCommandRef = useRef(false);
@@ -131,8 +133,30 @@ export function useEditorSaveController({
   }, [cancelScheduledSave, editor, flushPendingSlashMenuSave]);
 
   const handleEditorChange = useCallback(() => {
+    if (isRestoringRejectedContentRef.current) {
+      return;
+    }
+
     if (isEditable && collaboration) {
-      onCollaborativeContentChangeAction?.();
+      const previousContent = parseSerializedContent(lastSerializedContentRef.current);
+      const nextContent = editor.document as unknown[];
+      const previousBlockCount = countContentBlocks(previousContent);
+      const nextBlockCount = countContentBlocks(nextContent);
+
+      const accepted = onCollaborativeContentChangeAction?.(nextContent, {
+        blockCountDelta: nextBlockCount - previousBlockCount,
+        nextBlockCount,
+        previousBlockCount,
+      }) !== false;
+
+      if (!accepted) {
+        isRestoringRejectedContentRef.current = true;
+        editor.replaceBlocks(editor.document, previousContent as never[]);
+        isRestoringRejectedContentRef.current = false;
+        return;
+      }
+
+      lastSerializedContentRef.current = JSON.stringify(nextContent);
       return;
     }
 
@@ -183,4 +207,10 @@ export function useEditorSaveController({
     pendingSlashMenuSaveRef,
     setIsSaving,
   };
+}
+
+function parseSerializedContent(value: string): unknown[] {
+  const parsed = JSON.parse(value) as unknown;
+
+  return Array.isArray(parsed) ? parsed : [];
 }

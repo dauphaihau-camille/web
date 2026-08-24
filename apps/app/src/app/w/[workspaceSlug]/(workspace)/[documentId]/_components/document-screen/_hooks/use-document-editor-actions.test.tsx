@@ -10,6 +10,7 @@ import {
   it,
   vi,
 } from 'vitest';
+import { toast } from 'sonner';
 
 import type {
   Document,
@@ -25,6 +26,7 @@ const {
   restoreDocumentMock,
   setRecentWorkspaceDocumentIdMock,
   updateDocumentMock,
+  getWorkspaceBlockLimitReachedDataMock,
   useDocumentDraftPersistenceMock,
   useArchiveSubdocumentMutationMock,
 } = vi.hoisted(() => ({
@@ -34,12 +36,17 @@ const {
   restoreDocumentMock: vi.fn(),
   setRecentWorkspaceDocumentIdMock: vi.fn(),
   updateDocumentMock: vi.fn(),
+  getWorkspaceBlockLimitReachedDataMock: vi.fn(),
   useDocumentDraftPersistenceMock: vi.fn(),
   useArchiveSubdocumentMutationMock: vi.fn(),
 }));
 
 vi.mock('sonner', () => ({
   toast: vi.fn(),
+}));
+
+vi.mock('@/domains/subscription', () => ({
+  getWorkspaceBlockLimitReachedData: getWorkspaceBlockLimitReachedDataMock,
 }));
 
 vi.mock('@/domains/document', () => {
@@ -132,6 +139,7 @@ describe('useDocumentEditorActions', () => {
       },
     });
     archiveSubdocumentMutateAsyncMock.mockResolvedValue(undefined);
+    getWorkspaceBlockLimitReachedDataMock.mockReturnValue(null);
     useArchiveSubdocumentMutationMock.mockReturnValue({
       isPending: false,
       mutateAsync: archiveSubdocumentMutateAsyncMock,
@@ -311,5 +319,40 @@ describe('useDocumentEditorActions', () => {
     expect(registerCommandUndoMetadata.mock.invocationCallOrder[0]).toBeLessThan(
       archiveSubdocumentMutateAsyncMock.mock.invocationCallOrder[0],
     );
+  });
+
+  it('shows an upgrade toast when subdocument creation hits the workspace block limit', async () => {
+    const blockLimitError = new Error('block limit reached');
+    createSubdocumentMutateAsyncMock.mockRejectedValue(blockLimitError);
+    getWorkspaceBlockLimitReachedDataMock.mockReturnValue({
+      message: 'Workspace block limit reached.',
+      code: 'workspace_block_limit_reached',
+      plan: 'free',
+      block_count: 1000,
+      block_limit: 1000,
+      upgrade_available: true,
+    });
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(
+      () => useDocumentEditorActions({
+        document: documentFixture,
+        workspaceSlug: 'acme',
+        onRestoreDraft: vi.fn(),
+      }),
+      { wrapper: Wrapper },
+    );
+
+    await expect(result.current.createSubdocument({
+      anchorBlockId: 'block-1',
+    })).rejects.toBe(blockLimitError);
+
+    expect(getWorkspaceBlockLimitReachedDataMock).toHaveBeenCalledWith(
+      blockLimitError,
+    );
+    expect(toast).toHaveBeenCalledWith('Block limit reached', {
+      action: expect.objectContaining({
+        label: 'Upgrade',
+      }),
+    });
   });
 });

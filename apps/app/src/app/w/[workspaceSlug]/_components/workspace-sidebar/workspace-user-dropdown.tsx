@@ -41,9 +41,9 @@ import {
   useCurrentUserQuery,
 } from '@/domains/auth';
 
-import { CreateWorkspaceDialog } from './create-workspace-dialog';
-import { LogoutConfirmDialog } from './logout-confirm-dialog';
-import { WorkspaceUserDropdownSkeleton } from './workspace-skeleton/workspace-user-dropdown-skeleton';
+import { CreateWorkspaceDialog } from '../create-workspace-dialog';
+import { LogoutConfirmDialog } from '../logout-confirm-dialog';
+import { WorkspaceUserDropdownSkeleton } from '../workspace-skeleton/workspace-user-dropdown-skeleton';
 
 export function WorkspaceUserDropdown({
   workspaceSlug,

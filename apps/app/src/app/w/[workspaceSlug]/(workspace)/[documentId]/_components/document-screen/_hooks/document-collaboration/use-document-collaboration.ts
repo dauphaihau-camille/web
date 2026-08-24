@@ -17,9 +17,13 @@ import {
   documentCollaborationChannelName,
   documentCollaborationStorageName,
 } from './document-collaboration.constants';
-import { DocumentSocketProvider } from './document-socket-provider';
+import {
+  type CollaborationBlockLimitError,
+  DocumentSocketProvider,
+} from './document-socket-provider';
 
 type UseDocumentCollaborationOptions = {
+  onBlockLimitReached?: (error: CollaborationBlockLimitError) => void;
   onDocumentUpdatedAtChange?: (updatedAt: string) => void;
   showPresence: boolean;
   workspaceId: string;
@@ -39,6 +43,7 @@ export function useDocumentCollaboration(
   options: UseDocumentCollaborationOptions,
 ) {
   const currentUserQuery = useCurrentUserQuery();
+  const onBlockLimitReachedRef = useRef(options.onBlockLimitReached);
   const onDocumentUpdatedAtChangeRef = useRef(options.onDocumentUpdatedAtChange);
 
   const [resources] = useState(() => {
@@ -58,8 +63,9 @@ export function useDocumentCollaboration(
   const currentUserId = currentUserQuery.data?.id;
 
   useEffect(() => {
+    onBlockLimitReachedRef.current = options.onBlockLimitReached;
     onDocumentUpdatedAtChangeRef.current = options.onDocumentUpdatedAtChange;
-  }, [options.onDocumentUpdatedAtChange]);
+  }, [options.onBlockLimitReached, options.onDocumentUpdatedAtChange]);
 
   useEffect(() => {
     setCanEdit(false);
@@ -97,6 +103,9 @@ export function useDocumentCollaboration(
       resources.document,
       resources.awareness,
       {
+        onBlockLimitReached: (blockLimitError) => {
+          onBlockLimitReachedRef.current?.(blockLimitError);
+        },
         onDocumentUpdatedAtChange: (updatedAt) => {
           onDocumentUpdatedAtChangeRef.current?.(updatedAt);
         },

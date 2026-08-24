@@ -15,6 +15,8 @@ import {
   updateDocument,
   useCreateSubdocumentMutation,
 } from '@/domains/document';
+import { getWorkspaceBlockLimitReachedData } from '@/domains/subscription';
+import { workspaceRoutes } from '@/domains/workspace';
 import { hasMeaningfulContent } from '@shared/components/editor/has-meaningful-content';
 import { updateCachedNavigationContentStatus } from '@/domains/document/cache/document-query-cache';
 
@@ -226,7 +228,25 @@ export function useDocumentEditorActions({
   }, [documentId, workspaceSlug]);
 
   const createSubdocument = async (input?: CreateSubdocumentInput) => {
-    const result = await createSubdocumentMutation.mutateAsync(input);
+    const result = await createSubdocumentMutation.mutateAsync(input)
+      .catch((error: unknown) => {
+        const blockLimitError = getWorkspaceBlockLimitReachedData(error);
+
+        if (blockLimitError) {
+          toast('Block limit reached', {
+            action: {
+              label: 'Upgrade',
+              onClick: () => {
+                window.location.assign(
+                  workspaceRoutes.settingsBilling(workspaceSlug),
+                );
+              },
+            },
+          });
+        }
+
+        throw error;
+      });
 
     if (input?.anchorBlockId) {
       registerCommandUndoMetadata?.({

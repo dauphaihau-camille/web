@@ -16,12 +16,26 @@ import {
   SOCKET_COLLABORATION_ORIGIN,
 } from './document-collaboration.constants';
 
-// Yjs encodes an empty diff as [0, 0].
-const EMPTY_YJS_UPDATE_LENGTH = 2;
-
 type CollaborationResponse<T> =
   | { ok: true; data: T }
-  | { ok: false; error: { code: string; message: string } };
+  | { ok: false; error: CollaborationError };
+
+type CollaborationError = {
+  blockCount?: number;
+  blockLimit?: number;
+  code: string;
+  message: string;
+  plan?: string;
+  upgradeAvailable?: boolean;
+};
+
+export type CollaborationBlockLimitError = {
+  blockCount: number;
+  blockLimit: number;
+  message: string;
+  plan: string;
+  upgradeAvailable: boolean;
+};
 
 type ServerToClientEvents = {
   'collab:awareness': (payload: CollaborationUpdatePayload) => void;
@@ -70,13 +84,10 @@ type ProviderStatus = {
 };
 
 type DocumentSocketProviderOptions = {
+  onBlockLimitReached?: (error: CollaborationBlockLimitError) => void;
   onDocumentUpdatedAtChange?: (updatedAt: string) => void;
   showPresence: boolean;
 };
-
-function hasMeaningfulYjsUpdate(update: Uint8Array): boolean {
-  return update.byteLength > EMPTY_YJS_UPDATE_LENGTH;
-}
 
 export class DocumentSocketProvider {
   readonly awareness: Awareness;
@@ -238,9 +249,6 @@ export class DocumentSocketProvider {
         return;
       }
 
-      const serverStateVector = toUint8Array(response.data.serverStateVector);
-      const localUpdate = Yjs.encodeStateAsUpdate(this.document, serverStateVector);
-
       Yjs.applyUpdate(
         this.document,
         toUint8Array(response.data.update),
@@ -260,9 +268,6 @@ export class DocumentSocketProvider {
         });
       }
 
-      if (hasMeaningfulYjsUpdate(localUpdate) && this.canEdit) {
-        this.sendUpdate(localUpdate);
-      }
     });
   }
 
@@ -273,6 +278,12 @@ export class DocumentSocketProvider {
     }, (response) => {
       if (!response.ok) {
         this.error = response.error.message;
+        const blockLimitError = getBlockLimitError(response.error);
+
+        if (blockLimitError) {
+          this.options.onBlockLimitReached?.(blockLimitError);
+        }
+
         this.emitStatus();
         return;
       }
@@ -293,4 +304,26 @@ export class DocumentSocketProvider {
       synced: this.synced,
     };
   }
+}
+
+function getBlockLimitError(
+  error: CollaborationError,
+): CollaborationBlockLimitError | null {
+  if (
+    error.code !== 'workspace_block_limit_reached'
+    || typeof error.blockCount !== 'number'
+    || typeof error.blockLimit !== 'number'
+    || typeof error.plan !== 'string'
+    || typeof error.upgradeAvailable !== 'boolean'
+  ) {
+    return null;
+  }
+
+  return {
+    blockCount: error.blockCount,
+    blockLimit: error.blockLimit,
+    message: error.message,
+    plan: error.plan,
+    upgradeAvailable: error.upgradeAvailable,
+  };
 }

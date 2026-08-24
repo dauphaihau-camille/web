@@ -1,15 +1,23 @@
 'use client';
 
 import {
+  type RefObject,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from 'react';
-import type { BlockNoteSessionUndoRedoBridge } from '@shared/components/editor/blocknote-editor.types';
+import { toast } from 'sonner';
+import type {
+  BlockNoteSessionUndoRedoBridge,
+  CollaborativeContentChangeContext,
+} from '@shared/components/editor/blocknote-editor.types';
 
 import type { Document } from '@/domains/document';
+import { useSubscriptionSummaryQuery } from '@/domains/subscription';
+import { workspaceRoutes } from '@/domains/workspace';
 
+import type { CollaborationBlockLimitError } from './document-collaboration/document-socket-provider';
 import { useDocumentChromeVisibility } from './use-document-chrome-visibility';
 import { useDocumentCollaboration } from './document-collaboration/use-document-collaboration';
 import { useDocumentEditorActions } from './use-document-editor-actions';
@@ -38,6 +46,7 @@ export function useDocumentScreenState({
   const [isSharePopoverOpen, setIsSharePopoverOpen] = useState(false);
   const [acknowledgedUpdatedAt, setAcknowledgedUpdatedAt] = useState<string | null>(null);
   const hasLocalEditRef = useRef(false);
+  const lastBlockLimitToastAtRef = useRef(0);
   const titleInputRef = useRef<HTMLTextAreaElement | null>(null);
   const bodyEditorRef = useRef<HTMLDivElement | null>(null);
   const bodyUndoRedoBridgeRef = useRef<BlockNoteSessionUndoRedoBridge | null>(null);
@@ -49,6 +58,9 @@ export function useDocumentScreenState({
     (document.access?.can_edit && !document.archived_at ? 'edit' : 'view');
 
   const showPresence = Boolean(document.collaboration?.show_presence);
+
+  const subscriptionQuery = useSubscriptionSummaryQuery(document.workspace_id);
+  const subscription = subscriptionQuery.data;
 
   const displayUpdatedAt = getLatestTimestamp(
     document.updated_at,
@@ -67,7 +79,19 @@ export function useDocumentScreenState({
     setAcknowledgedUpdatedAt(updatedAt);
   }, []);
 
+  const handleBlockLimitReached = useCallback((_error: CollaborationBlockLimitError) => {
+    if (!hasLocalEditRef.current) {
+      return;
+    }
+
+    showBlockLimitToast({
+      lastBlockLimitToastAtRef,
+      workspaceSlug,
+    });
+  }, [workspaceSlug]);
+
   const documentCollaboration = useDocumentCollaboration(documentId, {
+    onBlockLimitReached: handleBlockLimitReached,
     onDocumentUpdatedAtChange: handleDocumentUpdatedAtChange,
     showPresence,
     workspaceId: document.workspace_id,
@@ -82,12 +106,37 @@ export function useDocumentScreenState({
     setEditorContent(content);
   }, []);
 
-  const handleDocumentContentInput = useCallback(() => {
+  const handleDocumentContentInput = useCallback((
+    _content: unknown[],
+    context: CollaborativeContentChangeContext,
+  ) => {
     if (!canEditDocument) {
-      return;
+      return false;
     }
+
     markLocalEdit();
-  }, [canEditDocument, markLocalEdit]);
+
+    if (
+      subscription?.block_limit !== null
+      && subscription?.block_limit !== undefined
+      && context.blockCountDelta > 0
+      && subscription.block_count + context.blockCountDelta > subscription.block_limit
+    ) {
+      showBlockLimitToast({
+        lastBlockLimitToastAtRef,
+        workspaceSlug,
+      });
+      return false;
+    }
+
+    return true;
+  }, [
+    canEditDocument,
+    markLocalEdit,
+    subscription?.block_count,
+    subscription?.block_limit,
+    workspaceSlug,
+  ]);
 
   const handleSessionUndoRedoBridgeChange = useCallback((
     bridge: BlockNoteSessionUndoRedoBridge | null,
@@ -142,6 +191,31 @@ export function useDocumentScreenState({
     setIsSharePopoverOpen,
     titleInputRef,
   };
+}
+
+function showBlockLimitToast({
+  lastBlockLimitToastAtRef,
+  workspaceSlug,
+}: {
+  lastBlockLimitToastAtRef: RefObject<number>;
+  workspaceSlug: string;
+}) {
+  const now = Date.now();
+
+  if (now - lastBlockLimitToastAtRef.current < 1000) {
+    return;
+  }
+
+  lastBlockLimitToastAtRef.current = now;
+
+  toast('Block limit reached', {
+    action: {
+      label: 'Upgrade',
+      onClick: () => {
+        window.location.assign(workspaceRoutes.settingsBilling(workspaceSlug));
+      },
+    },
+  });
 }
 
 function getLatestTimestamp(firstTimestamp: string, secondTimestamp: string | null) {

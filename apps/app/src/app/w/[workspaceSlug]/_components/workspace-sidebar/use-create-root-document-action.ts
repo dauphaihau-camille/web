@@ -2,7 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
+import { getWorkspaceBlockLimitReachedData } from '@/domains/subscription';
 import {
   createRootDocument,
   documentKeys,
@@ -95,7 +97,7 @@ export function useCreateRootDocumentAction(
         previousDocumentLists,
       };
     },
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       if (!context) {
         return;
       }
@@ -106,6 +108,22 @@ export function useCreateRootDocumentAction(
         queryKey: documentKeys.detail(context.optimisticDocumentId),
         exact: true,
       });
+
+      const blockLimitError = getWorkspaceBlockLimitReachedData(error);
+
+      if (blockLimitError) {
+        toast('Block limit reached', {
+          action: {
+            label: 'Upgrade',
+            onClick: () => {
+              router.push(workspaceRoutes.settingsBilling(workspaceSlug));
+            },
+          },
+        });
+        return;
+      }
+
+      toast('Could not create document');
     },
     onSuccess: (document, _variables, context) => {
       replaceCreatedRootDocument(

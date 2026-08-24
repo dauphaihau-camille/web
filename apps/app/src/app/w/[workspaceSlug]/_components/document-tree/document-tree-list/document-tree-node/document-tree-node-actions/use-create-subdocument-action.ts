@@ -1,6 +1,8 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import {
   documentKeys,
@@ -8,6 +10,7 @@ import {
   type DocumentNavigationNode,
   useCreateSubdocumentMutation,
 } from '@/domains/document';
+import { getWorkspaceBlockLimitReachedData } from '@/domains/subscription';
 import { dispatchDocumentSubdocCreatedEvent } from '@/domains/document/document-subdoc-created-event';
 import {
   markCachedNavigationNodeHasChildren,
@@ -26,6 +29,7 @@ import {
   type DocumentTreeScope,
   useDocumentTreeExpansionStore,
 } from '@/stores/document-tree-expansion-store';
+import { workspaceRoutes } from '@/domains/workspace';
 
 function createOptimisticSubdocument(
   document: DocumentNavigationNode,
@@ -69,6 +73,7 @@ export function useCreateSubdocumentAction({
   workspaceSlug: string;
   treeScope: DocumentTreeScope;
 }) {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   const expandedByWorkspace = useDocumentTreeExpansionStore(
@@ -140,7 +145,7 @@ export function useCreateSubdocumentAction({
         previousWorkspaceFavorites,
       };
     },
-    onError: (_error, _variables, context) => {
+    onError: (error, _variables, context) => {
       if (context) {
         restoreDocumentListSnapshot(queryClient, context.previousDocumentLists);
         setExpandedDocumentIds(
@@ -162,6 +167,19 @@ export function useCreateSubdocumentAction({
           favoriteKeys.workspaceList(workspaceSlug),
           context.previousWorkspaceFavorites,
         );
+      }
+
+      const blockLimitError = getWorkspaceBlockLimitReachedData(error);
+
+      if (blockLimitError) {
+        toast('Block limit reached', {
+          action: {
+            label: 'Upgrade',
+            onClick: () => {
+              router.push(workspaceRoutes.settingsBilling(workspaceSlug));
+            },
+          },
+        });
       }
     },
     onSuccess: (result, _variables, _context) => {

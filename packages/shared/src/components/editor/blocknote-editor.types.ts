@@ -41,6 +41,12 @@ export type BlockNoteSessionUndoRedoBridge = {
   undo: (context?: { preferredBlockId?: string }) => boolean | Promise<boolean>;
 };
 
+export type CollaborativeContentChangeContext = {
+  blockCountDelta: number;
+  nextBlockCount: number;
+  previousBlockCount: number;
+};
+
 export type BlockNoteEditorProps = {
   collaboration?: CollaborationOptions;
   documentTitle: string;
@@ -56,7 +62,10 @@ export type BlockNoteEditorProps = {
     slashCommandText?: string;
     content?: unknown[];
   }) => Promise<CreatedSubdoc>;
-  onCollaborativeContentChangeAction?: () => void;
+  onCollaborativeContentChangeAction?: (
+    content: unknown[],
+    context: CollaborativeContentChangeContext,
+  ) => boolean | void;
   onSessionUndoRedoBridgeChangeAction?: (
     bridge: BlockNoteSessionUndoRedoBridge | null,
   ) => void;

@@ -16,11 +16,12 @@ import { useWorkspaceQuery } from '@/domains/workspace';
 
 import { WorkspaceSidebarActionsSkeleton } from '../workspace-skeleton/workspace-sidebar-actions-skeleton';
 import { WorkspaceSidebarTreeSkeleton } from '../workspace-skeleton/workspace-sidebar-tree-skeleton';
-import { WorkspaceUserDropdown } from '../workspace-user-dropdown';
+import { WorkspaceUserDropdown } from './workspace-user-dropdown';
 import { PrivateDocumentsGroup } from './private-documents-group';
 import { FavoritesDocumentsGroup } from './favorites-documents-group';
 import { SharedDocumentsGroup } from './shared-documents-group';
 import { TeamspacesGroup } from './teamspaces-group';
+import { BlockLimitCard } from './block-limit-card';
 import { WorkspaceSearchButton } from './workspace-search-button';
 import { WorkspaceTrashButton } from './workspace-trash-button/workspace-trash-button';
 
@@ -57,7 +58,7 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
         />
       </SidebarHeader>
 
-      <SidebarContent className="overflow-hidden">
+      <SidebarContent className="min-h-0 overflow-hidden">
         <ScrollFade
           direction="y"
           fadeColor="var(--sidebar)"
@@ -110,6 +111,14 @@ export function WorkspaceSidebar({ workspaceSlug }: { workspaceSlug: string }) {
               )}
           </div>
         </ScrollFade>
+        {workspaceQuery.data
+          ? (
+            <BlockLimitCard
+              workspace={workspaceQuery.data}
+              workspaceSlug={workspaceSlug}
+            />
+          )
+          : null}
       </SidebarContent>
     </Sidebar>
   );
