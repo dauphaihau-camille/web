@@ -1,6 +1,7 @@
 import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.requests';
 import { workspaceRoutes } from '@/domains/workspace';
 import { getWorkspaceServer } from '@/domains/workspace/api/workspace.server.requests';
+import { SettingsPage } from '../_components/settings-page';
 import { MembersPanel } from './_components/members-panel';
 
 export default async function WorkspaceSettingsMembersPage({
@@ -14,14 +15,11 @@ export default async function WorkspaceSettingsMembersPage({
   const workspace = await getWorkspaceServer(workspaceSlug);
 
   return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">Members</h2>
-        <p className="text-sm text-muted-foreground">
-          Manage access and roles for the people who can work inside this space.
-        </p>
-      </div>
+    <SettingsPage
+      title="Members"
+      description="Manage access and roles for the people who can work inside this space."
+    >
       <MembersPanel workspace={workspace} />
-    </section>
+    </SettingsPage>
   );
 }

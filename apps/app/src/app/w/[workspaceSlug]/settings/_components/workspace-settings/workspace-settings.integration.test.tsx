@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { HTTPError } from 'ky';
 
@@ -6,7 +6,7 @@ import type * as WorkspaceDomain from '@/domains/workspace';
 import type { UpdateWorkspaceInput, Workspace } from '@/domains/workspace';
 import { renderWithProviders } from '@shared/test/render';
 
-import { WorkspaceSettingsPanel } from './workspace-settings-panel';
+import { WorkspaceSettings } from './workspace-settings';
 
 const { replaceMock, updateWorkspaceMock } = vi.hoisted(() => ({
   replaceMock: vi.fn<(path: string) => void>(),
@@ -43,28 +43,40 @@ const workspaceFixture: Workspace = {
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-describe('WorkspaceSettingsPanel integration', () => {
+describe('WorkspaceSettings integration', () => {
   beforeEach(() => {
     replaceMock.mockReset();
     updateWorkspaceMock.mockReset();
   });
 
-  it('disables submit until the form changes', async () => {
+  it('saves workspace changes on field blur', async () => {
     const user = userEvent.setup();
+    updateWorkspaceMock.mockResolvedValue({
+      ...workspaceFixture,
+      version: 2,
+      slug: 'updateddomain',
+    });
 
     renderWithProviders(
-      <WorkspaceSettingsPanel workspace={workspaceFixture} />,
+      <WorkspaceSettings workspace={workspaceFixture} />,
     );
 
-    const submitButton = screen.getByRole('button', { name: 'Save workspace' });
     const domainInput = screen.getByLabelText('Domain');
-
-    expect(submitButton).toBeDisabled();
 
     await user.clear(domainInput);
     await user.type(domainInput, 'updated-domain');
+    await waitFor(() => {
+      expect(domainInput).toHaveValue('updateddomain');
+    });
+    fireEvent.blur(domainInput);
 
-    expect(submitButton).toBeEnabled();
+    await waitFor(() => {
+      expect(updateWorkspaceMock).toHaveBeenCalledWith('workspace-1', {
+        version: 1,
+        name: 'Acme Product',
+        slug: 'updateddomain',
+      });
+    });
   });
 
   it('shows a friendly field error when the domain is unavailable', async () => {
@@ -80,19 +92,17 @@ describe('WorkspaceSettingsPanel integration', () => {
     updateWorkspaceMock.mockRejectedValue(error);
 
     renderWithProviders(
-      <WorkspaceSettingsPanel workspace={workspaceFixture} />,
+      <WorkspaceSettings workspace={workspaceFixture} />,
     );
 
-    const submitButton = screen.getByRole('button', { name: 'Save workspace' });
     const domainInput = screen.getByLabelText('Domain');
-
-    expect(submitButton).toBeDisabled();
 
     await user.clear(domainInput);
     await user.type(domainInput, 'taken-domain');
-
-    expect(submitButton).toBeEnabled();
-    await user.click(submitButton);
+    await waitFor(() => {
+      expect(domainInput).toHaveValue('takendomain');
+    });
+    fireEvent.blur(domainInput);
 
     expect(await screen.findByText('Domain not available')).toBeInTheDocument();
     expect(domainInput).toHaveAttribute('aria-invalid', 'true');

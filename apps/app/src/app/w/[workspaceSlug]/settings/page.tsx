@@ -2,7 +2,8 @@ import { requireCurrentUserServer } from '@/domains/auth/api/auth.server.request
 import { workspaceRoutes } from '@/domains/workspace';
 import { getWorkspaceServer } from '@/domains/workspace/api/workspace.server.requests';
 
-import { WorkspaceSettingsPanel } from './_components/workspace-settings-panel';
+import { SettingsPage } from './_components/settings-page';
+import { WorkspaceSettings } from './_components/workspace-settings/workspace-settings';
 
 export default async function WorkspaceSettingsPage({
   params,
@@ -15,14 +16,11 @@ export default async function WorkspaceSettingsPage({
   const workspace = await getWorkspaceServer(workspaceSlug);
 
   return (
-    <section className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold">Workspace settings</h2>
-        <p className="text-sm text-muted-foreground">
-          Update the workspace name, slug, and description for this space.
-        </p>
-      </div>
-      <WorkspaceSettingsPanel workspace={workspace} />
-    </section>
+    <SettingsPage
+      title="General"
+      description="Manage your workspace name, domains, and more"
+    >
+      <WorkspaceSettings workspace={workspace} />
+    </SettingsPage>
   );
 }
