@@ -17,6 +17,12 @@
     --color-ring: var(--ring);
     --color-input: var(--input);
     --color-border: var(--border);
+    --color-destructive-surface-hover: var(--destructive-surface-hover);
+    --color-destructive-surface-foreground: var(--destructive-surface-foreground);
+    --color-destructive-surface: var(--destructive-surface);
+    --color-destructive-solid-hover: var(--destructive-solid-hover);
+    --color-destructive-solid-foreground: var(--destructive-solid-foreground);
+    --color-destructive-solid: var(--destructive-solid);
     --color-destructive: var(--destructive);
     --color-accent-foreground: var(--accent-foreground);
     --color-accent: var(--accent);
@@ -30,6 +36,8 @@
     --color-popover: var(--popover);
     --color-card-foreground: var(--card-foreground);
     --color-card: var(--card);
+    --color-surface-foreground: var(--surface-foreground);
+    --color-surface: var(--surface);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
     --radius-sm: calc(var(--radius) * 0.6);
@@ -44,6 +52,8 @@
 :root {
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
+    --surface: color-mix(in oklab, var(--muted) 30%, var(--background));
+    --surface-foreground: var(--foreground);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
@@ -57,6 +67,12 @@
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
+    --destructive-solid: #e56458;
+    --destructive-solid-foreground: oklch(1 0 0);
+    --destructive-solid-hover: #dc5b4f;
+    --destructive-surface: #fdebea;
+    --destructive-surface-foreground: var(--destructive-solid);
+    --destructive-surface-hover: #fce0de;
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
@@ -77,9 +93,11 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
+    --background: oklch(0.15 0 0);
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
+    --surface: color-mix(in oklab, var(--muted) 30%, var(--background));
+    --surface-foreground: var(--foreground);
+    --card: oklch(0.215 0 0);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);
     --popover-foreground: oklch(0.985 0 0);
@@ -92,6 +110,12 @@
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
+    --destructive-solid: #e56458;
+    --destructive-solid-foreground: oklch(1 0 0);
+    --destructive-solid-hover: #dc5b4f;
+    --destructive-surface: #512c2a;
+    --destructive-surface-foreground: var(--destructive-solid);
+    --destructive-surface-hover: #5c312e;
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
