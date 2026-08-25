@@ -51,6 +51,10 @@ export async function updateWorkspace(
   return workspaceSchema.parse(response);
 }
 
+export async function deleteWorkspace(workspaceId: WorkspaceId): Promise<void> {
+  await apiDelete<void>(`workspaces/${workspaceId}`);
+}
+
 export async function listWorkspaceMembers(
   workspaceId: WorkspaceId,
 ): Promise<WorkspaceMember[]> {
