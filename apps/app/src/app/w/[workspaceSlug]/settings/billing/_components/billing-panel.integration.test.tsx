@@ -77,7 +77,7 @@ describe('BillingPanel integration', () => {
     createCheckoutSessionMock.mockReset();
   });
 
-  it('shows the current Free plan, seat count, and block usage', () => {
+  it('shows the current Free plan and upgrade features', () => {
     renderWithProviders(
       <BillingPanel
         workspace={workspaceFixture}
@@ -85,11 +85,16 @@ describe('BillingPanel integration', () => {
       />,
     );
 
-    expect(screen.getByText('free')).toBeInTheDocument();
+    expect(screen.getByText('free plan')).toBeInTheDocument();
+    expect(screen.getByText('Free for all users · 2 users')).toBeInTheDocument();
     expect(screen.queryByText(/Status:/)).not.toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByText('900 / 1,000 blocks')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Upgrade to Plus' })).toBeEnabled();
+    expect(screen.getByText('Upgrade to Plus plan')).toBeInTheDocument();
+    expect(screen.getByText('$12 per user/mo')).toBeInTheDocument();
+    expect(screen.getByText('Unlimited blocks')).toBeInTheDocument();
+    expect(screen.getByText('Unlimited workspace members')).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Upgrade now' }),
+    ).toBeEnabled();
   });
 
   it('shows customer-friendly copy for a past due Plus subscription', () => {
@@ -108,7 +113,7 @@ describe('BillingPanel integration', () => {
       />,
     );
 
-    expect(screen.getByText('plus')).toBeInTheDocument();
+    expect(screen.getByText('plus plan')).toBeInTheDocument();
     expect(screen.getByText('Payment issue')).toBeInTheDocument();
     expect(screen.queryByText('past_due')).not.toBeInTheDocument();
   });
@@ -137,7 +142,7 @@ describe('BillingPanel integration', () => {
       />,
     );
 
-    await user.click(screen.getByRole('button', { name: 'Upgrade to Plus' }));
+    await user.click(screen.getByRole('button', { name: 'Upgrade now' }));
 
     expect(createCheckoutSessionMock).toHaveBeenCalledWith('workspace-1', {
       return_url: 'http://localhost:4000/w/acme-product/settings/billing',

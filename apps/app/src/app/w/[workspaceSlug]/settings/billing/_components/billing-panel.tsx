@@ -1,6 +1,7 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CheckIcon } from 'lucide-react';
 
 import { Button } from '@shared/components/ui/button';
 import {
@@ -12,11 +13,20 @@ import {
   useSubscriptionSummaryQuery,
 } from '@/domains/subscription';
 import type { Workspace } from '@/domains/workspace';
+import { SettingsRow } from '../../_components/settings-section';
 
 const subscriptionStatusLabels: Partial<Record<SubscriptionStatus, string>> = {
   past_due: 'Payment issue',
   canceling: 'Cancels at period end',
 };
+
+const upgradeFeatures = [
+  'Unlimited blocks',
+  'Unlimited workspace members',
+  'Seat-based billing',
+  'Workspace-level collaboration',
+  'Active content remains editable',
+];
 
 export function BillingPanel({
   initialSubscription,
@@ -39,10 +49,6 @@ export function BillingPanel({
   const isPaid = subscription.plan === 'plus' && subscription.status !== 'free';
   const subscriptionStatusLabel = subscriptionStatusLabels[subscription.status];
 
-  const usageLabel = subscription.block_limit === null
-    ? `${subscription.block_count.toLocaleString()} blocks`
-    : `${subscription.block_count.toLocaleString()} / ${subscription.block_limit.toLocaleString()} blocks`;
-
   const checkoutMutation = useMutation({
     mutationFn: () => createCheckoutSession(workspaceId, {
       return_url: window.location.href,
@@ -62,78 +68,96 @@ export function BillingPanel({
   });
 
   return (
-    <section className="rounded-2xl border bg-muted/20 p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <p className="text-sm font-medium">Current plan</p>
-          <p className="text-3xl font-semibold capitalize">{subscription.plan}</p>
-          {subscriptionStatusLabel
+    <section className="space-y-4">
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <SettingsRow
+          title={(
+            <span className="capitalize">{subscription.plan} plan</span>
+          )}
+          description={(
+            <>
+              {isPaid ? 'Plus workspace' : 'Free for all users'}
+              {' · '}
+              {subscription.seat_count.toLocaleString()}{' '}
+              {subscription.seat_count === 1 ? 'user' : 'users'}
+              {subscriptionStatusLabel
+                ? (
+                  <>
+                    <br />
+                    Status: <span>{subscriptionStatusLabel}</span>
+                  </>
+                )
+                : null}
+            </>
+          )}
+          showDivider={false}
+        >
+          {isPaid
             ? (
-              <p className="text-sm text-muted-foreground">
-                Status: <span>{subscriptionStatusLabel}</span>
-              </p>
+              <Button
+                variant="outline"
+                disabled={
+                  !canCancel
+                  || cancelMutation.isPending
+                  || subscription.cancel_at_period_end
+                }
+                onClick={() => cancelMutation.mutate()}
+              >
+                {subscription.cancel_at_period_end
+                  ? 'Cancellation scheduled'
+                  : 'Cancel Plus'}
+              </Button>
             )
             : null}
-        </div>
+        </SettingsRow>
       </div>
 
-      <dl className="mt-6 grid gap-3 sm:grid-cols-2">
-        <UsageMetric label="Seats" value={subscription.seat_count.toLocaleString()} />
-        <UsageMetric label="Block usage" value={usageLabel} />
-      </dl>
-
-      <div className="mt-6 flex flex-wrap gap-2">
-        {isPaid
-          ? (
-            <Button
-              variant="outline"
-              disabled={!canCancel || cancelMutation.isPending || subscription.cancel_at_period_end}
-              onClick={() => cancelMutation.mutate()}
-            >
-              {subscription.cancel_at_period_end ? 'Cancellation scheduled' : 'Cancel Plus'}
-            </Button>
-          )
-          : (
-            <Button
-              disabled={!canStartCheckout || checkoutMutation.isPending}
-              onClick={() => checkoutMutation.mutate()}
-            >
-              {checkoutMutation.isPending ? 'Starting checkout...' : 'Upgrade to Plus'}
-            </Button>
-          )}
-      </div>
-
-      {!canStartCheckout
+      {!isPaid
         ? (
-          <p className="mt-3 text-sm text-muted-foreground">
-            Members can view billing, but only admins and owners can manage it.
-          </p>
+          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <SettingsRow
+              title="Upgrade to Plus plan"
+              description="$12 per user/mo"
+            >
+              <Button
+                size="lg"
+                disabled={!canStartCheckout || checkoutMutation.isPending}
+                onClick={() => checkoutMutation.mutate()}
+              >
+                {checkoutMutation.isPending
+                  ? 'Starting checkout...'
+                  : 'Upgrade now'}
+              </Button>
+            </SettingsRow>
+
+            <div className="p-5">
+              <ul className="grid gap-x-8 gap-y-3 text-sm text-muted-foreground sm:grid-cols-2 lg:grid-cols-3">
+                {upgradeFeatures.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2">
+                    <CheckIcon className="size-4 shrink-0 text-primary" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         )
         : null}
+
       {isPaid && !canCancel
         ? (
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Only workspace owners can cancel Plus.
           </p>
         )
         : null}
+      {!canStartCheckout && !isPaid
+        ? (
+          <p className="text-sm text-muted-foreground">
+            Members can view billing, but only admins and owners can manage it.
+          </p>
+        )
+        : null}
     </section>
-  );
-}
-
-function UsageMetric({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-lg border bg-background p-3">
-      <dt className="text-xs font-medium uppercase text-muted-foreground">
-        {label}
-      </dt>
-      <dd className="mt-1 text-sm font-medium">{value}</dd>
-    </div>
   );
 }
