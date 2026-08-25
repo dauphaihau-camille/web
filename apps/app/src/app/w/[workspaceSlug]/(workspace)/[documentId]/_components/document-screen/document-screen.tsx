@@ -127,7 +127,7 @@ function DocumentScreenContent({
         : null}
 
       <div
-        className="fixed inset-x-0 z-10 bg-background px-2 backdrop-blur md:left-(--sidebar-width)"
+        className="fixed inset-x-0 z-10 bg-surface px-2 md:left-(--sidebar-width)"
         style={{ top: fixedHeaderOffset }}
       >
         <div className="flex h-11 items-center justify-between gap-3">

@@ -46,7 +46,7 @@ export function BlockLimitCard({
       : 'Workspace block limit';
 
   return (
-    <aside className="shrink-0 border-t border-sidebar-border bg-sidebar p-3">
+    <aside className="shrink-0 bg-sidebar p-3">
       <div className="rounded-lg border border-sidebar-border bg-sidebar-accent/60 p-3">
         <div className="space-y-2">
           <div className="space-y-1">
@@ -55,8 +55,8 @@ export function BlockLimitCard({
             </p>
             <p
               className={cn(
-                'text-xs leading-5 text-sidebar-foreground/70',
-                isHighUsage ? 'text-destructive' : '',
+                'text-xs leading-5 text-sidebar-foreground/90 font-medium',
+                isHighUsage ? 'text-destructive-surface-foreground' : '',
               )}
             >
               This workspace has used{' '}
@@ -74,7 +74,7 @@ export function BlockLimitCard({
             className={cn(
               'h-1.5 bg-sidebar-border [&_[data-slot=progress-indicator]]:bg-sidebar-foreground/70',
               isHighUsage
-                ? '[&_[data-slot=progress-indicator]]:bg-destructive'
+                ? '[&_[data-slot=progress-indicator]]:bg-destructive-surface-foreground'
                 : '',
             )}
           />

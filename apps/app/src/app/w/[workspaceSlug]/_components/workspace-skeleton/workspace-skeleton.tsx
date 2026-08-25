@@ -9,11 +9,12 @@ import { WorkspaceSidebarSkeleton } from './workspace-sidebar-skeleton';
 
 export function WorkspaceSkeleton() {
   return (
-    <SidebarProvider className="h-svh min-h-svh items-stretch overflow-hidden">
+    <SidebarProvider className="h-svh min-h-svh items-stretch overflow-hidden bg-surface text-surface-foreground">
       <WorkspaceSidebarSkeleton />
-      <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-background shadow-sm">
+      <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-transparent shadow-sm">
         <ScrollFade
           direction="y"
+          fadeColor="var(--surface)"
           topOffset="2.75rem"
           className="h-full overflow-y-auto px-5"
           fadeSize="3rem"
