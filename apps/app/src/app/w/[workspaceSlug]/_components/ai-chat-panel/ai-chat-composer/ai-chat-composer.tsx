@@ -31,7 +31,7 @@ export function AiChatComposer({
 }: AiChatComposerProps) {
   return (
     <form
-      className="shrink-0 p-3 pt-0"
+      className="relative z-10 shrink-0  p-3 pt-0"
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit();

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { HTTPError } from 'ky';
 
 import { apiGet, apiPost, apiRequest } from '@shared/lib/api-client';
 
@@ -51,6 +52,24 @@ const aiChatTurnListSchema = z.object({
   meta: cursorPaginationMetaSchema,
 });
 
+const aiResponseEntitlementSchema = z.object({
+  workspace_id: z.string().min(1),
+  plan: z.string().min(1),
+  allowance: z.number().nullable(),
+  used_responses: z.number(),
+  reserved_responses: z.number(),
+  remaining_responses: z.number().nullable(),
+  limit_reached: z.boolean(),
+  upgrade_available: z.boolean(),
+});
+
+const aiResponseLimitReachedSchema = z.object({
+  code: z.literal('ai_response_limit_reached'),
+  message: z.string(),
+  remaining_responses: z.number(),
+  upgrade_available: z.boolean(),
+});
+
 const aiChatTurnStreamEventSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('started'),
@@ -74,7 +93,17 @@ export type AiConversationSession = z.infer<typeof aiConversationSessionSchema>;
 export type AiChatTurn = z.infer<typeof aiChatTurnSchema>;
 export type AiChatTurnPage = z.infer<typeof aiChatTurnListSchema>;
 export type AiChatTurnStreamEvent = z.infer<typeof aiChatTurnStreamEventSchema>;
+export type AiResponseEntitlement = z.infer<typeof aiResponseEntitlementSchema>;
+export type AiResponseLimitReached = z.infer<typeof aiResponseLimitReachedSchema>;
 
+
+export async function getAiResponseEntitlement(
+  workspaceId: string,
+): Promise<AiResponseEntitlement> {
+  const response = await apiGet<unknown>(`workspaces/${workspaceId}/ai/entitlement`);
+
+  return aiResponseEntitlementSchema.parse(response);
+}
 export async function listAiConversationSessions(
   workspaceId: string,
   options: { q?: string } = {},
@@ -183,6 +212,16 @@ export async function streamAiChatTurn(
 
   buffer += decoder.decode();
   parseStreamLines(buffer, onEvent, { flush: true });
+}
+
+export function getAiResponseLimitReachedData(error: unknown): AiResponseLimitReached | null {
+  if (!(error instanceof HTTPError) || error.response.status !== 403) {
+    return null;
+  }
+
+  const result = aiResponseLimitReachedSchema.safeParse(error.data);
+
+  return result.success ? result.data : null;
 }
 
 function parseStreamLines(

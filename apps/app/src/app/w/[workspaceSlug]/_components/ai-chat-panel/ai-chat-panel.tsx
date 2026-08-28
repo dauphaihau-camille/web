@@ -1,5 +1,6 @@
 import { cn } from '@shared/lib/utils';
 
+import { AiChatLimitCard } from './ai-chat-limit-card';
 import { AiChatComposer } from './ai-chat-composer/ai-chat-composer';
 import { emptyChatSuggestions } from './ai-chat-panel.constants';
 import { AiChatPanelHeader } from './ai-chat-panel-header';
@@ -21,6 +22,7 @@ export function AiChatPanel({
     canSubmitMessage,
     draftMessage,
     isBusy,
+    isWorkspaceAiLimitReached,
     isSearchingSessions,
     messages,
     loadOlderTurns,
@@ -94,6 +96,8 @@ export function AiChatPanel({
             />
           )
           : null}
+
+        {isWorkspaceAiLimitReached ? <AiChatLimitCard /> : null}
 
         <AiChatComposer
           canSubmit={canSubmitMessage}

@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { HTTPError } from 'ky';
 import userEvent from '@testing-library/user-event';
 
 const {
   createAiConversationSessionMock,
   getWorkspaceMock,
+  getAiResponseLimitReachedDataMock,
+  getAiResponseEntitlementMock,
   listAiChatTurnsMock,
   listAiConversationSessionsMock,
   streamAiChatTurnMock,
@@ -12,6 +15,17 @@ const {
 } = vi.hoisted(() => ({
   createAiConversationSessionMock: vi.fn(),
   getWorkspaceMock: vi.fn(),
+  getAiResponseLimitReachedDataMock: vi.fn((error: { data?: unknown }) => {
+    const data = error.data;
+
+    return typeof data === 'object'
+      && data !== null
+      && 'code' in data
+      && data.code === 'ai_response_limit_reached'
+      ? data
+      : null;
+  }),
+  getAiResponseEntitlementMock: vi.fn(),
   listAiChatTurnsMock: vi.fn(),
   listAiConversationSessionsMock: vi.fn(),
   streamAiChatTurnMock: vi.fn(),
@@ -31,6 +45,8 @@ vi.mock('@/domains/workspace', () => ({
 
 vi.mock('./ai-chat-panel.requests', () => ({
   createAiConversationSession: createAiConversationSessionMock,
+  getAiResponseLimitReachedData: getAiResponseLimitReachedDataMock,
+  getAiResponseEntitlement: getAiResponseEntitlementMock,
   listAiChatTurns: listAiChatTurnsMock,
   listAiConversationSessions: listAiConversationSessionsMock,
   streamAiChatTurn: streamAiChatTurnMock,
@@ -70,6 +86,8 @@ function renderAiChat(children = <main />) {
 beforeEach(() => {
   createAiConversationSessionMock.mockReset();
   getWorkspaceMock.mockReset();
+  getAiResponseLimitReachedDataMock.mockClear();
+  getAiResponseEntitlementMock.mockReset();
   listAiChatTurnsMock.mockReset();
   listAiConversationSessionsMock.mockReset();
   streamAiChatTurnMock.mockReset();
@@ -82,6 +100,16 @@ beforeEach(() => {
     current_user_role: 'member',
     created_at: '2026-01-01T00:00:00.000Z',
     updated_at: '2026-01-01T00:00:00.000Z',
+  });
+  getAiResponseEntitlementMock.mockResolvedValue({
+    workspace_id: 'workspace-1',
+    plan: 'free',
+    allowance: 20,
+    used_responses: 4,
+    reserved_responses: 0,
+    remaining_responses: 16,
+    limit_reached: false,
+    upgrade_available: false,
   });
   listAiConversationSessionsMock.mockResolvedValue([
     {
@@ -330,6 +358,71 @@ describe('AiChatPanel', () => {
       message: 'Summarize this page',
       documentIds: [],
     }, expect.any(Function));
+  });
+
+  it('shows the workspace AI limit card and blocks sends when responses are exhausted', async () => {
+    const user = userEvent.setup();
+    getAiResponseEntitlementMock.mockResolvedValue({
+      workspace_id: 'workspace-1',
+      plan: 'free',
+      allowance: 20,
+      used_responses: 20,
+      reserved_responses: 0,
+      remaining_responses: 0,
+      limit_reached: true,
+      upgrade_available: false,
+    });
+    renderAiChat();
+
+    await user.click(screen.getByRole('button', { name: 'Open AI chat' }));
+    await waitFor(() => {
+      expect(screen.getByText('Workspace AI limit reached')).toBeInTheDocument();
+    });
+    await user.type(screen.getByRole('textbox', { name: 'Message AI' }), 'Try anyway');
+
+    expect(screen.getByRole('button', { name: 'Upgrade Camille AI' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
+
+    await user.click(screen.getByRole('button', { name: 'Dock AI limit notice' }));
+
+    expect(screen.getByText('Workspace AI limit reached')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show AI limit details' })).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('button', { name: 'Upgrade Camille AI' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Show AI limit details' }));
+
+    expect(screen.getByRole('button', { name: 'Dock AI limit notice' })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Upgrade Camille AI' })).toBeDisabled();
+    expect(streamAiChatTurnMock).not.toHaveBeenCalled();
+  });
+
+  it('shows the workspace AI limit card when streaming is rejected by the backend limit', async () => {
+    const user = userEvent.setup();
+    const error = new HTTPError(
+      new Response(null, { status: 403, statusText: 'Forbidden' }),
+      new Request('http://localhost/v1/workspaces/workspace-1/ai/conversations/session-new/turns/stream'),
+      {} as never,
+    );
+    error.data = {
+      code: 'ai_response_limit_reached',
+      message: 'Workspace AI trial responses are exhausted',
+      remaining_responses: 0,
+      upgrade_available: false,
+    };
+    streamAiChatTurnMock.mockRejectedValue(error);
+    renderAiChat();
+
+    await user.click(screen.getByRole('button', { name: 'Open AI chat' }));
+    await waitFor(() => {
+      expect(screen.getByRole('textbox', { name: 'Message AI' })).toBeEnabled();
+    });
+    await user.type(screen.getByRole('textbox', { name: 'Message AI' }), 'What are the risks?');
+    await user.click(screen.getByRole('button', { name: 'Send message' }));
+
+    await waitFor(() => {
+      expect(screen.getByText('Workspace AI limit reached')).toBeInTheDocument();
+    });
+    expect(toastMock).toHaveBeenCalledWith('Workspace AI trial responses are exhausted');
   });
 
   it('sends typed composer messages to the AI chat turn API', async () => {

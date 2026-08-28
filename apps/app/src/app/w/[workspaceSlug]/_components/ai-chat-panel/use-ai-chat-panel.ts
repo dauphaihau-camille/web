@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 
 import { getWorkspace, workspaceKeys } from '@/domains/workspace';
 import {
+  getAiResponseEntitlement,
+  getAiResponseLimitReachedData,
   streamAiChatTurn,
 } from './ai-chat-panel.requests';
 import type {
@@ -26,6 +28,7 @@ export function useAiChatPanel({
   const queryClient = useQueryClient();
   const [draftMessage, setDraftMessage] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
+  const [hasReachedAiLimit, setHasReachedAiLimit] = useState(false);
 
   const workspaceQuery = useQuery({
     queryKey: workspaceKeys.detail(workspaceSlug),
@@ -36,18 +39,30 @@ export function useAiChatPanel({
 
   const conversationSessions = useAiConversationSessions({ workspaceId });
 
+  const aiEntitlementQuery = useQuery({
+    queryKey: ['ai-entitlement', workspaceId],
+    queryFn: () => getAiResponseEntitlement(workspaceId ?? ''),
+    enabled: Boolean(workspaceId),
+  });
+
   const conversationMessages = useAiConversationMessages({
     selectedSessionId: conversationSessions.selectedSession.id,
     workspaceId,
   });
 
+  const isWorkspaceAiLimitReached = hasReachedAiLimit
+    || aiEntitlementQuery.data?.limit_reached === true;
+
   const isBusy = workspaceQuery.isLoading
+    || aiEntitlementQuery.isLoading
     || conversationSessions.isLoadingSessions
     || conversationSessions.isCreatingSession
     || conversationMessages.isLoadingTurns
     || isStreaming;
 
-  const canSubmitMessage = !isBusy && draftMessage.trim().length > 0;
+  const canSubmitMessage = !isBusy
+    && !isWorkspaceAiLimitReached
+    && draftMessage.trim().length > 0;
 
   async function ensureSession() {
     if (conversationSessions.selectedSession.id !== localDraftSessionId) {
@@ -61,7 +76,7 @@ export function useAiChatPanel({
   }
 
   async function sendMessage(content: string) {
-    if (isBusy || content.trim().length === 0) {
+    if (isBusy || isWorkspaceAiLimitReached || content.trim().length === 0) {
       return;
     }
 
@@ -88,6 +103,9 @@ export function useAiChatPanel({
           void queryClient.invalidateQueries({
             queryKey: ['ai-conversations', workspaceId],
           });
+          void queryClient.invalidateQueries({
+            queryKey: ['ai-entitlement', workspaceId],
+          });
           return;
         }
 
@@ -97,6 +115,14 @@ export function useAiChatPanel({
       });
     }
     catch (error) {
+      const aiLimitError = getAiResponseLimitReachedData(error);
+
+      if (aiLimitError) {
+        setHasReachedAiLimit(true);
+        toast(aiLimitError.message);
+        return;
+      }
+
       if (error instanceof Error && error.message === 'Workspace is not loaded') {
         toast('Workspace is still loading');
         return;
@@ -140,6 +166,7 @@ export function useAiChatPanel({
 
   return {
     canSubmitMessage,
+    isWorkspaceAiLimitReached,
     draftMessage,
     isBusy,
     isSearchingSessions: conversationSessions.isSearchingSessions,
