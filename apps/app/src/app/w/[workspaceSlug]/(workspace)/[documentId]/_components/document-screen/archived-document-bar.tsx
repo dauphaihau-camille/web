@@ -31,7 +31,7 @@ export function ArchivedDocumentBar({
   return (
     <>
       <div
-        className="fixed inset-x-0 z-20 h-12 border-b border-white/15 bg-[#ff4d57]/90 px-5 text-white md:left-(--sidebar-width)"
+        className="fixed inset-x-0 z-20 h-12 border-b border-white/15 bg-[#ff4d57]/90 px-5 text-white md:left-(--sidebar-width) md:right-[var(--workspace-right-rail-reserved-width,0rem)]"
         style={{ top: offsetTop }}
       >
         <div className="flex h-full items-center justify-center gap-3 text-center text-sm font-medium">

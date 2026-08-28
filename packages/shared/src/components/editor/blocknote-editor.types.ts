@@ -47,6 +47,13 @@ export type CollaborativeContentChangeContext = {
   previousBlockCount: number;
 };
 
+export type BlockNoteAppendBlocksRequest = {
+  id: string;
+  blocks: unknown[];
+  metadata?: Record<string, unknown>;
+  onComplete: (result: { ok: boolean }) => void;
+};
+
 export type BlockNoteEditorProps = {
   collaboration?: CollaborationOptions;
   documentTitle: string;
@@ -56,6 +63,7 @@ export type BlockNoteEditorProps = {
   editable?: boolean;
   suppressHoverControls?: boolean;
   documentOperations?: BlockNoteDocumentOperations;
+  appendBlocksRequest?: BlockNoteAppendBlocksRequest;
   onContentChangeAction?: (content: unknown[]) => Promise<void>;
   onCreateSubdocAction?: (input?: {
     anchorBlockId?: string;

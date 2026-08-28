@@ -9,6 +9,7 @@ import { blockNoteViewClassName } from './blocknote-view-class-name';
 import type { CreateBlockNoteEditorClientOptions } from './create-blocknote-editor-client.types';
 import { dragHandleMenuSelectionExtension } from './drag-handle-menu-selection-extension';
 import { editorKeyboardExtension } from './editor-keyboard-extension';
+import { useAppendBlocksRequest } from './_hooks/use-append-blocks-request';
 import { useEditorKeyboardCapture } from './_hooks/use-editor-keyboard-capture';
 import { useEditorSaveController } from './_hooks/use-editor-save-controller';
 import { useExternalSubdocCreated } from './_hooks/use-external-subdoc-created';
@@ -29,6 +30,7 @@ export function createBlockNoteEditorClient({
   const hiddenSlashMenuTitleSet = new Set(hiddenSlashMenuTitles);
 
   return function BlockNoteEditorClient({
+    appendBlocksRequest,
     collaboration,
     documentTitle,
     content,
@@ -91,6 +93,13 @@ export function createBlockNoteEditorClient({
       onContentChangeAction,
       onStartContentChangeAction,
       shouldSkipSaveWhileExecutingSlashCommand,
+    });
+
+    useAppendBlocksRequest({
+      appendBlocksRequest,
+      editor,
+      isEditable,
+      onCollaborativeContentChangeAction,
     });
 
     const {

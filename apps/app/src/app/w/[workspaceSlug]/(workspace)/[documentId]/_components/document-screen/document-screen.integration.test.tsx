@@ -2,19 +2,47 @@ import {
   act,
   fireEvent,
   screen,
+  waitFor,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import * as Yjs from 'yjs';
 
 import type { Document } from '@/domains/document';
 import { renderWithProviders } from '@shared/test/render';
 
 import { DocumentScreen } from './document-screen';
+import { WorkspaceAiChatShell } from '../../../../_components/workspace-ai-chat-shell';
 
 const collaborationMock = vi.hoisted(() => ({
   document: undefined as Yjs.Doc | undefined,
   onDocumentUpdatedAtChange: undefined as
     | ((updatedAt: string) => void)
     | undefined,
+}));
+
+const editorMock = vi.hoisted(() => ({
+  appendedBlocks: [] as unknown[][],
+}));
+
+const aiChatMock = vi.hoisted(() => ({
+  getWorkspace: vi.fn(),
+  listAiConversationSessions: vi.fn(),
+  listAiChatTurns: vi.fn(),
+  streamAiChatTurn: vi.fn(),
+}));
+
+vi.mock('@/domains/workspace', () => ({
+  getWorkspace: aiChatMock.getWorkspace,
+  workspaceKeys: {
+    detail: (workspaceSlug: string) => ['workspace', workspaceSlug],
+  },
+}));
+
+vi.mock('../../../../_components/ai-chat-panel/ai-chat-panel.requests', () => ({
+  createAiConversationSession: vi.fn(),
+  listAiChatTurns: aiChatMock.listAiChatTurns,
+  listAiConversationSessions: aiChatMock.listAiConversationSessions,
+  streamAiChatTurn: aiChatMock.streamAiChatTurn,
 }));
 
 vi.mock('next/link', () => ({
@@ -30,12 +58,21 @@ vi.mock('next/link', () => ({
 vi.mock('@shared/components/editor/create-blocknote-editor-loader', () => ({
   createBlockNoteEditorLoader: () =>
     function MockBlockNoteEditorLoader({
+      appendBlocksRequest,
       onCollaborativeContentChangeAction,
       suppressHoverControls,
     }: {
+      appendBlocksRequest?: {
+        blocks: unknown[];
+        onComplete: (result: { ok: boolean }) => void;
+      };
       onCollaborativeContentChangeAction?: () => void;
       suppressHoverControls?: boolean;
     }) {
+      if (appendBlocksRequest) {
+        editorMock.appendedBlocks.push(appendBlocksRequest.blocks);
+        appendBlocksRequest.onComplete({ ok: true });
+      }
       return (
         <button
           type="button"
@@ -185,12 +222,18 @@ const documentFixture: Document = {
   },
 };
 
-function renderDocumentScreen() {
-  return renderWithProviders(
+function renderDocumentScreen({ withAiShell = false } = {}) {
+  const documentScreen = (
     <DocumentScreen
       document={documentFixture}
       workspaceSlug="acme"
-    />,
+    />
+  );
+
+  return renderWithProviders(
+    withAiShell
+      ? <WorkspaceAiChatShell workspaceSlug="acme">{documentScreen}</WorkspaceAiChatShell>
+      : documentScreen,
   );
 }
 
@@ -209,6 +252,91 @@ async function advanceRevealDelay() {
     vi.advanceTimersByTime(180);
   });
 }
+
+describe('DocumentScreen AI append action', () => {
+  beforeEach(() => {
+    editorMock.appendedBlocks = [];
+    collaborationMock.document = new Yjs.Doc();
+    collaborationMock.onDocumentUpdatedAtChange = undefined;
+    aiChatMock.getWorkspace.mockReset();
+    aiChatMock.listAiConversationSessions.mockReset();
+    aiChatMock.listAiChatTurns.mockReset();
+    aiChatMock.streamAiChatTurn.mockReset();
+    aiChatMock.getWorkspace.mockResolvedValue({
+      id: 'workspace-1',
+      version: 1,
+      name: 'Acme',
+      slug: 'acme',
+      current_user_role: 'member',
+      created_at: '2026-01-01T00:00:00.000Z',
+      updated_at: '2026-01-01T00:00:00.000Z',
+    });
+    aiChatMock.listAiConversationSessions.mockResolvedValue([
+      {
+        id: 'untitled',
+        workspace_id: 'workspace-1',
+        title: 'Untitled',
+        group: 'Past week',
+        created_at: '2026-01-01T00:00:00.000Z',
+        updated_at: '2026-01-01T00:00:00.000Z',
+      },
+    ]);
+    aiChatMock.listAiChatTurns.mockResolvedValue({
+      items: [],
+      meta: { limit: 50, has_more: false },
+    });
+    aiChatMock.streamAiChatTurn.mockImplementation(async (_workspaceId, input, onEvent) => {
+      onEvent({ type: 'delta', text: 'classic streaming scroll problem' });
+      onEvent({
+        type: 'done',
+        turn: {
+          id: 'mock-assistant-streaming-scroll',
+          session_id: input.sessionId,
+          user_message: input.message,
+          assistant_response: 'classic streaming scroll problem',
+          status: 'completed',
+          attachments: [],
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+        },
+      });
+    });
+  });
+
+  it('appends a completed assistant response through the active document editor', async () => {
+    const user = userEvent.setup();
+
+    renderDocumentScreen({ withAiShell: true });
+
+    await user.click(screen.getByRole('button', { name: 'Open AI chat' }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Selected chat session: New AI chat' })).toBeInTheDocument();
+    });
+    await user.click(screen.getByRole('button', { name: 'Selected chat session: New AI chat' }));
+    await user.click(screen.getByRole('button', { name: 'Untitled' }));
+    await user.click(screen.getByRole('button', { name: 'Summarize this page' }));
+    await waitFor(() => {
+      expect(screen.getByText('classic streaming scroll problem')).toBeInTheDocument();
+    });
+    await user.click(screen.getAllByRole('button', { name: 'Append to this document' })[0]);
+
+    await waitFor(() => {
+      expect(editorMock.appendedBlocks[0]).toContainEqual({
+        type: 'paragraph',
+        content: [{ type: 'text', text: expect.stringContaining('classic streaming scroll problem') }],
+      });
+    });
+    expect(screen.getByRole('complementary', { name: 'AI chat' })).toBeInTheDocument();
+    expect(collaborationMock.document?.getArray('ai_assisted_edit_metadata').toArray()).toEqual([
+      expect.objectContaining({
+        actionType: 'append',
+        assistantMessageId: 'assistant-untitled-mock-assistant-streaming-scroll',
+        conversationSessionId: 'untitled',
+        actorName: 'Owner',
+      }),
+    ]);
+  });
+});
 
 describe('DocumentScreen chrome visibility', () => {
   beforeEach(() => {

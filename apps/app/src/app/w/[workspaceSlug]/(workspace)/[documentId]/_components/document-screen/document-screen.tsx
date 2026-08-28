@@ -12,6 +12,8 @@ import { PublishedDocumentBar } from './published-document-bar';
 import { useDocumentTitle } from './_hooks/use-document-title';
 import { DOCUMENT_LOCAL_EDIT_ORIGIN } from './_hooks/use-document-session-undo-redo';
 import { useDocumentScreenState } from './_hooks/use-document-screen-state';
+import { useDocumentAiAppend } from './_hooks/use-document-ai-append';
+import { useDocumentScreenChrome } from './_hooks/use-document-screen-chrome';
 import { DocumentScreenBodySkeleton } from '../../../../_components/workspace-skeleton/document-screen-skeleton';
 
 const BlockNoteEditorLoader = createBlockNoteEditorLoader(
@@ -82,22 +84,24 @@ function DocumentScreenContent({
     workspaceSlug,
   });
 
-  const isPublished = Boolean(
-    documentToolbar.publishStatus?.published_document_id,
-  );
-  const isArchived = Boolean(document.archived_at);
+  const {
+    fixedHeaderOffset,
+    isArchived,
+    publishedBarOffset,
+    showCollaborators,
+  } = useDocumentScreenChrome({
+    activeMemberCount: documentCollaboration.activeMemberCount,
+    document,
+    isPublished: Boolean(documentToolbar.publishStatus?.published_document_id),
+  });
 
-  const statusBarHeight = 48;
-
-  const showCollaborators =
-    document.collaboration?.enabled === true
-    && documentCollaboration.activeMemberCount >= 2;
-
-  const publishedBarOffset = isArchived ? statusBarHeight : 0;
-
-  const fixedHeaderOffset =
-    (isPublished ? statusBarHeight : 0) +
-    (isArchived ? statusBarHeight : 0);
+  const { appendBlocksRequest } = useDocumentAiAppend({
+    canEditDocument,
+    collaborationDocument: documentCollaboration.document,
+    collaborationUserName: documentCollaboration.collaboration.user.name,
+    documentId,
+    savedTitle,
+  });
 
   return (
     <section
@@ -127,7 +131,7 @@ function DocumentScreenContent({
         : null}
 
       <div
-        className="fixed inset-x-0 z-10 bg-surface px-2 md:left-(--sidebar-width)"
+        className="fixed inset-x-0 z-10 bg-surface px-2 md:left-(--sidebar-width) md:right-[var(--workspace-right-rail-reserved-width,0rem)]"
         style={{ top: fixedHeaderOffset }}
       >
         <div className="flex h-11 items-center justify-between gap-3">
@@ -202,6 +206,7 @@ function DocumentScreenContent({
 
               <div ref={bodyEditorRef}>
                 <BlockNoteEditorLoader
+                  appendBlocksRequest={appendBlocksRequest}
                   key={documentId}
                   collaboration={documentCollaboration.collaboration}
                   documentId={documentId}
