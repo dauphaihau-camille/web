@@ -9,12 +9,12 @@ import {
   getAiResponseEntitlement,
   getAiResponseLimitReachedData,
   streamAiChatTurn,
-} from './ai-chat-panel.requests';
+} from '../ai-chat-panel.requests';
 import type {
   AiChatDocumentBadge,
   ChatMessage,
   ChatSuggestion,
-} from './ai-chat-panel.types';
+} from '../ai-chat-panel.types';
 import { localDraftSessionId, useAiConversationSessions } from './use-ai-conversation-sessions';
 import { useAiConversationMessages } from './use-ai-conversation-messages';
 
@@ -80,11 +80,15 @@ export function useAiChatPanel({
       return;
     }
 
+    let pendingSessionId: string | null = null;
+
     try {
       const session = await ensureSession();
+      pendingSessionId = session.id;
       const userMessage = createUserMessage(content.trim());
 
       conversationMessages.appendSessionMessage(session.id, userMessage);
+      conversationMessages.startAssistantResponse(session.id);
       setIsStreaming(true);
 
       await streamAiChatTurn(workspaceId ?? '', {
@@ -110,6 +114,7 @@ export function useAiChatPanel({
         }
 
         if (event.type === 'error') {
+          conversationMessages.removePendingAssistantResponse(session.id);
           toast(event.message);
         }
       });
@@ -118,16 +123,25 @@ export function useAiChatPanel({
       const aiLimitError = getAiResponseLimitReachedData(error);
 
       if (aiLimitError) {
+        if (pendingSessionId) {
+          conversationMessages.removePendingAssistantResponse(pendingSessionId);
+        }
         setHasReachedAiLimit(true);
         toast(aiLimitError.message);
         return;
       }
 
       if (error instanceof Error && error.message === 'Workspace is not loaded') {
+        if (pendingSessionId) {
+          conversationMessages.removePendingAssistantResponse(pendingSessionId);
+        }
         toast('Workspace is still loading');
         return;
       }
 
+      if (pendingSessionId) {
+        conversationMessages.removePendingAssistantResponse(pendingSessionId);
+      }
       toast('Could not get AI response');
     }
     finally {

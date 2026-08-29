@@ -17,9 +17,11 @@ export function EmptyChatSuggestions({
 }: EmptyChatSuggestionsProps) {
   return (
     <section className="shrink-0 px-4 pb-4" aria-label="Suggested AI actions">
-      <div className="space-y-4">
-        <BotIcon className="size-10" />
-        <h3 className="text-xl font-semibold tracking-tight">How can I help you today?</h3>
+      <div className="space-y-2">
+        <div className="space-y-1">
+          <BotIcon className="size-10" />
+          <h3 className="text-xl font-semibold tracking-tight">How can I help you today?</h3>
+        </div>
 
         <div className="grid gap-1 -mx-2">
           {suggestions.map((suggestion) => {

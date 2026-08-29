@@ -7,7 +7,7 @@ import { AiChatPanelHeader } from './ai-chat-panel-header';
 import { AiChatMessageList } from './ai-chat-message-list/ai-chat-message-list';
 import type { AiChatPanelProps } from './ai-chat-panel.types';
 import { EmptyChatSuggestions } from './empty-chat-suggestions';
-import { useAiChatPanel } from './use-ai-chat-panel';
+import { useAiChatPanel } from './use-ai-chat-panel/use-ai-chat-panel';
 
 export function AiChatPanel({
   isOpen,
@@ -61,7 +61,7 @@ export function AiChatPanel({
         data-slot="ai-chat-panel"
         data-state={isOpen ? 'open' : 'closed'}
         className={cn(
-          'fixed inset-y-0 right-0 z-30 flex h-svh w-[min(100vw,var(--workspace-right-rail-width,30rem))] min-w-0 flex-col border-l border-border bg-background text-foreground shadow-xl transition-transform duration-200 ease-out md:static md:z-auto md:w-[var(--workspace-right-rail-width,30rem)] md:shrink-0 md:shadow-none md:transition-[width,opacity] md:duration-200',
+          'fixed inset-y-0 right-0 z-30 flex h-svh w-[min(100vw,var(--workspace-right-rail-width,30rem))] min-w-0 flex-col border-l border-border bg-surface text-foreground shadow-xl transition-transform duration-200 ease-out md:static md:z-auto md:w-[var(--workspace-right-rail-width,30rem)] md:shrink-0 md:shadow-none md:transition-[width,opacity] md:duration-200',
           isOpen
             ? 'translate-x-0 md:opacity-100'
             : 'translate-x-full md:w-0 md:translate-x-0 md:overflow-hidden md:border-l-0 md:opacity-0',

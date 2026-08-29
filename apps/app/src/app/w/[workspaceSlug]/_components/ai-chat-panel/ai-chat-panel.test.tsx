@@ -1,5 +1,10 @@
 import { useEffect } from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { HTTPError } from 'ky';
 import userEvent from '@testing-library/user-event';
 
@@ -83,6 +88,19 @@ function renderAiChat(children = <main />) {
   );
 }
 
+function createCompletedTurn(sessionId: string, message: string, assistantResponse: string) {
+  return {
+    id: 'turn-1',
+    session_id: sessionId,
+    user_message: message,
+    assistant_response: assistantResponse,
+    status: 'completed',
+    attachments: [],
+    created_at: '2026-01-01T00:00:00.000Z',
+    updated_at: '2026-01-01T00:00:00.000Z',
+  };
+}
+
 beforeEach(() => {
   createAiConversationSessionMock.mockReset();
   getWorkspaceMock.mockReset();
@@ -155,16 +173,7 @@ beforeEach(() => {
     onEvent({ type: 'delta', text: 'generated summary.' });
     onEvent({
       type: 'done',
-      turn: {
-        id: 'turn-1',
-        session_id: input.sessionId,
-        user_message: input.message,
-        assistant_response: 'Server generated summary.',
-        status: 'completed',
-        attachments: [],
-        created_at: '2026-01-01T00:00:00.000Z',
-        updated_at: '2026-01-01T00:00:00.000Z',
-      },
+      turn: createCompletedTurn(input.sessionId, input.message, 'Server generated summary.'),
     });
   });
 });
@@ -358,6 +367,58 @@ describe('AiChatPanel', () => {
       message: 'Summarize this page',
       documentIds: [],
     }, expect.any(Function));
+  });
+
+  it('shows a pending assistant response before the first stream delta', async () => {
+    const user = userEvent.setup();
+    let emitDelta: (() => void) | undefined;
+    let finishStream: (() => void) | undefined;
+
+    streamAiChatTurnMock.mockImplementation((_workspaceId, input, onEvent) => new Promise<void>((resolve) => {
+      emitDelta = () => {
+        onEvent({ type: 'delta', text: 'Server generated ' });
+      };
+      finishStream = () => {
+        onEvent({
+          type: 'done',
+          turn: createCompletedTurn(input.sessionId, input.message, 'Server generated summary.'),
+        });
+        resolve();
+      };
+    }));
+    const { container } = renderAiChat(<CurrentDocumentRegistration onAppendResponse={vi.fn()} />);
+
+    await user.click(screen.getByRole('button', { name: 'Open AI chat' }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Summarize this page' })).toBeEnabled();
+    });
+    await user.click(screen.getByRole('button', { name: 'Summarize this page' }));
+
+    expect(await screen.findByRole('status', { name: 'AI is thinking' })).toBeInTheDocument();
+    expect(screen.getByText('Churning')).toBeInTheDocument();
+    expect(screen.getByText('0.0s')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Copy response' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Append to this document' })).not.toBeInTheDocument();
+
+    await act(async () => {
+      emitDelta?.();
+    });
+
+    expect(container.querySelector('.stream-tail')).toHaveTextContent('ated');
+    expect(container.querySelector('[data-slot="stream-caret"]')).not.toBeNull();
+    expect(screen.queryByRole('button', { name: 'Copy response' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Append to this document' })).not.toBeInTheDocument();
+
+    await act(async () => {
+      finishStream?.();
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByRole('status', { name: 'AI is thinking' })).not.toBeInTheDocument();
+    });
+    expect(screen.getByText('Server generated summary.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy response' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Append to this document' })).toBeInTheDocument();
   });
 
   it('shows the workspace AI limit card and blocks sends when responses are exhausted', async () => {

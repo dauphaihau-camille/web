@@ -8,12 +8,12 @@ import {
   MessageScrollerViewport,
 } from '@/components/ui/message-scroller';
 
-import type { AiChatAppendResponse, ChatMessage } from '../ai-chat-panel.types';
-import { ChatBubble } from './chat-bubble';
+import type { AiChatAppendResponse, ChatMessage as AiChatMessage } from '../ai-chat-panel.types';
+import { ChatMessage } from './chat-message/chat-message';
 
 type AiChatMessageListProps = {
   isBusy: boolean;
-  messages: ChatMessage[];
+  messages: AiChatMessage[];
   onAppendResponse?: AiChatAppendResponse;
   onLoadOlder: () => void;
   selectedSessionId: string;
@@ -44,7 +44,7 @@ export function AiChatMessageList({
                 messageId={message.id}
                 scrollAnchor={message.role === 'user'}
               >
-                <ChatBubble message={message} selectedSessionId={selectedSessionId} onAppendResponse={onAppendResponse} />
+                <ChatMessage message={message} selectedSessionId={selectedSessionId} onAppendResponse={onAppendResponse} />
               </MessageScrollerItem>
             ))}
           </MessageScrollerContent>

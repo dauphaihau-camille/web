@@ -40,6 +40,7 @@
     --color-surface: var(--surface);
     --color-foreground: var(--foreground);
     --color-background: var(--background);
+    --color-ai-chat-composer: var(--ai-chat-composer);
     --radius-sm: calc(var(--radius) * 0.6);
     --radius-md: calc(var(--radius) * 0.8);
     --radius-lg: var(--radius);
@@ -54,6 +55,7 @@
     --foreground: oklch(0.145 0 0);
     --surface: color-mix(in oklab, var(--muted) 30%, var(--background));
     --surface-foreground: var(--foreground);
+    --ai-chat-composer: var(--background);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
     --popover: oklch(1 0 0);
@@ -97,6 +99,7 @@
     --foreground: oklch(0.985 0 0);
     --surface: color-mix(in oklab, var(--muted) 30%, var(--background));
     --surface-foreground: var(--foreground);
+    --ai-chat-composer: color-mix(in oklab, var(--background) 24%, var(--muted));                                                                                                                
     --card: oklch(0.215 0 0);
     --card-foreground: oklch(0.985 0 0);
     --popover: oklch(0.205 0 0);

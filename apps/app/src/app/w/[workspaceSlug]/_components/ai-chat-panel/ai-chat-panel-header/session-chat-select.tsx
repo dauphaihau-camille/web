@@ -88,7 +88,7 @@ export function SessionChatSelect({
           />
         </div>
 
-        <div className="max-h-92 overflow-y-auto pr-1">
+        <div className="max-h-92 overflow-y-auto pr-1 app-scrollbar">
           {sessionGroups.map((group) => {
             const groupSessions = groupedSessions.filter((session) => session.group === group);
 

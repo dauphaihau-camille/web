@@ -8,8 +8,8 @@ import {
   listAiChatTurns,
   type AiChatTurn,
   type AiChatTurnPage,
-} from './ai-chat-panel.requests';
-import type { ChatMessage } from './ai-chat-panel.types';
+} from '../ai-chat-panel.requests';
+import type { ChatMessage } from '../ai-chat-panel.types';
 import { localDraftSessionId } from './use-ai-conversation-sessions';
 
 export function useAiConversationMessages({
@@ -74,6 +74,25 @@ export function useAiConversationMessages({
     }));
   }
 
+  function startAssistantResponse(sessionId: string) {
+    setMessagesBySessionId((currentMessagesBySessionId) => {
+      const existingMessages = currentMessagesBySessionId[sessionId] ?? [];
+      const pendingMessage = createPendingAssistantMessage(sessionId);
+
+      if (existingMessages.some((existingMessage) => existingMessage.id === pendingMessage.id)) {
+        return currentMessagesBySessionId;
+      }
+
+      return {
+        ...currentMessagesBySessionId,
+        [sessionId]: [
+          ...existingMessages,
+          pendingMessage,
+        ],
+      };
+    });
+  }
+
   function appendAssistantDelta(sessionId: string, text: string) {
     setMessagesBySessionId((currentMessagesBySessionId) => {
       const existingMessages = currentMessagesBySessionId[sessionId] ?? [];
@@ -88,6 +107,7 @@ export function useAiConversationMessages({
             {
               ...createPendingAssistantMessage(sessionId),
               content: text,
+              status: 'streaming',
             },
           ],
         };
@@ -96,7 +116,7 @@ export function useAiConversationMessages({
       return {
         ...currentMessagesBySessionId,
         [sessionId]: existingMessages.map((existingMessage, index) => index === pendingMessageIndex
-          ? { ...existingMessage, content: `${existingMessage.content}${text}` }
+          ? { ...existingMessage, content: `${existingMessage.content}${text}`, status: 'streaming' }
           : existingMessage),
       };
     });
@@ -128,6 +148,22 @@ export function useAiConversationMessages({
         [sessionId]: existingMessages.map((existingMessage) => existingMessage.id === pendingMessageId
           ? finalMessage
           : existingMessage),
+      };
+    });
+  }
+
+  function removePendingAssistantResponse(sessionId: string) {
+    setMessagesBySessionId((currentMessagesBySessionId) => {
+      const existingMessages = currentMessagesBySessionId[sessionId] ?? [];
+      const pendingMessageId = createPendingAssistantMessage(sessionId).id;
+
+      if (!existingMessages.some((existingMessage) => existingMessage.id === pendingMessageId)) {
+        return currentMessagesBySessionId;
+      }
+
+      return {
+        ...currentMessagesBySessionId,
+        [sessionId]: existingMessages.filter((existingMessage) => existingMessage.id !== pendingMessageId),
       };
     });
   }
@@ -173,7 +209,9 @@ export function useAiConversationMessages({
     isLoadingTurns: turnsQuery.isLoading,
     loadOlderTurns,
     messages: selectedMessages,
+    removePendingAssistantResponse,
     setSessionMessages,
+    startAssistantResponse,
   };
 }
 
@@ -206,5 +244,6 @@ function createPendingAssistantMessage(sessionId: string): ChatMessage {
     id: `assistant-${sessionId}-pending`,
     role: 'assistant',
     content: '',
+    status: 'pending',
   };
 }

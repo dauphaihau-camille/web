@@ -8,8 +8,8 @@ import {
   createAiConversationSession,
   listAiConversationSessions,
   type AiConversationSession,
-} from './ai-chat-panel.requests';
-import type { ChatSession } from './ai-chat-panel.types';
+} from '../ai-chat-panel.requests';
+import type { ChatSession } from '../ai-chat-panel.types';
 
 export const localDraftSessionId = 'local-draft';
 

@@ -7,63 +7,22 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
-import { cn } from '@shared/lib/utils';
 
-import type { AiChatAppendResponse, ChatMessage } from '../ai-chat-panel.types';
+import type { AiChatAppendResponse } from '../../ai-chat-panel.types';
 
-type ChatBubbleProps = {
-  message: ChatMessage;
-  selectedSessionId: string;
-  onAppendResponse?: AiChatAppendResponse;
-};
-
-export function ChatBubble({
-  message,
-  selectedSessionId,
-  onAppendResponse,
-}: ChatBubbleProps) {
-  const isUser = message.role === 'user';
-
-  return (
-    <article className={cn('group/message flex gap-2', isUser && 'justify-end')}>
-      <div className={cn('flex max-w-full flex-col gap-1.5', isUser ? 'items-end max-w-[85%]' : 'max-w-[95%]')}>
-        <div
-          className={cn(
-            'rounded-2xl text-sm leading-6',
-            isUser
-              ? 'border border-border bg-muted text-foreground px-3 py-1'
-              : 'py-0',
-          )}
-        >
-          {message.content}
-        </div>
-
-        {isUser
-          ? null
-          : (
-            <AssistantMessageActions
-              content={message.content}
-              messageId={message.id}
-              selectedSessionId={selectedSessionId}
-              onAppendResponse={onAppendResponse}
-            />
-          )}
-      </div>
-    </article>
-  );
-}
-
-function AssistantMessageActions({
-  content,
-  messageId,
-  selectedSessionId,
-  onAppendResponse,
-}: {
+type AssistantMessageActionsProps = {
   content: string;
   messageId: string;
   selectedSessionId: string;
   onAppendResponse?: AiChatAppendResponse;
-}) {
+};
+
+export function AssistantMessageActions({
+  content,
+  messageId,
+  selectedSessionId,
+  onAppendResponse,
+}: AssistantMessageActionsProps) {
   async function copyResponse() {
     await window.navigator.clipboard.writeText(content);
     toast('Response copied to clipboard');
