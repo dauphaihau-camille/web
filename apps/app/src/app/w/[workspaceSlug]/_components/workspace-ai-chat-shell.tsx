@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useId,
   useMemo,
   useState,
@@ -11,6 +12,8 @@ import {
   type ReactNode,
 } from 'react';
 import { BotIcon, XIcon } from 'lucide-react';
+
+import { Kbd } from '@/components/ui/kbd';
 
 import { Button } from '@shared/components/ui/button';
 import {
@@ -21,9 +24,11 @@ import {
 
 import { AiChatPanel } from './ai-chat-panel/ai-chat-panel';
 import type { AiChatAppendResponse, AiChatDocumentBadge } from './ai-chat-panel/ai-chat-panel.types';
+import { TOGGLE_AI_CHAT_EVENT } from './workspace-shortcuts-provider';
 
 const rightRailWidth = '30rem';
 const closedRightRailReservedWidth = '0rem';
+const AI_CHAT_SHORTCUT = '\u21e7\u2318A';
 
 type WorkspaceAiChatCurrentDocument = AiChatDocumentBadge & {
   onAppendResponse?: AiChatAppendResponse;
@@ -61,6 +66,18 @@ export function WorkspaceAiChatShell({
     () => new Set(),
   );
   const panelId = useId();
+
+  useEffect(() => {
+    const handleToggleAiChat = () => {
+      setIsChatOpen((currentOpen) => !currentOpen);
+    };
+
+    window.addEventListener(TOGGLE_AI_CHAT_EVENT, handleToggleAiChat);
+
+    return () => {
+      window.removeEventListener(TOGGLE_AI_CHAT_EVENT, handleToggleAiChat);
+    };
+  }, []);
 
   const registerCurrentDocument = useCallback((document: WorkspaceAiChatCurrentDocument) => {
     setAppendTarget(document.onAppendResponse
@@ -131,6 +148,7 @@ export function WorkspaceAiChatShell({
           />
           <TooltipContent>
             {isChatOpen ? 'Close AI chat' : 'Open AI chat'}
+            <Kbd>{AI_CHAT_SHORTCUT}</Kbd>
           </TooltipContent>
         </Tooltip>
 

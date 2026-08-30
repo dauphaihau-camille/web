@@ -10,6 +10,7 @@ import { useTheme } from 'next-themes';
 export const OPEN_SHARE_EVENT = 'workspace:open-share';
 export const COPY_LINK_EVENT = 'workspace:copy-link';
 export const DUPLICATE_DOCUMENT_EVENT = 'workspace:duplicate-document';
+export const TOGGLE_AI_CHAT_EVENT = 'workspace:toggle-ai-chat';
 
 type WorkspaceShortcutsContextValue = {
   closeSearch: () => void;
@@ -83,6 +84,12 @@ export function WorkspaceShortcutsProvider({
         if (event.key.toLowerCase() === 'l') {
           event.preventDefault();
           window.dispatchEvent(new CustomEvent(COPY_LINK_EVENT));
+          return;
+        }
+
+        if (event.key.toLowerCase() === 'a') {
+          event.preventDefault();
+          window.dispatchEvent(new CustomEvent(TOGGLE_AI_CHAT_EVENT));
           return;
         }
 

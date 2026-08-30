@@ -57,7 +57,24 @@ vi.mock('./ai-chat-panel.requests', () => ({
   streamAiChatTurn: streamAiChatTurnMock,
 }));
 
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/w/acme',
+  useRouter: () => ({
+    back: vi.fn(),
+    forward: vi.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+vi.mock('next-themes', () => ({
+  useTheme: () => ({
+    resolvedTheme: 'light',
+    setTheme: vi.fn(),
+  }),
+}));
+
 import { renderWithProviders } from '@shared/test/render';
+import { WorkspaceShortcutsProvider } from '../workspace-shortcuts-provider';
 
 import {
   useWorkspaceAiChatDocument,
@@ -85,6 +102,16 @@ function renderAiChat(children = <main />) {
     <WorkspaceAiChatShell workspaceSlug="acme">
       {children}
     </WorkspaceAiChatShell>,
+  );
+}
+
+function renderAiChatWithShortcuts(children = <main />) {
+  return renderWithProviders(
+    <WorkspaceShortcutsProvider>
+      <WorkspaceAiChatShell workspaceSlug="acme">
+        {children}
+      </WorkspaceAiChatShell>
+    </WorkspaceShortcutsProvider>,
   );
 }
 
@@ -179,6 +206,30 @@ beforeEach(() => {
 });
 
 describe('AiChatPanel', () => {
+  it('toggles AI chat from the workspace shortcut', async () => {
+    renderAiChatWithShortcuts();
+
+    fireEvent.keyDown(window, {
+      key: 'a',
+      metaKey: true,
+      shiftKey: true,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('complementary', { name: 'AI chat' })).toBeInTheDocument();
+    });
+
+    fireEvent.keyDown(window, {
+      key: 'a',
+      metaKey: true,
+      shiftKey: true,
+    });
+
+    await waitFor(() => {
+      expect(screen.queryByRole('complementary', { name: 'AI chat' })).not.toBeInTheDocument();
+    });
+  });
+
   it('loads chat sessions from the AI API', async () => {
     const user = userEvent.setup();
     const { container } = renderAiChat();
