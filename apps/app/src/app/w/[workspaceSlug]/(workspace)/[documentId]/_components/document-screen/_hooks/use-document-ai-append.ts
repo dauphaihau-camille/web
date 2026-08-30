@@ -9,9 +9,8 @@ import {
 import type * as Yjs from 'yjs';
 
 import type { BlockNoteAppendBlocksRequest } from '@shared/components/editor/blocknote-editor.types';
-import type { AiChatAppendRequest } from '../../../../../_components/ai-chat-panel/ai-chat-panel.types';
+import type { AiChatAppendRequest, AiResponseBlock } from '../../../../../_components/ai-chat-panel/ai-chat-panel.types';
 import { useWorkspaceAiChatDocument } from '../../../../../_components/workspace-ai-chat-shell';
-import { convertAiAppendResponseToBlocks } from '../ai-append-block-conversion';
 import { DOCUMENT_SYSTEM_SYNC_ORIGIN } from './use-document-session-undo-redo';
 
 export function useDocumentAiAppend({
@@ -53,7 +52,7 @@ export function useDocumentAiAppend({
 
       setAppendBlocksRequest({
         id: requestId,
-        blocks: convertAiAppendResponseToBlocks(request.content),
+        blocks: prepareBlocksForDocumentAppend(request.responseBlockPayload),
         metadata,
         onComplete: ({ ok }) => {
           setAppendBlocksRequest((currentRequest) =>
@@ -97,4 +96,19 @@ export function useDocumentAiAppend({
   ]);
 
   return { appendBlocksRequest };
+}
+
+function prepareBlocksForDocumentAppend(blocks: AiResponseBlock[]): unknown[] {
+  return blocks.map((block) => ({
+    type: block.type,
+    content: block.content,
+    ...(block.type === 'heading' ? { props: getDocumentAppendHeadingProps(block) } : {}),
+    ...(block.type !== 'heading' && block.props ? { props: block.props } : {}),
+  }));
+}
+
+function getDocumentAppendHeadingProps(block: AiResponseBlock): { level: number } {
+  const level = block.props?.level ?? 1;
+
+  return { level: Math.min(level + 1, 3) };
 }

@@ -286,14 +286,51 @@ describe('DocumentScreen AI append action', () => {
       meta: { limit: 50, has_more: false },
     });
     aiChatMock.streamAiChatTurn.mockImplementation(async (_workspaceId, input, onEvent) => {
-      onEvent({ type: 'delta', text: 'classic streaming scroll problem' });
+      onEvent({
+        type: 'block_start',
+        block_id: 'ai-block-1',
+        block_type: 'heading',
+        props: { level: 1 },
+      });
+      onEvent({
+        type: 'text_delta',
+        block_id: 'ai-block-1',
+        content: [{ type: 'text', text: 'My AI Notes Summary' }],
+      });
+      onEvent({ type: 'block_end', block_id: 'ai-block-1' });
+      onEvent({
+        type: 'block_start',
+        block_id: 'ai-block-2',
+        block_type: 'heading',
+        props: { level: 2 },
+      });
+      onEvent({
+        type: 'text_delta',
+        block_id: 'ai-block-2',
+        content: [{ type: 'text', text: 'Objective' }],
+      });
+      onEvent({ type: 'block_end', block_id: 'ai-block-2' });
       onEvent({
         type: 'done',
         turn: {
           id: 'mock-assistant-streaming-scroll',
           session_id: input.sessionId,
           user_message: input.message,
-          assistant_response: 'classic streaming scroll problem',
+          assistant_response: 'My AI Notes Summary\nObjective',
+          response_block_payload: [
+            {
+              id: 'ai-block-1',
+              type: 'heading',
+              props: { level: 1 },
+              content: [{ type: 'text', text: 'My AI Notes Summary' }],
+            },
+            {
+              id: 'ai-block-2',
+              type: 'heading',
+              props: { level: 2 },
+              content: [{ type: 'text', text: 'Objective' }],
+            },
+          ],
           status: 'completed',
           attachments: [],
           created_at: '2026-01-01T00:00:00.000Z',
@@ -316,15 +353,26 @@ describe('DocumentScreen AI append action', () => {
     await user.click(screen.getByRole('button', { name: 'Untitled' }));
     await user.click(screen.getByRole('button', { name: 'Summarize this page' }));
     await waitFor(() => {
-      expect(screen.getByText('classic streaming scroll problem')).toBeInTheDocument();
+      expect(screen.getByText('My AI Notes Summary')).toBeInTheDocument();
+      expect(screen.getByText('Objective')).toBeInTheDocument();
     });
     await user.click(screen.getAllByRole('button', { name: 'Append to this document' })[0]);
 
     await waitFor(() => {
-      expect(editorMock.appendedBlocks[0]).toContainEqual({
-        type: 'paragraph',
-        content: [{ type: 'text', text: expect.stringContaining('classic streaming scroll problem') }],
-      });
+      expect(editorMock.appendedBlocks[0]).toEqual([
+        expect.objectContaining({
+          type: 'heading',
+          props: { level: 2 },
+          content: [{ type: 'text', text: 'My AI Notes Summary' }],
+        }),
+        expect.objectContaining({
+          type: 'heading',
+          props: { level: 3 },
+          content: [{ type: 'text', text: 'Objective' }],
+        }),
+      ]);
+      expect(editorMock.appendedBlocks[0]?.[0]).not.toHaveProperty('id');
+      expect(editorMock.appendedBlocks[0]?.[1]).not.toHaveProperty('id');
     });
     expect(screen.getByRole('complementary', { name: 'AI chat' })).toBeInTheDocument();
     expect(collaborationMock.document?.getArray('ai_assisted_edit_metadata').toArray()).toEqual([
