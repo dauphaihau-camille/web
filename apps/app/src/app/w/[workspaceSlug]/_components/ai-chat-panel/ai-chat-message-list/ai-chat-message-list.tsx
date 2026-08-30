@@ -14,12 +14,14 @@ import { ChatMessage } from './chat-message/chat-message';
 type AiChatMessageListProps = {
   isBusy: boolean;
   messages: AiChatMessage[];
+  canAppendResponse: boolean;
   onAppendResponse?: AiChatAppendResponse;
   onLoadOlder: () => void;
   selectedSessionId: string;
 };
 
 export function AiChatMessageList({
+  canAppendResponse,
   isBusy,
   messages,
   onAppendResponse,
@@ -44,7 +46,12 @@ export function AiChatMessageList({
                 messageId={message.id}
                 scrollAnchor={message.role === 'user'}
               >
-                <ChatMessage message={message} selectedSessionId={selectedSessionId} onAppendResponse={onAppendResponse} />
+                <ChatMessage
+                  canAppendResponse={canAppendResponse}
+                  message={message}
+                  selectedSessionId={selectedSessionId}
+                  onAppendResponse={onAppendResponse}
+                />
               </MessageScrollerItem>
             ))}
           </MessageScrollerContent>

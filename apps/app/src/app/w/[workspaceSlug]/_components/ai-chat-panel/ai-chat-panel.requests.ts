@@ -17,11 +17,30 @@ const aiDocumentAttachmentSchema = z.object({
   title: z.string(),
 });
 
+const aiResponseInlineContentSchema = z.object({
+  type: z.literal('text'),
+  text: z.string(),
+  styles: z.object({
+    bold: z.literal(true).optional(),
+    italic: z.literal(true).optional(),
+  }).optional(),
+});
+
+const aiResponseBlockSchema = z.object({
+  id: z.string().min(1),
+  type: z.enum(['paragraph', 'bulletListItem', 'numberedListItem', 'heading']),
+  content: z.array(aiResponseInlineContentSchema),
+  props: z.object({
+    level: z.number(),
+  }).optional(),
+});
+
 const aiChatTurnSchema = z.object({
   id: z.string().min(1),
   session_id: z.string().min(1),
   user_message: z.string(),
   assistant_response: z.string(),
+  response_block_payload: z.array(aiResponseBlockSchema),
   status: z.enum(['completed', 'failed', 'canceled']),
   attachments: z.array(aiDocumentAttachmentSchema),
   created_at: z.string(),
@@ -76,8 +95,21 @@ const aiChatTurnStreamEventSchema = z.discriminatedUnion('type', [
     session_id: z.string().min(1),
   }),
   z.object({
-    type: z.literal('delta'),
-    text: z.string(),
+    type: z.literal('block_start'),
+    block_id: z.string().min(1),
+    block_type: z.enum(['paragraph', 'bulletListItem', 'numberedListItem', 'heading']),
+    props: z.object({
+      level: z.number(),
+    }).optional(),
+  }),
+  z.object({
+    type: z.literal('text_delta'),
+    block_id: z.string().min(1),
+    content: z.array(aiResponseInlineContentSchema),
+  }),
+  z.object({
+    type: z.literal('block_end'),
+    block_id: z.string().min(1),
   }),
   z.object({
     type: z.literal('done'),

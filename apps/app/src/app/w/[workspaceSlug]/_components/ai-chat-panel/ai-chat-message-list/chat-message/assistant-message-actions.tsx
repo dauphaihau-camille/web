@@ -8,17 +8,21 @@ import {
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
 
-import type { AiChatAppendResponse } from '../../ai-chat-panel.types';
+import type { AiChatAppendResponse, AiResponseBlockPayload } from '../../ai-chat-panel.types';
 
 type AssistantMessageActionsProps = {
+  canAppendResponse: boolean;
   content: string;
   messageId: string;
+  responseBlockPayload: AiResponseBlockPayload;
   selectedSessionId: string;
   onAppendResponse?: AiChatAppendResponse;
 };
 
 export function AssistantMessageActions({
+  canAppendResponse,
   content,
+  responseBlockPayload,
   messageId,
   selectedSessionId,
   onAppendResponse,
@@ -29,7 +33,7 @@ export function AssistantMessageActions({
   }
 
   async function appendResponse() {
-    if (!onAppendResponse) {
+    if (!onAppendResponse || !canAppendResponse) {
       return;
     }
 
@@ -38,6 +42,7 @@ export function AssistantMessageActions({
         conversationSessionId: selectedSessionId,
         assistantMessageId: messageId,
         content,
+        responseBlockPayload,
       });
       toast('Appended to document');
     }
@@ -47,7 +52,7 @@ export function AssistantMessageActions({
   }
 
   return (
-    <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover/message:opacity-100 group-focus-within/message:opacity-100">
+    <div data-slot="assistant-message-actions" className="flex items-center gap-1 opacity-0 transition-opacity group-hover/message:opacity-100 group-focus-within/message:opacity-100">
       <Tooltip>
         <TooltipTrigger
           delay={0}
@@ -69,7 +74,7 @@ export function AssistantMessageActions({
         <TooltipContent side="top">Copy response</TooltipContent>
       </Tooltip>
 
-      {onAppendResponse
+      {canAppendResponse
         ? (
           <Tooltip>
             <TooltipTrigger
@@ -80,6 +85,7 @@ export function AssistantMessageActions({
                   variant="ghost"
                   size="icon-xs"
                   aria-label="Append to this document"
+                  disabled={!onAppendResponse}
                   className="size-6 text-muted-foreground p-3.5"
                   onClick={() => {
                     void appendResponse();

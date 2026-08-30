@@ -8,8 +8,9 @@ import {
   listAiChatTurns,
   type AiChatTurn,
   type AiChatTurnPage,
+  type AiChatTurnStreamEvent,
 } from '../ai-chat-panel.requests';
-import type { ChatMessage } from '../ai-chat-panel.types';
+import type { AiResponseBlock, ChatMessage } from '../ai-chat-panel.types';
 import { localDraftSessionId } from './use-ai-conversation-sessions';
 
 export function useAiConversationMessages({
@@ -41,6 +42,7 @@ export function useAiConversationMessages({
     }
 
     setSessionMessages(selectedSessionId, createMessagesFromTurns(turnsQuery.data.items));
+
     setTurnPageBySessionId((currentPagesBySessionId) => ({
       ...currentPagesBySessionId,
       [selectedSessionId]: turnsQuery.data.meta,
@@ -122,6 +124,49 @@ export function useAiConversationMessages({
     });
   }
 
+  function appendAssistantBlockEvent(sessionId: string, event: AiChatTurnStreamEvent) {
+    if (event.type !== 'block_start' && event.type !== 'text_delta') {
+      return;
+    }
+
+    setMessagesBySessionId((currentMessagesBySessionId) => {
+      const existingMessages = currentMessagesBySessionId[sessionId] ?? [];
+      const pendingMessageId = createPendingAssistantMessage(sessionId).id;
+      const pendingMessageIndex = existingMessages.findIndex((existingMessage) => existingMessage.id === pendingMessageId);
+
+      const pendingMessage = pendingMessageIndex === -1
+        ? { ...createPendingAssistantMessage(sessionId), status: 'streaming' as const }
+        : existingMessages[pendingMessageIndex];
+
+      const streamingBlocks = updateStreamingBlocks(pendingMessage.streamingBlocks ?? [], event);
+
+      const content = streamingBlocks
+        .flatMap((block) => block.content.map((inline) => inline.text))
+        .join('');
+
+      const nextMessage = {
+        ...pendingMessage,
+        content,
+        status: 'streaming' as const,
+        streamingBlocks,
+      };
+
+      if (pendingMessageIndex === -1) {
+        return {
+          ...currentMessagesBySessionId,
+          [sessionId]: [...existingMessages, nextMessage],
+        };
+      }
+
+      return {
+        ...currentMessagesBySessionId,
+        [sessionId]: existingMessages.map((existingMessage, index) => index === pendingMessageIndex
+          ? nextMessage
+          : existingMessage),
+      };
+    });
+  }
+
   function completeAssistantMessage(sessionId: string, turn: AiChatTurn) {
     setMessagesBySessionId((currentMessagesBySessionId) => {
       const existingMessages = currentMessagesBySessionId[sessionId] ?? [];
@@ -131,6 +176,7 @@ export function useAiConversationMessages({
         sessionId,
         turn.id,
         turn.assistant_response,
+        turn.response_block_payload,
       );
 
       if (!existingMessages.some((existingMessage) => existingMessage.id === pendingMessageId)) {
@@ -209,6 +255,7 @@ export function useAiConversationMessages({
     isLoadingTurns: turnsQuery.isLoading,
     loadOlderTurns,
     messages: selectedMessages,
+    appendAssistantBlockEvent,
     removePendingAssistantResponse,
     setSessionMessages,
     startAssistantResponse,
@@ -216,11 +263,17 @@ export function useAiConversationMessages({
 }
 
 
-function createAssistantMessage(sessionId: string, turnId: string, content: string): ChatMessage {
+function createAssistantMessage(
+  sessionId: string,
+  turnId: string,
+  content: string,
+  responseBlockPayload: AiResponseBlock[],
+): ChatMessage {
   return {
     id: `assistant-${sessionId}-${turnId}`,
     role: 'assistant',
     content,
+    responseBlockPayload,
   };
 }
 
@@ -235,7 +288,7 @@ function createUserMessageFromTurn(turn: AiChatTurn): ChatMessage {
 function createMessagesFromTurns(turns: AiChatTurn[]): ChatMessage[] {
   return turns.flatMap((turn) => [
     createUserMessageFromTurn(turn),
-    createAssistantMessage(turn.session_id, turn.id, turn.assistant_response),
+    createAssistantMessage(turn.session_id, turn.id, turn.assistant_response, turn.response_block_payload),
   ]);
 }
 
@@ -246,4 +299,25 @@ function createPendingAssistantMessage(sessionId: string): ChatMessage {
     content: '',
     status: 'pending',
   };
+}
+
+function updateStreamingBlocks(
+  blocks: AiResponseBlock[],
+  event: Extract<AiChatTurnStreamEvent, { type: 'block_start' | 'text_delta' }>,
+): AiResponseBlock[] {
+  if (event.type === 'block_start') {
+    return [
+      ...blocks,
+      {
+        id: event.block_id,
+        type: event.block_type,
+        content: [],
+        ...(event.props ? { props: event.props } : {}),
+      },
+    ];
+  }
+
+  return blocks.map((block) => block.id === event.block_id
+    ? { ...block, content: [...block.content, ...event.content] }
+    : block);
 }

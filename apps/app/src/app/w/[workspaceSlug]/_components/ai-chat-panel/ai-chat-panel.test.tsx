@@ -84,7 +84,7 @@ import {
 function CurrentDocumentRegistration({
   onAppendResponse,
 }: {
-  onAppendResponse?: (request: { content: string }) => void | Promise<void>;
+  onAppendResponse?: (request: { content: string; responseBlockPayload: unknown[] }) => void | Promise<void>;
 }) {
   const aiChatDocument = useWorkspaceAiChatDocument();
 
@@ -121,6 +121,11 @@ function createCompletedTurn(sessionId: string, message: string, assistantRespon
     session_id: sessionId,
     user_message: message,
     assistant_response: assistantResponse,
+    response_block_payload: [{
+      id: 'ai-block-1',
+      type: 'paragraph',
+      content: [{ type: 'text', text: assistantResponse }],
+    }],
     status: 'completed',
     attachments: [],
     created_at: '2026-01-01T00:00:00.000Z',
@@ -195,15 +200,20 @@ beforeEach(() => {
     updated_at: '2026-01-01T00:00:00.000Z',
   });
   streamAiChatTurnMock.mockImplementation(async (_workspaceId, input, onEvent) => {
-    onEvent({ type: 'started', session_id: input.sessionId });
-    onEvent({ type: 'delta', text: 'Server ' });
-    onEvent({ type: 'delta', text: 'generated summary.' });
+    onEvent({ type: 'block_start', block_id: 'ai-block-1', block_type: 'paragraph' });
+    onEvent({
+      type: 'text_delta',
+      block_id: 'ai-block-1',
+      content: [{ type: 'text', text: 'Server generated summary.' }],
+    });
+    onEvent({ type: 'block_end', block_id: 'ai-block-1' });
     onEvent({
       type: 'done',
       turn: createCompletedTurn(input.sessionId, input.message, 'Server generated summary.'),
     });
   });
 });
+
 
 describe('AiChatPanel', () => {
   it('toggles AI chat from the workspace shortcut', async () => {
@@ -297,6 +307,11 @@ describe('AiChatPanel', () => {
         session_id: sessionId,
         user_message: `Question ${sessionId}`,
         assistant_response: `Answer ${sessionId}`,
+        response_block_payload: [{
+          id: `block-${sessionId}`,
+          type: 'paragraph',
+          content: [{ type: 'text', text: `Answer ${sessionId}` }],
+        }],
         status: 'completed',
         attachments: [],
         created_at: '2026-01-01T00:00:00.000Z',
@@ -351,6 +366,11 @@ describe('AiChatPanel', () => {
             session_id: 'session-a',
             user_message: 'Older question',
             assistant_response: 'Older answer',
+            response_block_payload: [{
+              id: 'older-block',
+              type: 'paragraph',
+              content: [{ type: 'text', text: 'Older answer' }],
+            }],
             status: 'completed',
             attachments: [],
             created_at: '2026-01-01T00:00:00.000Z',
@@ -366,6 +386,11 @@ describe('AiChatPanel', () => {
           session_id: 'session-a',
           user_message: 'Latest question',
           assistant_response: 'Latest answer',
+          response_block_payload: [{
+            id: 'latest-block',
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'Latest answer' }],
+          }],
           status: 'completed',
           attachments: [],
           created_at: '2026-01-01T00:01:00.000Z',
@@ -427,9 +452,15 @@ describe('AiChatPanel', () => {
 
     streamAiChatTurnMock.mockImplementation((_workspaceId, input, onEvent) => new Promise<void>((resolve) => {
       emitDelta = () => {
-        onEvent({ type: 'delta', text: 'Server generated ' });
+        onEvent({ type: 'block_start', block_id: 'ai-block-1', block_type: 'paragraph' });
+        onEvent({
+          type: 'text_delta',
+          block_id: 'ai-block-1',
+          content: [{ type: 'text', text: 'Server generated ' }],
+        });
       };
       finishStream = () => {
+        onEvent({ type: 'block_end', block_id: 'ai-block-1' });
         onEvent({
           type: 'done',
           turn: createCompletedTurn(input.sessionId, input.message, 'Server generated summary.'),
@@ -455,7 +486,7 @@ describe('AiChatPanel', () => {
       emitDelta?.();
     });
 
-    expect(container.querySelector('.stream-tail')).toHaveTextContent('ated');
+    expect(screen.getByText('Server generated')).toBeInTheDocument();
     expect(container.querySelector('[data-slot="stream-caret"]')).not.toBeNull();
     expect(screen.queryByRole('button', { name: 'Copy response' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Append to this document' })).not.toBeInTheDocument();
@@ -470,6 +501,72 @@ describe('AiChatPanel', () => {
     expect(screen.getByText('Server generated summary.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Copy response' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Append to this document' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Append to this document' }).closest('[data-slot="assistant-message-actions"]'),
+    ).toHaveClass('opacity-0');
+  });
+
+  it('renders structured assistant response blocks while streaming', async () => {
+    const user = userEvent.setup();
+
+    streamAiChatTurnMock.mockImplementation(async (_workspaceId, input, onEvent) => {
+      onEvent({
+        type: 'block_start',
+        block_id: 'heading-1',
+        block_type: 'heading',
+        props: { level: 2 },
+      });
+      onEvent({
+        type: 'text_delta',
+        block_id: 'heading-1',
+        content: [{ type: 'text', text: 'Objective', styles: { bold: true } }],
+      });
+      onEvent({ type: 'block_end', block_id: 'heading-1' });
+      onEvent({ type: 'block_start', block_id: 'bullet-1', block_type: 'bulletListItem' });
+      onEvent({
+        type: 'text_delta',
+        block_id: 'bullet-1',
+        content: [
+          { type: 'text', text: 'Next action:', styles: { bold: true } },
+          { type: 'text', text: ' name the owner' },
+        ],
+      });
+      onEvent({ type: 'block_end', block_id: 'bullet-1' });
+      onEvent({
+        type: 'done',
+        turn: {
+          ...createCompletedTurn(input.sessionId, input.message, 'Objective\\nNext action: name the owner'),
+          response_block_payload: [
+            {
+              id: 'heading-1',
+              type: 'heading',
+              props: { level: 2 },
+              content: [{ type: 'text', text: 'Objective', styles: { bold: true } }],
+            },
+            {
+              id: 'bullet-1',
+              type: 'bulletListItem',
+              content: [
+                { type: 'text', text: 'Next action:', styles: { bold: true } },
+                { type: 'text', text: ' name the owner' },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    renderAiChat();
+
+    await user.click(screen.getByRole('button', { name: 'Open AI chat' }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Summarize this page' })).toBeEnabled();
+    });
+    await user.click(screen.getByRole('button', { name: 'Summarize this page' }));
+
+    expect(await screen.findByRole('heading', { name: 'Objective', level: 2 })).toBeInTheDocument();
+    expect(screen.getByText('Next action:')).toHaveClass('font-semibold');
+    expect(screen.getByText('name the owner')).toBeInTheDocument();
   });
 
   it('shows the workspace AI limit card and blocks sends when responses are exhausted', async () => {
@@ -572,6 +669,10 @@ describe('AiChatPanel', () => {
         documentIds: ['doc-1'],
       }), expect.any(Function));
     });
+    await waitFor(() => {
+      expect(screen.getByText('Server generated summary.')).toBeInTheDocument();
+    });
+    expect(screen.getByRole('button', { name: 'Append to this document' })).toBeDisabled();
   });
 
   it('appends a completed API assistant response to the active editable document', async () => {
@@ -592,6 +693,11 @@ describe('AiChatPanel', () => {
     expect(appendResponse).toHaveBeenCalledWith(expect.objectContaining({
       assistantMessageId: 'assistant-session-new-turn-1',
       content: 'Server generated summary.',
+      responseBlockPayload: [{
+        id: 'ai-block-1',
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'Server generated summary.' }],
+      }],
       conversationSessionId: 'session-new',
     }));
     await waitFor(() => {
@@ -617,6 +723,11 @@ describe('AiChatPanel', () => {
         session_id: 'session-a',
         user_message: 'Question session-a',
         assistant_response: 'Answer session-a',
+        response_block_payload: [{
+          id: 'block-session-a',
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Answer session-a' }],
+        }],
         status: 'completed',
         attachments: [],
         created_at: '2026-01-01T00:00:00.000Z',

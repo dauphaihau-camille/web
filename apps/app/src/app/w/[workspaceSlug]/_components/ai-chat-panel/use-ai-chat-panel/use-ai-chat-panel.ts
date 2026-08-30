@@ -96,8 +96,12 @@ export function useAiChatPanel({
         message: content.trim(),
         documentIds: documentBadges.map((documentBadge) => documentBadge.id),
       }, (event) => {
-        if (event.type === 'delta') {
-          conversationMessages.appendAssistantDelta(session.id, event.text);
+        if (event.type === 'block_start' || event.type === 'text_delta') {
+          conversationMessages.appendAssistantBlockEvent(session.id, event);
+          return;
+        }
+
+        if (event.type === 'block_end' || event.type === 'started') {
           return;
         }
 

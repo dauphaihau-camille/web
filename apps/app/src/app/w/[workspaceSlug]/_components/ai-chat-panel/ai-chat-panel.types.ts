@@ -1,10 +1,30 @@
 import type { LucideIcon } from 'lucide-react';
 
+export type AiResponseInlineContent = {
+  type: 'text';
+  text: string;
+  styles?: {
+    bold?: true;
+    italic?: true;
+  };
+};
+
+export type AiResponseBlock = {
+  id: string;
+  type: 'paragraph' | 'bulletListItem' | 'numberedListItem' | 'heading';
+  content: AiResponseInlineContent[];
+  props?: { level: number };
+};
+
+export type AiResponseBlockPayload = AiResponseBlock[];
+
 export type ChatMessage = {
   id: string;
   role: 'assistant' | 'user';
   content: string;
   status?: 'pending' | 'streaming';
+  responseBlockPayload?: AiResponseBlockPayload;
+  streamingBlocks?: AiResponseBlockPayload;
 };
 
 export type ChatSession = {
@@ -31,6 +51,7 @@ export type AiChatAppendRequest = {
   conversationSessionId: string;
   assistantMessageId: string;
   content: string;
+  responseBlockPayload: AiResponseBlockPayload;
 };
 
 export type AiChatAppendResponse = (request: AiChatAppendRequest) => void | Promise<void>;

@@ -80,6 +80,7 @@ export function AiChatPanel({
         />
 
         <AiChatMessageList
+          canAppendResponse={documentBadges.length > 0}
           isBusy={isBusy}
           messages={messages}
           selectedSessionId={selectedSessionId}
