@@ -101,11 +101,11 @@ vi.mock('@/components/ui/dropdown-menu', () => {
   };
 });
 
-vi.mock('./create-workspace-dialog', () => ({
+vi.mock('../create-workspace-dialog', () => ({
   CreateWorkspaceDialog: () => null,
 }));
 
-vi.mock('./logout-confirm-dialog', () => ({
+vi.mock('../logout-confirm-dialog', () => ({
   LogoutConfirmDialog: ({
     onConfirm,
     open,

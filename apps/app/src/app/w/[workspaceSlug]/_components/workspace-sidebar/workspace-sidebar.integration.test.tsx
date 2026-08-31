@@ -68,7 +68,7 @@ vi.mock('@/hooks/use-mobile', () => ({
   useIsMobile: () => false,
 }));
 
-vi.mock('../workspace-user-dropdown', () => ({
+vi.mock('./workspace-user-dropdown', () => ({
   WorkspaceUserDropdown: ({ workspaceSlug, workspace }: { workspaceSlug: string; workspace?: { name: string } }) => <div>{workspace ? `user:${workspace.name}` : `user:${workspaceSlug}`}</div>,
 }));
 
