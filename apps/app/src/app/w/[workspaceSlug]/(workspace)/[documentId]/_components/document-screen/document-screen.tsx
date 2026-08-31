@@ -16,6 +16,7 @@ import { useDocumentScreenState } from './_hooks/use-document-screen-state';
 import { useDocumentAiAppend } from './_hooks/use-document-ai-append';
 import { useDocumentScreenChrome } from './_hooks/use-document-screen-chrome';
 import { DocumentScreenBodySkeleton } from '../../../../_components/workspace-skeleton/document-screen-skeleton';
+import { useWorkspaceScrollFadeTopOffset } from '../../../_components/workspace-scroll-fade';
 
 const BlockNoteEditorLoader = createBlockNoteEditorLoader(
   () => import('./editor/blocknote-editor-client/blocknote-editor-client'),
@@ -95,6 +96,11 @@ function DocumentScreenContent({
     document,
     isPublished: Boolean(documentToolbar.publishStatus?.published_document_id),
   });
+  useWorkspaceScrollFadeTopOffset(
+    fixedHeaderOffset > 0
+      ? `calc(2.75rem + ${fixedHeaderOffset}px)`
+      : '2.75rem',
+  );
 
   const { appendBlocksRequest } = useDocumentAiAppend({
     canEditDocument,

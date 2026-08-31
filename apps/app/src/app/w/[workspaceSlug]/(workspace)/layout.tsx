@@ -2,10 +2,10 @@ import {
   SidebarInset,
   SidebarProvider,
 } from '@/components/ui/sidebar';
-import { ScrollFade } from '@/components/ui/scroll-fade';
 
 import { WorkspaceSidebar } from '../_components/workspace-sidebar/workspace-sidebar';
 import { WorkspaceAiChatShell } from '../_components/workspace-ai-chat-shell';
+import { WorkspaceScrollFade } from './_components/workspace-scroll-fade';
 
 export default async function WorkspaceRoutesLayout({
   children,
@@ -22,15 +22,9 @@ export default async function WorkspaceRoutesLayout({
 
       <WorkspaceAiChatShell workspaceSlug={workspaceSlug}>
         <SidebarInset className="min-h-0 min-w-0 overflow-hidden bg-transparent shadow-sm">
-          <ScrollFade
-            direction="y"
-            fadeColor="var(--surface)"
-            topOffset="2.75rem"
-            className="app-scrollbar h-full overflow-y-auto px-5"
-            fadeSize="3rem"
-          >
+          <WorkspaceScrollFade>
             {children}
-          </ScrollFade>
+          </WorkspaceScrollFade>
         </SidebarInset>
       </WorkspaceAiChatShell>
     </SidebarProvider>
