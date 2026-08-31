@@ -393,15 +393,14 @@ describe('DocumentScreen AI append action', () => {
         expect.objectContaining({
           type: 'numberedListItem',
           content: [{ type: 'text', text: 'First point', styles: { bold: true } }],
-          children: [
-            expect.objectContaining({
-              type: 'paragraph',
-              content: [{ type: 'text', text: 'First detail' }],
-            }),
-          ],
+        }),
+        expect.objectContaining({
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'First detail' }],
         }),
         expect.objectContaining({
           type: 'numberedListItem',
+          props: { start: 2 },
           content: [{ type: 'text', text: 'Second point', styles: { bold: true } }],
         }),
         expect.objectContaining({
