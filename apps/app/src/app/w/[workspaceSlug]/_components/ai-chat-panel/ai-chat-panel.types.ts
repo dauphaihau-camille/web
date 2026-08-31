@@ -63,5 +63,6 @@ export type AiChatPanelProps = {
   onOpenChangeAction: (isOpen: boolean) => void;
   documentBadges: AiChatDocumentBadge[];
   onDocumentBadgeRemove: (documentId: string) => void;
+  onDocumentBadgesRestore: () => void;
   onAppendResponse?: AiChatAppendResponse;
 };

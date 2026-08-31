@@ -16,6 +16,7 @@ export function AiChatPanel({
   documentBadges,
   onAppendResponse,
   onDocumentBadgeRemove,
+  onDocumentBadgesRestore,
   onOpenChangeAction,
 }: AiChatPanelProps) {
   const {
@@ -39,6 +40,11 @@ export function AiChatPanel({
     documentBadges,
     workspaceSlug,
   });
+
+  function startNewChat() {
+    resetConversation();
+    onDocumentBadgesRestore();
+  }
 
   function closePanel() {
     onOpenChangeAction(false);
@@ -74,7 +80,7 @@ export function AiChatPanel({
           selectedSessionId={selectedSessionId}
           sessions={sessions}
           onClose={closePanel}
-          onReset={resetConversation}
+          onReset={startNewChat}
           onSearchChange={setSessionSearchValue}
           onSelectSession={selectSession}
         />

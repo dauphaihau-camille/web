@@ -61,6 +61,7 @@ export function WorkspaceAiChatShell({
 }: WorkspaceAiChatShellProps) {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [documentBadges, setDocumentBadges] = useState<AiChatDocumentBadge[]>([]);
+  const [currentDocumentBadge, setCurrentDocumentBadge] = useState<AiChatDocumentBadge | null>(null);
   const [appendTarget, setAppendTarget] = useState<WorkspaceAiChatAppendTarget | null>(null);
   const [removedDocumentIds, setRemovedDocumentIds] = useState<Set<string>>(
     () => new Set(),
@@ -83,20 +84,27 @@ export function WorkspaceAiChatShell({
     setAppendTarget(document.onAppendResponse
       ? { documentId: document.id, appendResponse: document.onAppendResponse }
       : null);
+    const badge = { id: document.id, title: document.title };
+
+    setCurrentDocumentBadge(badge);
+
     setDocumentBadges((currentBadges) => {
       if (removedDocumentIds.has(document.id)) {
-        return currentBadges.filter((badge) => badge.id !== document.id);
+        return currentBadges.filter((currentBadge) => currentBadge.id !== document.id);
       }
 
-      return [{ id: document.id, title: document.title }];
+      return [badge];
     });
 
     return () => {
       setAppendTarget((currentTarget) =>
         currentTarget?.documentId === document.id ? null : currentTarget,
       );
+      setCurrentDocumentBadge((currentBadge) =>
+        currentBadge?.id === document.id ? null : currentBadge,
+      );
       setDocumentBadges((currentBadges) =>
-        currentBadges.filter((badge) => badge.id !== document.id),
+        currentBadges.filter((currentBadge) => currentBadge.id !== document.id),
       );
     };
   }, [removedDocumentIds]);
@@ -110,6 +118,11 @@ export function WorkspaceAiChatShell({
     setDocumentBadges((currentBadges) =>
       currentBadges.filter((badge) => badge.id !== documentId),
     );
+  }
+
+  function restoreDocumentBadges() {
+    setRemovedDocumentIds(new Set());
+    setDocumentBadges(currentDocumentBadge ? [currentDocumentBadge] : []);
   }
 
   const aiChatDocument = useMemo(
@@ -162,6 +175,7 @@ export function WorkspaceAiChatShell({
               workspaceSlug={workspaceSlug}
               documentBadges={documentBadges}
               onDocumentBadgeRemove={removeDocumentBadge}
+              onDocumentBadgesRestore={restoreDocumentBadges}
               onAppendResponse={appendTarget?.appendResponse}
               onOpenChangeAction={setIsChatOpen}
             />

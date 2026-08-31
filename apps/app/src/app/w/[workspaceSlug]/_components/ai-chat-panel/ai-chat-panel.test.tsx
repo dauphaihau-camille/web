@@ -746,6 +746,23 @@ describe('AiChatPanel', () => {
     expect(screen.getByRole('button', { name: 'Append to this document' })).toBeDisabled();
   });
 
+  it('restores a removed current document badge when starting a new chat', async () => {
+    const user = userEvent.setup();
+    renderAiChat(<CurrentDocumentRegistration />);
+
+    await user.click(screen.getByRole('button', { name: 'Open AI chat' }));
+    await waitFor(() => {
+      expect(screen.getByText('Account Health Review')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Remove Account Health Review' }));
+    expect(screen.queryByText('Account Health Review')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Start new chat' }));
+
+    expect(screen.getByText('Account Health Review')).toBeInTheDocument();
+  });
+
   it('appends a completed API assistant response to the active editable document', async () => {
     const user = userEvent.setup();
     const appendResponse = vi.fn();
