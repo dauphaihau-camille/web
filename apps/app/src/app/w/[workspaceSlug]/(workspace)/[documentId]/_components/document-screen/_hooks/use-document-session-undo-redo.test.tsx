@@ -20,7 +20,7 @@ import {
   DOCUMENT_LOCAL_EDIT_ORIGIN,
   useDocumentSessionUndoRedo,
 } from './use-document-session-undo-redo';
-import { SOCKET_COLLABORATION_ORIGIN } from './document-collaboration/document-collaboration.constants';
+import { SOCKET_COLLABORATION_ORIGIN } from './use-document-collaboration/document-collaboration.constants';
 
 const {
   toastMock,

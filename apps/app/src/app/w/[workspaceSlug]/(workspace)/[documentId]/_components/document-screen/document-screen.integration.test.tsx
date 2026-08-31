@@ -86,7 +86,7 @@ vi.mock('@shared/components/editor/create-blocknote-editor-loader', () => ({
     },
 }));
 
-vi.mock('./_hooks/document-collaboration/use-document-collaboration', () => ({
+vi.mock('./_hooks/use-document-collaboration/use-document-collaboration', () => ({
   useDocumentCollaboration: (
     _documentId: string,
     options: {

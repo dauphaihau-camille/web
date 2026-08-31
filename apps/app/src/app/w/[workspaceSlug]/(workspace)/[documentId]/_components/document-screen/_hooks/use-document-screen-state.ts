@@ -17,9 +17,9 @@ import type { Document } from '@/domains/document';
 import { useSubscriptionSummaryQuery } from '@/domains/subscription';
 import { workspaceRoutes } from '@/domains/workspace';
 
-import type { CollaborationBlockLimitError } from './document-collaboration/document-socket-provider';
+import type { CollaborationBlockLimitError } from './use-document-collaboration/document-socket-provider';
 import { useDocumentChromeVisibility } from './use-document-chrome-visibility';
-import { useDocumentCollaboration } from './document-collaboration/use-document-collaboration';
+import { useDocumentCollaboration } from './use-document-collaboration/use-document-collaboration';
 import { useDocumentEditorActions } from './use-document-editor-actions';
 import {
   type CommandUndoMetadata,

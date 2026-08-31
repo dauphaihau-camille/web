@@ -13,7 +13,7 @@ import * as Yjs from 'yjs';
 import {
   BROADCAST_COLLABORATION_ORIGIN,
   SOCKET_COLLABORATION_ORIGIN,
-} from './document-collaboration/document-collaboration.constants';
+} from './use-document-collaboration/document-collaboration.constants';
 
 export const DOCUMENT_LOCAL_EDIT_ORIGIN = Symbol('document-local-edit');
 export const DOCUMENT_SYSTEM_SYNC_ORIGIN = Symbol('document-system-sync');
