@@ -100,19 +100,21 @@ export function useDocumentAiAppend({
 
 function prepareBlocksForDocumentAppend(blocks: AiResponseBlock[]): unknown[] {
   const preparedBlocks: DocumentAppendBlock[] = [];
-  let numberedListStart = 1;
 
   for (const block of blocks) {
-    const preparedBlock = prepareSingleBlockForDocumentAppend(block, numberedListStart);
+    if (block.type === 'paragraph' && !isQuoteBlock(block)) {
+      const previousBlock = preparedBlocks.at(-1);
 
-    if (block.type === 'numberedListItem') {
-      numberedListStart += 1;
-    }
-    else if (block.type !== 'paragraph') {
-      numberedListStart = 1;
+      if (previousBlock && isDocumentListItemBlock(previousBlock)) {
+        previousBlock.children = [
+          ...(previousBlock.children ?? []),
+          prepareSingleBlockForDocumentAppend(block),
+        ];
+        continue;
+      }
     }
 
-    preparedBlocks.push(preparedBlock);
+    preparedBlocks.push(prepareSingleBlockForDocumentAppend(block));
   }
 
   return preparedBlocks;
@@ -122,9 +124,10 @@ type DocumentAppendBlock = {
   type: string;
   content: AiResponseBlock['content'];
   props?: Record<string, unknown>;
+  children?: unknown[];
 };
 
-function prepareSingleBlockForDocumentAppend(block: AiResponseBlock, numberedListStart: number): DocumentAppendBlock {
+function prepareSingleBlockForDocumentAppend(block: AiResponseBlock): DocumentAppendBlock {
   if (isQuoteBlock(block)) {
     return {
       type: 'quote',
@@ -136,8 +139,7 @@ function prepareSingleBlockForDocumentAppend(block: AiResponseBlock, numberedLis
     type: block.type,
     content: block.content,
     ...(block.type === 'heading' ? { props: getDocumentAppendHeadingProps(block) } : {}),
-    ...(block.type === 'numberedListItem' && numberedListStart > 1 ? { props: { ...block.props, start: numberedListStart } } : {}),
-    ...(block.type !== 'heading' && block.type !== 'numberedListItem' && block.props ? { props: block.props } : {}),
+    ...(block.type !== 'heading' && block.props ? { props: block.props } : {}),
   };
 }
 
@@ -147,7 +149,9 @@ function getDocumentAppendHeadingProps(block: AiResponseBlock): { level: number 
   return { level: Math.min(level + 1, 3) };
 }
 
-
+function isDocumentListItemBlock(block: { type: string }) {
+  return block.type === 'bulletListItem' || block.type === 'numberedListItem';
+}
 function isQuoteBlock(block: AiResponseBlock) {
   return block.type === 'paragraph' && block.content[0]?.text.trimStart().startsWith('>');
 }

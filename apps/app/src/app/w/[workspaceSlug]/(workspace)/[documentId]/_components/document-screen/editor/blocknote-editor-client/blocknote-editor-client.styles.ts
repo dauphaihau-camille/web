@@ -16,6 +16,14 @@ ${blockNoteEditorClientBaseStyles}
     padding-left: 0.5rem;
   }
 
+  .editor-blocknote-client
+    .bn-block-group
+    .bn-block:not(:has(.bn-toggle-wrapper))
+    .bn-block-group
+    .bn-block-outer:not([data-prev-depth-changed])::before {
+    border-left: 0 !important;
+  }
+
   .editor-blocknote-client .bn-formatting-toolbar:empty {
     display: none !important;
   }
