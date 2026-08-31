@@ -45,6 +45,7 @@ export type ChatSuggestion = {
 export type AiChatDocumentBadge = {
   id: string;
   title: string;
+  hasContent: boolean;
 };
 
 export type AiChatAppendRequest = {

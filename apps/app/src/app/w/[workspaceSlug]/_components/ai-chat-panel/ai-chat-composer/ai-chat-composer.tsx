@@ -1,4 +1,9 @@
-import { ArrowUpIcon, FileTextIcon, XIcon } from 'lucide-react';
+import {
+  ArrowUpIcon,
+  FileIcon,
+  FileTextIcon,
+  XIcon,
+} from 'lucide-react';
 
 import {
   InputGroup,
@@ -37,28 +42,32 @@ export function AiChatComposer({
         onSubmit();
       }}
     >
-      <InputGroup className="min-h-24 items-stretch rounded-xl bg-ai-chat-composer shadow-sm has-disabled:bg-ai-chat-composer has-disabled:opacity-100 dark:!bg-ai-chat-composer dark:has-disabled:!bg-ai-chat-composer">
+      <InputGroup className="min-h-24 items-stretch rounded-xl bg-ai-chat-composer shadow-sm has-disabled:bg-ai-chat-composer has-disabled:opacity-100 dark:!border-input/50 dark:!bg-ai-chat-composer dark:has-disabled:!bg-ai-chat-composer">
         {documentBadges.length > 0
           ? (
             <div className="flex w-full flex-wrap gap-1.5 px-3 pt-3">
-              {documentBadges.map((documentBadge) => (
-                <Badge
-                  key={documentBadge.id}
-                  variant="secondary"
-                  className="group/badge relative max-w-[10rem] gap-1.5 px-2.5 py-1 text-sm leading-5 [&>svg]:size-3.5"
-                >
-                  <FileTextIcon data-icon="inline-start" />
-                  <span className="truncate">{documentBadge.title}</span>
-                  <button
-                    type="button"
-                    aria-label={`Remove ${documentBadge.title}`}
-                    className="absolute top-1/2 right-1.5 inline-flex size-5 -translate-y-1/2 items-center justify-center rounded-sm bg-secondary opacity-0 shadow-sm transition-opacity group-hover/badge:opacity-100 group-focus-within/badge:opacity-100 hover:bg-background focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                    onClick={() => onDocumentBadgeRemove(documentBadge.id)}
+              {documentBadges.map((documentBadge) => {
+                const DocumentIcon = documentBadge.hasContent ? FileTextIcon : FileIcon;
+
+                return (
+                  <Badge
+                    key={documentBadge.id}
+                    variant="secondary"
+                    className="group/badge relative max-w-[10rem] gap-1.5 px-2.5 py-1 text-sm leading-5 [&>svg]:size-3.5"
                   >
-                    <XIcon className="size-3.5" />
-                  </button>
-                </Badge>
-              ))}
+                    <DocumentIcon data-icon="inline-start" />
+                    <span className="truncate">{documentBadge.title}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${documentBadge.title}`}
+                      className="absolute top-1/2 right-1.5 inline-flex size-5 -translate-y-1/2 items-center justify-center rounded-sm bg-secondary opacity-0 shadow-sm transition-opacity group-hover/badge:opacity-100 group-focus-within/badge:opacity-100 hover:bg-background focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                      onClick={() => onDocumentBadgeRemove(documentBadge.id)}
+                    >
+                      <XIcon className="size-3.5" />
+                    </button>
+                  </Badge>
+                );
+              })}
             </div>
           )
           : null}

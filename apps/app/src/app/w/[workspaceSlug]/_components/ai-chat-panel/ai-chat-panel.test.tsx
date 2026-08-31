@@ -91,6 +91,7 @@ function CurrentDocumentRegistration({
   useEffect(() => aiChatDocument?.registerCurrentDocument({
     id: 'doc-1',
     title: 'Account Health Review',
+    hasContent: true,
     onAppendResponse,
   }), [aiChatDocument, onAppendResponse]);
 

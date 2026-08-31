@@ -18,6 +18,7 @@ export function useDocumentAiAppend({
   collaborationDocument,
   collaborationUserName,
   documentId,
+  hasContent,
   savedTitle,
 }: {
   canEditDocument: boolean;
@@ -25,6 +26,7 @@ export function useDocumentAiAppend({
   collaborationUserName: string;
   documentId: string;
   savedTitle: string;
+  hasContent: boolean;
 }) {
   const aiChatDocument = useWorkspaceAiChatDocument();
   const appendRequestIdRef = useRef(0);
@@ -85,12 +87,14 @@ export function useDocumentAiAppend({
     return aiChatDocument.registerCurrentDocument({
       id: documentId,
       title: savedTitle,
+      hasContent,
       onAppendResponse: canEditDocument ? appendAiResponseToDocument : undefined,
     });
   }, [
     aiChatDocument,
     appendAiResponseToDocument,
     canEditDocument,
+    hasContent,
     documentId,
     savedTitle,
   ]);

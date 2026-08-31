@@ -84,7 +84,7 @@ export function WorkspaceAiChatShell({
     setAppendTarget(document.onAppendResponse
       ? { documentId: document.id, appendResponse: document.onAppendResponse }
       : null);
-    const badge = { id: document.id, title: document.title };
+    const badge = { id: document.id, title: document.title, hasContent: document.hasContent };
 
     setCurrentDocumentBadge(badge);
 

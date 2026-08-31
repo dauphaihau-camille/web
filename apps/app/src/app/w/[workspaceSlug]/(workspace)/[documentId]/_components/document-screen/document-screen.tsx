@@ -3,6 +3,7 @@
 import { createBlockNoteEditorLoader } from '@shared/components/editor/create-blocknote-editor-loader';
 import type { Document } from '@/domains/document';
 import { Textarea } from '@shared/components/ui/textarea';
+import { hasMeaningfulContent } from '@shared/components/editor/has-meaningful-content';
 
 import { DocumentBreadcrumb } from './document-breadcrumb';
 import { DocumentToolbar } from './document-toolbar/document-toolbar';
@@ -99,6 +100,7 @@ function DocumentScreenContent({
     canEditDocument,
     collaborationDocument: documentCollaboration.document,
     collaborationUserName: documentCollaboration.collaboration.user.name,
+    hasContent: hasMeaningfulContent(document.content),
     documentId,
     savedTitle,
   });
