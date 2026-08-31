@@ -157,7 +157,7 @@ function DocumentScreenContent({
       </div>
 
       <div
-        className="mx-auto max-w-2xl"
+        className="mx-auto max-w-3xl"
         style={{ paddingTop: `${110 + fixedHeaderOffset}px` }}
       >
         {documentCollaboration.isReady
@@ -199,7 +199,7 @@ function DocumentScreenContent({
                     disabled={isArchived}
                     rows={1}
                     wrap="soft"
-                    className="min-h-[1lh] resize-none overflow-hidden rounded-none border-0 bg-transparent px-0 py-0 text-4xl leading-tight font-semibold break-words whitespace-pre-wrap shadow-none disabled:cursor-default disabled:bg-transparent disabled:opacity-100 focus-visible:ring-0 md:text-5xl dark:bg-transparent dark:disabled:bg-transparent"
+                    className="min-h-[1lh] resize-none overflow-hidden rounded-none border-0 bg-transparent px-0 py-0 text-3xl font-bold break-words whitespace-pre-wrap shadow-none disabled:cursor-default disabled:bg-transparent disabled:opacity-100 focus-visible:ring-0 md:text-4xl dark:bg-transparent dark:disabled:bg-transparent"
                   />
                 </div>
               </div>

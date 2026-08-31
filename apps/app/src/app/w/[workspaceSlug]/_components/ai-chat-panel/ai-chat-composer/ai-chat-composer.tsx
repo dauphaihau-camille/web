@@ -45,7 +45,7 @@ export function AiChatComposer({
                 <Badge
                   key={documentBadge.id}
                   variant="secondary"
-                  className="group/badge relative max-w-full gap-1.5 px-2.5 py-1 text-sm leading-5 [&>svg]:size-3.5"
+                  className="group/badge relative max-w-[10rem] gap-1.5 px-2.5 py-1 text-sm leading-5 [&>svg]:size-3.5"
                 >
                   <FileTextIcon data-icon="inline-start" />
                   <span className="truncate">{documentBadge.title}</span>
