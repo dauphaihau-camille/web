@@ -87,6 +87,7 @@ export function AuthForm({ mode }: { mode: AuthFormMode }) {
                     id="login-code"
                     inputMode="numeric"
                     autoComplete="one-time-code"
+                    autoFocus
                     disabled={isVerifyingCode}
                     readOnly={isVerifyingCode}
                     aria-invalid={codeForm.getFieldState('code').invalid}
