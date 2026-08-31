@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from '@shared/components/ui/tooltip';
 
-import type { AiChatAppendResponse, AiResponseBlockPayload } from '../../ai-chat-panel.types';
+import type { AiChatAppendResponse, AiResponseBlockPayload } from '../../../ai-chat-panel.types';
 
 type AssistantMessageActionsProps = {
   canAppendResponse: boolean;

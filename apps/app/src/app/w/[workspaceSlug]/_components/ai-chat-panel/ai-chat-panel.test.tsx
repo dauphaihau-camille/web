@@ -569,6 +569,77 @@ describe('AiChatPanel', () => {
     expect(screen.getByText('name the owner')).toBeInTheDocument();
   });
 
+  it('keeps numbered response items in one ordered list with their follow-up paragraphs', async () => {
+    const user = userEvent.setup();
+
+    streamAiChatTurnMock.mockImplementation(async (_workspaceId, input, onEvent) => {
+      onEvent({
+        type: 'done',
+        turn: {
+          ...createCompletedTurn(input.sessionId, input.message, [
+            'Summary',
+            'Question one?',
+            'Explanation one.',
+            'Question two?',
+            'Explanation two.',
+            '> “Quote this without marker.”',
+          ].join('\n')),
+          response_block_payload: [
+            {
+              id: 'heading-1',
+              type: 'heading',
+              props: { level: 1 },
+              content: [{ type: 'text', text: 'Summary' }],
+            },
+            {
+              id: 'numbered-1',
+              type: 'numberedListItem',
+              content: [{ type: 'text', text: 'Question one?', styles: { bold: true } }],
+            },
+            {
+              id: 'paragraph-1',
+              type: 'paragraph',
+              content: [{ type: 'text', text: 'Explanation one.' }],
+            },
+            {
+              id: 'numbered-2',
+              type: 'numberedListItem',
+              content: [{ type: 'text', text: 'Question two?', styles: { bold: true } }],
+            },
+            {
+              id: 'paragraph-2',
+              type: 'paragraph',
+              content: [{ type: 'text', text: 'Explanation two.' }],
+            },
+            {
+              id: 'quote-1',
+              type: 'paragraph',
+              content: [{ type: 'text', text: '> “Quote this without marker.”' }],
+            },
+          ],
+        },
+      });
+    });
+
+    const { container } = renderAiChat();
+
+    await user.click(screen.getByRole('button', { name: 'Open AI chat' }));
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Summarize this page' })).toBeEnabled();
+    });
+    await user.click(screen.getByRole('button', { name: 'Summarize this page' }));
+
+    expect(await screen.findByRole('heading', { name: 'Summary', level: 1 })).toBeInTheDocument();
+    expect(container.querySelectorAll('ol')).toHaveLength(1);
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
+    expect(screen.getAllByRole('listitem')[0]).toHaveTextContent('Question one?Explanation one.');
+    expect(screen.getAllByRole('listitem')[1]).toHaveTextContent('Question two?Explanation two.');
+    expect(screen.getByText('Question one?')).toHaveClass('font-semibold');
+    expect(screen.getByText('“Quote this without marker.”')).toBeInTheDocument();
+    expect(screen.queryByText('> “Quote this without marker.”')).not.toBeInTheDocument();
+    expect(container.querySelector('blockquote')).toHaveTextContent('“Quote this without marker.”');
+  });
+
   it('shows the workspace AI limit card and blocks sends when responses are exhausted', async () => {
     const user = userEvent.setup();
     getAiResponseEntitlementMock.mockResolvedValue({

@@ -1,5 +1,5 @@
 import type { AiChatAppendResponse, ChatMessage as AiChatMessage } from '../../ai-chat-panel.types';
-import { AssistantMessage } from './assistant-message';
+import { AssistantMessage } from './assistant-message/assistant-message';
 import { UserMessage } from './user-message';
 
 type ChatMessageProps = {

@@ -1,10 +1,10 @@
 import { cn } from '@shared/lib/utils';
 
-import type { AiChatAppendResponse, ChatMessage as AiChatMessage } from '../../ai-chat-panel.types';
+import type { AiChatAppendResponse, ChatMessage as AiChatMessage } from '../../../ai-chat-panel.types';
 import { AssistantMessageActions } from './assistant-message-actions';
 import { AssistantMessagePreview } from './assistant-message-preview';
 import { AssistantThinkingIndicator } from './assistant-thinking-indicator';
-import { StreamingText } from './streaming-text';
+import { StreamingText } from '../streaming-text';
 
 type AssistantMessageProps = {
   message: AiChatMessage;

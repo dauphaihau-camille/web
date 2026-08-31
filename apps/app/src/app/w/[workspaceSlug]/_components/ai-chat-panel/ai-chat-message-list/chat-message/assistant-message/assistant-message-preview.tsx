@@ -1,6 +1,11 @@
 import { cn } from '@shared/lib/utils';
 
-import type { AiResponseBlock, AiResponseInlineContent } from '../../ai-chat-panel.types';
+import type { AiResponseBlock, AiResponseInlineContent } from '../../../ai-chat-panel.types';
+
+type PreviewListItemGroup = {
+  block: AiResponseBlock & { type: 'bulletListItem' | 'numberedListItem' };
+  children: AiResponseBlock[];
+};
 
 type PreviewGroup =
   | {
@@ -10,7 +15,7 @@ type PreviewGroup =
   | {
     type: 'list';
     listType: 'bulletListItem' | 'numberedListItem';
-    blocks: AiResponseBlock[];
+    items: PreviewListItemGroup[];
   };
 
 export function AssistantMessagePreview({
@@ -53,8 +58,8 @@ function PreviewGroup({ group, isFirst }: { group: PreviewGroup; isFirst: boolea
 
     return (
       <ListTag className={className}>
-        {group.blocks.map((block) => (
-          <PreviewListItem key={block.id} block={block} />
+        {group.items.map((item) => (
+          <PreviewListItem item={item} key={item.block.id} />
         ))}
       </ListTag>
     );
@@ -64,6 +69,14 @@ function PreviewGroup({ group, isFirst }: { group: PreviewGroup; isFirst: boolea
 }
 
 function PreviewBlock({ block, isFirst }: { block: AiResponseBlock; isFirst: boolean }) {
+  if (isQuoteBlock(block)) {
+    return (
+      <blockquote className={cn('border-l-2 border-border pl-4 font-semibold', !isFirst && 'mt-4')}>
+        <PreviewContent block={removeQuoteMarker(block)} />
+      </blockquote>
+    );
+  }
+
   const content = <PreviewContent block={block} />;
 
   if (block.type === 'heading') {
@@ -93,10 +106,17 @@ function PreviewBlock({ block, isFirst }: { block: AiResponseBlock; isFirst: boo
   return <p className={cn(!isFirst && 'mt-1')}>{content}</p>;
 }
 
-function PreviewListItem({ block }: { block: AiResponseBlock }) {
+function PreviewListItem({ item }: { item: PreviewListItemGroup }) {
   return (
     <li className="pl-1">
-      <PreviewContent block={block} />
+      <div>
+        <PreviewContent block={item.block} />
+      </div>
+      {item.children.map((child) => (
+        <p className="mt-1" key={child.id}>
+          <PreviewContent block={child} />
+        </p>
+      ))}
     </li>
   );
 }
@@ -115,6 +135,17 @@ function groupPreviewBlocks(blocks: AiResponseBlock[]): PreviewGroup[] {
 
   for (const block of blocks) {
     if (!isListItemBlock(block)) {
+      const previousGroup = groups.at(-1);
+
+      if (block.type === 'paragraph' && !isQuoteBlock(block) && previousGroup?.type === 'list') {
+        const previousItem = previousGroup.items.at(-1);
+
+        if (previousItem) {
+          previousItem.children.push(block);
+          continue;
+        }
+      }
+
       groups.push({ type: 'block', block });
       continue;
     }
@@ -125,14 +156,14 @@ function groupPreviewBlocks(blocks: AiResponseBlock[]): PreviewGroup[] {
       previousGroup?.type === 'list'
       && previousGroup.listType === block.type
     ) {
-      previousGroup.blocks.push(block);
+      previousGroup.items.push({ block, children: [] });
       continue;
     }
 
     groups.push({
       type: 'list',
       listType: block.type,
-      blocks: [block],
+      items: [{ block, children: [] }],
     });
   }
 
@@ -144,13 +175,36 @@ function getPreviewGroupKey(group: PreviewGroup) {
     return group.block.id;
   }
 
-  return `${group.listType}-${group.blocks[0]?.id ?? 'empty'}`;
+  return `${group.listType}-${group.items[0]?.block.id ?? 'empty'}`;
 }
 
 function isListItemBlock(
   block: AiResponseBlock,
 ): block is AiResponseBlock & { type: 'bulletListItem' | 'numberedListItem' } {
   return block.type === 'bulletListItem' || block.type === 'numberedListItem';
+}
+
+function isQuoteBlock(block: AiResponseBlock) {
+  return block.type === 'paragraph' && block.content[0]?.text.trimStart().startsWith('>');
+}
+
+function removeQuoteMarker(block: AiResponseBlock): AiResponseBlock {
+  const [firstInline, ...remainingContent] = block.content;
+
+  if (!firstInline) {
+    return block;
+  }
+
+  return {
+    ...block,
+    content: [
+      {
+        ...firstInline,
+        text: firstInline.text.replace(/^\s*>\s?/, ''),
+      },
+      ...remainingContent,
+    ],
+  };
 }
 
 function PreviewInline({ inline }: { inline: AiResponseInlineContent }) {
