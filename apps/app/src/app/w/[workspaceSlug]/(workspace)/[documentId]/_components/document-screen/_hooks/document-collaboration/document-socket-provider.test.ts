@@ -19,6 +19,7 @@ class TestSocket {
     event: string;
     payload: unknown;
   }> = [];
+  readonly serverDocument = new Yjs.Doc();
 
   private readonly handlers = new Map<string, SocketHandler>();
 
@@ -32,14 +33,12 @@ class TestSocket {
     this.emitted.push({ event, payload });
 
     if (event === 'collab:join') {
-      const serverDocument = new Yjs.Doc();
-
       callback?.({
         ok: true,
         data: {
           canEdit: true,
-          serverStateVector: Yjs.encodeStateVector(serverDocument),
-          update: Yjs.encodeStateAsUpdate(serverDocument),
+          serverStateVector: Yjs.encodeStateVector(this.serverDocument),
+          update: Yjs.encodeStateAsUpdate(this.serverDocument),
         },
       });
       return;
@@ -77,7 +76,7 @@ describe('DocumentSocketProvider', () => {
     vi.clearAllMocks();
   });
 
-  it('does not send pre-existing local document state during initial join', () => {
+  it('sends pre-existing local document state after initial join', () => {
     const document = new Yjs.Doc();
     document.getText('body').insert(0, 'Persisted local state');
     const provider = new DocumentSocketProvider(
@@ -91,7 +90,13 @@ describe('DocumentSocketProvider', () => {
 
     provider.connect();
 
-    expect(socket.emitted.map((entry) => entry.event)).toEqual(['collab:join']);
+    expect(socket.emitted.map((entry) => entry.event)).toEqual([
+      'collab:join',
+      'collab:update',
+    ]);
+    const update = socket.emitted[1]?.payload as { update: Uint8Array };
+    Yjs.applyUpdate(socket.serverDocument, update.update);
+    expect(socket.serverDocument.getText('body').toString()).toBe('Persisted local state');
 
     provider.destroy();
   });

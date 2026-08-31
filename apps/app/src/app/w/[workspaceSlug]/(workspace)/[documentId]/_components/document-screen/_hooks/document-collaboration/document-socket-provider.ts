@@ -261,6 +261,15 @@ export class DocumentSocketProvider {
       this.synced = true;
       this.emitStatus();
 
+      const missingClientUpdate = Yjs.encodeStateAsUpdate(
+        this.document,
+        toUint8Array(response.data.serverStateVector),
+      );
+
+      if (this.canEdit && hasYjsUpdateContent(missingClientUpdate)) {
+        this.sendUpdate(missingClientUpdate);
+      }
+
       if (this.options.showPresence && this.awareness.getLocalState()) {
         this.socket.emit('collab:awareness', {
           documentId: this.documentId,
@@ -304,6 +313,12 @@ export class DocumentSocketProvider {
       synced: this.synced,
     };
   }
+}
+
+function hasYjsUpdateContent(update: Uint8Array): boolean {
+  const decodedUpdate = Yjs.decodeUpdate(update);
+
+  return decodedUpdate.structs.length > 0 || decodedUpdate.ds.clients.size > 0;
 }
 
 function getBlockLimitError(
