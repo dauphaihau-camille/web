@@ -316,7 +316,7 @@ describe('DocumentScreen AI append action', () => {
           id: 'mock-assistant-streaming-scroll',
           session_id: input.sessionId,
           user_message: input.message,
-          assistant_response: 'My AI Notes Summary\nObjective',
+          assistant_response: 'My AI Notes Summary\nObjective\nFirst point\nFirst detail\nSecond point\n> Quote me',
           response_block_payload: [
             {
               id: 'ai-block-1',
@@ -329,6 +329,26 @@ describe('DocumentScreen AI append action', () => {
               type: 'heading',
               props: { level: 2 },
               content: [{ type: 'text', text: 'Objective' }],
+            },
+            {
+              id: 'ai-block-3',
+              type: 'numberedListItem',
+              content: [{ type: 'text', text: 'First point', styles: { bold: true } }],
+            },
+            {
+              id: 'ai-block-4',
+              type: 'paragraph',
+              content: [{ type: 'text', text: 'First detail' }],
+            },
+            {
+              id: 'ai-block-5',
+              type: 'numberedListItem',
+              content: [{ type: 'text', text: 'Second point', styles: { bold: true } }],
+            },
+            {
+              id: 'ai-block-6',
+              type: 'paragraph',
+              content: [{ type: 'text', text: '> Quote me' }],
             },
           ],
           status: 'completed',
@@ -369,6 +389,24 @@ describe('DocumentScreen AI append action', () => {
           type: 'heading',
           props: { level: 3 },
           content: [{ type: 'text', text: 'Objective' }],
+        }),
+        expect.objectContaining({
+          type: 'numberedListItem',
+          content: [{ type: 'text', text: 'First point', styles: { bold: true } }],
+          children: [
+            expect.objectContaining({
+              type: 'paragraph',
+              content: [{ type: 'text', text: 'First detail' }],
+            }),
+          ],
+        }),
+        expect.objectContaining({
+          type: 'numberedListItem',
+          content: [{ type: 'text', text: 'Second point', styles: { bold: true } }],
+        }),
+        expect.objectContaining({
+          type: 'quote',
+          content: [{ type: 'text', text: 'Quote me' }],
         }),
       ]);
       expect(editorMock.appendedBlocks[0]?.[0]).not.toHaveProperty('id');

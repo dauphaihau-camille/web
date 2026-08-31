@@ -99,16 +99,81 @@ export function useDocumentAiAppend({
 }
 
 function prepareBlocksForDocumentAppend(blocks: AiResponseBlock[]): unknown[] {
-  return blocks.map((block) => ({
+  const preparedBlocks: Array<{
+    type: string;
+    content: AiResponseBlock['content'];
+    props?: AiResponseBlock['props'];
+    children?: unknown[];
+  }> = [];
+
+  for (const block of blocks) {
+    if (block.type === 'paragraph' && !isQuoteBlock(block)) {
+      const previousBlock = preparedBlocks.at(-1);
+
+      if (previousBlock && isDocumentListItemBlock(previousBlock)) {
+        previousBlock.children = [
+          ...(previousBlock.children ?? []),
+          prepareSingleBlockForDocumentAppend(block),
+        ];
+        continue;
+      }
+    }
+
+    preparedBlocks.push(prepareSingleBlockForDocumentAppend(block));
+  }
+
+  return preparedBlocks;
+}
+
+function prepareSingleBlockForDocumentAppend(block: AiResponseBlock): {
+  type: string;
+  content: AiResponseBlock['content'];
+  props?: AiResponseBlock['props'];
+} {
+  if (isQuoteBlock(block)) {
+    return {
+      type: 'quote',
+      content: removeQuoteMarker(block).content,
+    };
+  }
+
+  return {
     type: block.type,
     content: block.content,
     ...(block.type === 'heading' ? { props: getDocumentAppendHeadingProps(block) } : {}),
     ...(block.type !== 'heading' && block.props ? { props: block.props } : {}),
-  }));
+  };
 }
 
 function getDocumentAppendHeadingProps(block: AiResponseBlock): { level: number } {
   const level = block.props?.level ?? 1;
 
   return { level: Math.min(level + 1, 3) };
+}
+
+function isDocumentListItemBlock(block: { type: string }) {
+  return block.type === 'bulletListItem' || block.type === 'numberedListItem';
+}
+
+function isQuoteBlock(block: AiResponseBlock) {
+  return block.type === 'paragraph' && block.content[0]?.text.trimStart().startsWith('>');
+}
+
+function removeQuoteMarker(block: AiResponseBlock): AiResponseBlock {
+  const [firstInline, ...remainingContent] = block.content;
+
+  if (!firstInline) {
+    return block;
+  }
+
+  return {
+    ...block,
+    content: [
+      {
+        ...firstInline,
+        text: firstInline.text.replace(/^\s*>\s?/, ''),
+      },
+      ...remainingContent,
+    ],
+  };
 }
