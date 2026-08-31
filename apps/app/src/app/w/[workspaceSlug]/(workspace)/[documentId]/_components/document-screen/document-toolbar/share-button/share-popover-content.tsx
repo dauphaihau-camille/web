@@ -29,11 +29,12 @@ export function SharePopoverContent({
   copyPublishedLinkShortcut,
   document,
   isArchived,
+  isPublished,
   workspaceSlug,
   onCopyLink,
   ...publishProps
 }: SharePopoverContentProps) {
-  const [tabValue, setTabValue] = useState('share');
+  const [tabValue, setTabValue] = useState(isPublished ? 'publish' : 'share');
   const shareTab = useShareTab({
     canManageAccess,
     document,
@@ -91,6 +92,7 @@ export function SharePopoverContent({
           <PublishTabContent
             {...publishProps}
             isArchived={isArchived}
+            isPublished={isPublished}
             copyPublishedLinkShortcut={copyPublishedLinkShortcut}
           />
         </TabsContent>
