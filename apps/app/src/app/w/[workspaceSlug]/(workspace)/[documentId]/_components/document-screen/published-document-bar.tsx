@@ -22,7 +22,7 @@ export function PublishedDocumentBar({
 
   return (
     <div
-      className="fixed inset-x-0 z-20 h-12 bg-sky-100 px-5 text-sky-700 dark:bg-sky-950 dark:text-sky-50 md:left-(--sidebar-width) md:right-[var(--workspace-right-rail-reserved-width,0rem)]"
+      className="fixed inset-x-0 z-20 h-12 bg-sky-100/50 px-5 text-sky-700 dark:bg-sky-950 dark:text-sky-50 md:left-(--sidebar-width) md:right-[var(--workspace-right-rail-reserved-width,0rem)]"
       style={{ top: offsetTop }}
     >
       <div className="flex h-full items-center justify-center gap-3 text-center text-sm font-medium">
