@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 
-import { LoginForm } from './_components/login-form';
+import { AuthForm } from './_components/auth-form/auth-form';
 
 export default function LoginPage() {
   return (
     <Suspense fallback={null}>
-      <LoginForm />
+      <AuthForm />
     </Suspense>
   );
 }

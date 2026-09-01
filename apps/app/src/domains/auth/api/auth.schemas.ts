@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+const passwordSchema = z.string().min(8, 'Password must be at least 8 characters.');
+
 export const currentUserSchema = z.object({
   id: z.string(),
   email: z.email(),
@@ -33,7 +35,27 @@ export const currentUserApiSchema = z.object({
 
 export const loginInputSchema = z.object({
   email: z.email(),
-  password: z.string().min(1),
+  password: passwordSchema,
+});
+
+export const registerInputSchema = z.object({
+  email: z.email(),
+  password: passwordSchema,
+  displayName: z.string().trim().min(1, 'Name is required.').max(120),
+});
+
+export const forgotPasswordInputSchema = z.object({
+  email: z.email(),
+  redirectTo: z.string().optional(),
+});
+
+export const verifyResetPasswordTokenInputSchema = z.object({
+  token: z.string().min(1),
+});
+
+export const resetPasswordInputSchema = z.object({
+  token: z.string().min(1),
+  password: passwordSchema,
 });
 
 export const emailAuthIntentSchema = z.enum(['login', 'signup']);

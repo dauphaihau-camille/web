@@ -5,16 +5,24 @@ import {
   emailAuthStartInputSchema,
   emailAuthStartResponseApiSchema,
   emailAuthVerifyInputSchema,
+  forgotPasswordInputSchema,
   loginInputSchema,
   loginResponseApiSchema,
+  registerInputSchema,
+  resetPasswordInputSchema,
+  verifyResetPasswordTokenInputSchema,
 } from './auth.schemas';
 import type {
   CurrentUser,
   EmailAuthStartInput,
   EmailAuthStartResponse,
   EmailAuthVerifyInput,
+  ForgotPasswordInput,
   LoginInput,
   LoginResponse,
+  RegisterInput,
+  ResetPasswordInput,
+  VerifyResetPasswordTokenInput,
 } from './auth.types';
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
@@ -38,6 +46,65 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 export async function login(body: LoginInput): Promise<LoginResponse> {
   const payload = loginInputSchema.parse(body);
   const response = await apiPost<unknown, LoginInput>('auth/login', payload);
+
+  return loginResponseApiSchema.parse(response);
+}
+
+export async function register(body: RegisterInput): Promise<LoginResponse> {
+  const payload = registerInputSchema.parse(body);
+  const response = await apiPost<
+    unknown,
+    {
+      email: string;
+      password: string;
+      display_name: string;
+    }
+  >('auth/register', {
+    email: payload.email,
+    password: payload.password,
+    display_name: payload.displayName,
+  });
+
+  return loginResponseApiSchema.parse(response);
+}
+
+export async function forgotPassword(body: ForgotPasswordInput): Promise<void> {
+  const payload = forgotPasswordInputSchema.parse(body);
+
+  await apiRequest('auth/forgot-password', {
+    json: {
+      email: payload.email,
+      redirect_to: payload.redirectTo,
+    },
+    method: 'post',
+  });
+}
+
+export async function verifyResetPasswordToken(
+  body: VerifyResetPasswordTokenInput,
+): Promise<void> {
+  const payload = verifyResetPasswordTokenInputSchema.parse(body);
+  const searchParams = new URLSearchParams({
+    token: payload.token,
+    type: 'reset_password',
+  });
+
+  await apiRequest(`auth/verify-token?${searchParams.toString()}`);
+}
+
+export async function resetPassword(body: ResetPasswordInput): Promise<LoginResponse> {
+  const payload = resetPasswordInputSchema.parse(body);
+  const searchParams = new URLSearchParams({
+    token: payload.token,
+  });
+  const response = await apiPost<
+    unknown,
+    {
+      password: string;
+    }
+  >(`auth/reset-password?${searchParams.toString()}`, {
+    password: payload.password,
+  });
 
   return loginResponseApiSchema.parse(response);
 }

@@ -5,8 +5,8 @@ import { publicEnv } from '@shared/lib/public-env';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-svh bg-background">
-      <header className="bg-background">
+    <div className="min-h-svh bg-surface">
+      <header>
         <div className="mx-auto flex h-16 max-w-6xl items-center px-4">
           <Link
             href={publicEnv.marketingHost}

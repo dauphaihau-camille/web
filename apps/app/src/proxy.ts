@@ -64,7 +64,7 @@ export default async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login', '/signup', '/workspace', '/w', '/w/:workspaceSlug', '/w/:workspaceSlug/:path*'],
+  matcher: ['/', '/login', '/signup', '/forgot-password', '/reset', '/workspace', '/w', '/w/:workspaceSlug', '/w/:workspaceSlug/:path*'],
 };
 
 function isAuthPage(pathname: string) {

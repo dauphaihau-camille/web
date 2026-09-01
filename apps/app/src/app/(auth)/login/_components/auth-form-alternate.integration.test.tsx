@@ -9,7 +9,7 @@ import { mswServer } from '@shared/test/msw/server';
 import type * as AuthDomain from '@/domains/auth';
 import type { CurrentUser } from '@/domains/auth';
 
-import { SignupForm } from './signup-form';
+import { AuthForm } from './auth-form/auth-form';
 
 const authEmailStartUrlPattern = /\/auth\/email\/start\/?$/;
 const authEmailVerifyUrlPattern = /\/auth\/email\/verify\/?$/;
@@ -20,10 +20,12 @@ const {
   useSearchParamsGetMock,
   currentUserQueryOptionsMock,
   navigateAfterLoginMock,
+  openWindowMock,
 } = vi.hoisted(() => ({
   useSearchParamsGetMock: vi.fn<(key: string) => string | null>(),
   currentUserQueryOptionsMock: vi.fn(),
   navigateAfterLoginMock: vi.fn<(path: string) => void>(),
+  openWindowMock: vi.fn(),
 }));
 
 vi.mock('next/navigation', () => ({
@@ -41,7 +43,7 @@ vi.mock('@/domains/auth', async () => {
   };
 });
 
-vi.mock('./login-navigation', () => ({
+vi.mock('../../_hooks/login-navigation', () => ({
   navigateAfterLogin: navigateAfterLoginMock,
 }));
 
@@ -66,7 +68,7 @@ const workspaceFixture: Workspace = {
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-describe('SignupForm integration', () => {
+describe('AuthForm login alternate flows', () => {
   let searchParams: URLSearchParams;
   let currentUserResult: CurrentUser | null;
   let workspaceListResult: Workspace[];
@@ -81,6 +83,12 @@ describe('SignupForm integration', () => {
     useSearchParamsGetMock.mockImplementation((key) => searchParams.get(key));
     currentUserQueryOptionsMock.mockReset();
     navigateAfterLoginMock.mockReset();
+    openWindowMock.mockReset();
+    openWindowMock.mockReturnValue({
+      focus: vi.fn(),
+      closed: false,
+    });
+    vi.stubGlobal('open', openWindowMock);
 
     currentUserQueryOptionsMock.mockImplementation(() =>
       queryOptions({
@@ -94,75 +102,11 @@ describe('SignupForm integration', () => {
     );
   });
 
-  it('links back to the login route', async () => {
-    renderWithProviders(<SignupForm />);
-
-    expect(screen.getByRole('button', { name: 'Log in' })).toHaveAttribute('href', '/login');
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
-  it('submits signup intent and display name through email verification', async () => {
-    const user = userEvent.setup();
-    let startRequestBody: unknown = null;
-    let verifyRequestBody: unknown = null;
-
-    workspaceListResult = [];
-
-    mswServer.use(
-      http.post(authEmailStartUrlPattern, async ({ request }) => {
-        startRequestBody = await request.json();
-
-        return HttpResponse.json({
-          challenge_id: 'challenge-1',
-          expires_in_seconds: 600,
-        });
-      }),
-      http.post(authEmailVerifyUrlPattern, async ({ request }) => {
-        verifyRequestBody = await request.json();
-
-        return HttpResponse.json({
-          access_token: 'access-token',
-          refresh_token: 'refresh-token',
-          user: {
-            id: currentUserFixture.id,
-            email: 'new@example.com',
-            display_name: 'New User',
-            status: currentUserFixture.status,
-            session_id: currentUserFixture.sessionId,
-            roles: currentUserFixture.roles,
-            permissions: currentUserFixture.permissions,
-          },
-        });
-      }),
-    );
-
-    renderWithProviders(<SignupForm />);
-
-    await user.type(screen.getByLabelText('Name'), 'New User');
-    await user.type(screen.getByLabelText('Email'), 'new@example.com');
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.input(await screen.findByPlaceholderText('123456'), {
-      target: { value: '123456' },
-    });
-    await user.click(screen.getByRole('button', { name: 'Verify code' }));
-
-    await waitFor(() => {
-      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/workspace');
-    });
-
-    expect(startRequestBody).toEqual({
-      email: 'new@example.com',
-      intent: 'signup',
-      display_name: 'New User',
-    });
-    expect(verifyRequestBody).toEqual({
-      challenge_id: 'challenge-1',
-      code: '123456',
-      intent: 'signup',
-      display_name: 'New User',
-    });
-  });
-
-  it('shows a login prompt when the signup email already exists', async () => {
+  it('shows a sign-up prompt when login verification succeeds but no account exists', async () => {
     const user = userEvent.setup();
 
     mswServer.use(
@@ -174,17 +118,17 @@ describe('SignupForm integration', () => {
       http.post(authEmailVerifyUrlPattern, () =>
         HttpResponse.json(
           {
-            message: 'Email is already registered.',
+            message: 'No account found for this email.',
           },
           {
-            status: 409,
+            status: 404,
           },
         )),
     );
 
-    renderWithProviders(<SignupForm />);
+    renderWithProviders(<AuthForm />);
 
-    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.type(screen.getByLabelText('Email'), 'new@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     fireEvent.input(await screen.findByPlaceholderText('123456'), {
       target: { value: '123456' },
@@ -193,6 +137,44 @@ describe('SignupForm integration', () => {
 
     const errorAlert = await screen.findByRole('alert');
 
-    expect(errorAlert.textContent).toMatch(/This email already has an account\. Log in instead\./i);
+    expect(errorAlert.textContent).toMatch(/No account found for this email\. Sign up instead\./i);
+  });
+
+  it('opens OAuth in a popup window with a popup callback redirect', async () => {
+    const user = userEvent.setup();
+
+    searchParams = new URLSearchParams('redirectTo=/shared/doc-1');
+
+    renderWithProviders(<AuthForm />);
+
+    await user.click(screen.getByRole('button', { name: 'Google' }));
+
+    expect(openWindowMock).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '/auth/oauth/google?redirectTo=%2Foauth%2Fpopup%3FredirectTo%3D%252Fshared%252Fdoc-1',
+      ),
+      'camille-oauth',
+      expect.stringContaining('popup=yes'),
+    );
+  });
+
+  it('shows only the full-page loader after OAuth completes before navigation', async () => {
+    renderWithProviders(<AuthForm />);
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: window.location.origin,
+      data: {
+        type: 'camille:oauth-complete',
+      },
+    }));
+
+    await waitFor(() => {
+      expect(screen.queryByText('Log in')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Continue' })).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/w/acme');
+    });
   });
 });

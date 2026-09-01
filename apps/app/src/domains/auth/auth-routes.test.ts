@@ -20,6 +20,13 @@ describe('authRoutes', () => {
   it('builds a dedicated optimistic logout login route', () => {
     expect(authRoutes.loginAfterLogout()).toBe('/login?loggedOut=1');
   });
+
+  it('builds Password Reset Request and Password Reset routes', () => {
+    expect(authRoutes.forgotPassword('/w/acme')).toBe('/forgot-password?redirectTo=%2Fw%2Facme');
+    expect(authRoutes.resetPassword('reset-token', '/w/acme')).toBe(
+      '/reset?t=reset-token&redirectTo=%2Fw%2Facme',
+    );
+  });
 });
 
 describe('hasLoggedOutSearchParam', () => {

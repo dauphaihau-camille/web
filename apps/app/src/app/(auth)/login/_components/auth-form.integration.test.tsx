@@ -9,9 +9,10 @@ import { mswServer } from '@shared/test/msw/server';
 import type * as AuthDomain from '@/domains/auth';
 import type { CurrentUser } from '@/domains/auth';
 
-import { LoginForm } from './login-form';
+import { AuthForm } from './auth-form/auth-form';
 
 const authEmailStartUrlPattern = /\/auth\/email\/start\/?$/;
+const authLoginUrlPattern = /\/auth\/login\/?$/;
 const authEmailVerifyUrlPattern = /\/auth\/email\/verify\/?$/;
 const myWorkspacesUrlPattern = /\/me\/workspaces\/?$/;
 const lastActiveWorkspaceUrlPattern = /\/me\/workspaces\/last-active\/?$/;
@@ -41,7 +42,7 @@ vi.mock('@/domains/auth', async () => {
   };
 });
 
-vi.mock('./login-navigation', () => ({
+vi.mock('../../_hooks/login-navigation', () => ({
   navigateAfterLogin: navigateAfterLoginMock,
 }));
 
@@ -66,7 +67,7 @@ const workspaceFixture: Workspace = {
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-describe('LoginForm integration', () => {
+describe('AuthForm login integration', () => {
   let searchParams: URLSearchParams;
   let currentUserResult: CurrentUser | null;
   let workspaceListResult: Workspace[];
@@ -97,7 +98,7 @@ describe('LoginForm integration', () => {
   it('validates the email before requesting a code', async () => {
     const user = userEvent.setup();
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<AuthForm />);
 
     await user.clear(screen.getByLabelText('Email'));
     await user.type(screen.getByLabelText('Email'), 'invalid-email');
@@ -107,9 +108,75 @@ describe('LoginForm integration', () => {
   });
 
   it('links to the dedicated signup route', async () => {
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<AuthForm />);
 
     expect(screen.getByRole('button', { name: 'Sign up' })).toHaveAttribute('href', '/signup');
+  });
+
+  it('switches to Password Login and back to Email-Code Login', async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<AuthForm />);
+
+    await user.click(screen.getByRole('button', { name: 'Password' }));
+
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Forgot password?' })).toHaveAttribute(
+      'href',
+      '/forgot-password',
+    );
+    expect(screen.getByRole('button', { name: 'Google' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'GitHub' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Email' })).toHaveClass('border-border');
+
+    await user.click(screen.getByRole('button', { name: 'Email' }));
+
+    expect(screen.queryByLabelText('Password')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument();
+  });
+
+  it('logs in with a password and redirects to the requested route', async () => {
+    const user = userEvent.setup();
+    let loginRequestBody: unknown = null;
+
+    searchParams = new URLSearchParams('redirectTo=/shared/doc-1');
+
+    mswServer.use(
+      http.post(authLoginUrlPattern, async ({ request }) => {
+        loginRequestBody = await request.json();
+
+        return HttpResponse.json({
+          access_token: 'access-token',
+          refresh_token: 'refresh-token',
+          user: {
+            id: currentUserFixture.id,
+            email: currentUserFixture.email,
+            display_name: currentUserFixture.displayName,
+            status: currentUserFixture.status,
+            session_id: currentUserFixture.sessionId,
+            roles: currentUserFixture.roles,
+            permissions: currentUserFixture.permissions,
+          },
+        });
+      }),
+    );
+
+    renderWithProviders(<AuthForm />);
+
+    await user.click(screen.getByRole('button', { name: 'Password' }));
+    await screen.findByLabelText('Password');
+    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.type(screen.getByLabelText('Password'), 'strong-password');
+    await user.click(screen.getByRole('button', { name: 'Log in' }));
+
+    await waitFor(() => {
+      expect(navigateAfterLoginMock).toHaveBeenCalledWith('/shared/doc-1');
+    });
+
+    expect(loginRequestBody).toEqual({
+      email: 'member@example.com',
+      password: 'strong-password',
+    });
   });
 
   it('redirects to the requested route after a successful code verification', async () => {
@@ -147,7 +214,7 @@ describe('LoginForm integration', () => {
       }),
     );
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<AuthForm />);
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
@@ -196,7 +263,7 @@ describe('LoginForm integration', () => {
         })),
     );
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<AuthForm />);
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
@@ -242,7 +309,7 @@ describe('LoginForm integration', () => {
         })),
     );
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<AuthForm />);
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
@@ -282,7 +349,7 @@ describe('LoginForm integration', () => {
         })),
     );
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<AuthForm />);
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
@@ -311,7 +378,7 @@ describe('LoginForm integration', () => {
         )),
     );
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<AuthForm />);
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
@@ -346,7 +413,7 @@ describe('LoginForm integration', () => {
         )),
     );
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<AuthForm />);
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
@@ -376,7 +443,7 @@ describe('LoginForm integration', () => {
         })),
     );
 
-    renderWithProviders(<LoginForm />);
+    renderWithProviders(<AuthForm />);
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));

@@ -1,34 +1,34 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, type UseMutationResult } from '@tanstack/react-query';
 import { HTTPError } from 'ky';
-import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type UseFormReturn } from 'react-hook-form';
 
 import {
-  myWorkspaceListQueryOptions,
-  workspaceKeys,
-  workspaceRoutes,
-} from '@/domains/workspace';
-import {
-  authKeys,
   authRoutes,
-  currentUserQueryOptions,
-  getPostLoginRedirectTarget,
+  login,
   startEmailAuth,
   verifyEmailAuth,
 } from '@/domains/auth';
-import { getLastActiveWorkspace } from '@/domains/workspace-preference';
+import type {
+  EmailAuthStartInput,
+  EmailAuthStartResponse,
+  EmailAuthVerifyInput,
+  LoginInput,
+  LoginResponse,
+} from '@/domains/auth';
 
+import { usePostAuthRedirect } from '../../_hooks/use-post-auth-redirect';
 import {
+  passwordLoginFormSchema,
+  type PasswordLoginFormValues,
   requestEmailCodeFormSchema,
   type RequestEmailCodeFormValues,
   type VerifyEmailCodeFormValues,
   verifyEmailCodeFormSchema,
 } from '../_forms/login.scheme';
-import { navigateAfterLogin } from '../_components/login-navigation';
 
 const RESEND_COOLDOWN_SECONDS = 30;
 const OAUTH_POPUP_MESSAGE_TYPE = 'camille:oauth-complete';
@@ -36,23 +36,42 @@ const OAUTH_POPUP_WINDOW_NAME = 'camille-oauth';
 const OAUTH_POPUP_WIDTH = 520;
 const OAUTH_POPUP_HEIGHT = 720;
 
-export type AuthFormMode = 'login' | 'signup';
+export type LoginAuthMethod = 'email-code' | 'password';
 
-export function useLoginForm(mode: AuthFormMode = 'login') {
-  const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
-  const [emailChallenge, setEmailChallenge] = useState<{
-    challengeId: string;
-    email: string;
-    displayName?: string;
-  } | null>(null);
+interface EmailChallenge {
+  challengeId: string;
+  email: string;
+  displayName?: string;
+}
+
+export interface UseLoginFormResult {
+  codeForm: UseFormReturn<VerifyEmailCodeFormValues>;
+  emailChallenge: EmailChallenge | null;
+  emailForm: UseFormReturn<RequestEmailCodeFormValues>;
+  handleEditEmail(): void;
+  handleOAuthSignIn(provider: 'google' | 'github'): void;
+  handlePasswordLogin(values: PasswordLoginFormValues): void;
+  handleRequestCode(values: RequestEmailCodeFormValues): void;
+  handleResendCode(): void;
+  handleVerifyCode(values: VerifyEmailCodeFormValues): void;
+  isOAuthRedirecting: boolean;
+  isVerifyRedirecting: boolean;
+  passwordLoginForm: UseFormReturn<PasswordLoginFormValues>;
+  passwordLoginMutation: UseMutationResult<LoginResponse, Error, LoginInput>;
+  redirectTarget: string;
+  resendCooldownSeconds: number;
+  startEmailAuthMutation: UseMutationResult<EmailAuthStartResponse, Error, EmailAuthStartInput>;
+  verifyEmailAuthMutation: UseMutationResult<LoginResponse, Error, EmailAuthVerifyInput>;
+}
+
+export function useLoginForm(): UseLoginFormResult {
+  const [emailChallenge, setEmailChallenge] = useState<EmailChallenge | null>(null);
   const [resendCooldownSeconds, setResendCooldownSeconds] = useState(0);
   const [isVerifyRedirecting, setIsVerifyRedirecting] = useState(false);
   const [isOAuthRedirecting, setIsOAuthRedirecting] = useState(false);
-
-  const redirectTarget = getPostLoginRedirectTarget(
-    searchParams.get('redirectTo') ?? searchParams.get('from'),
-  );
+  const { redirectAfterAuth, redirectTarget } = usePostAuthRedirect({
+    fallbackAuthPath: 'login',
+  });
 
   const emailForm = useForm<RequestEmailCodeFormValues>({
     resolver: zodResolver(requestEmailCodeFormSchema),
@@ -70,28 +89,17 @@ export function useLoginForm(mode: AuthFormMode = 'login') {
     },
   });
 
-  async function resolvePostLoginPath() {
-    const currentUser = await queryClient.fetchQuery(currentUserQueryOptions());
+  const passwordLoginForm = useForm<PasswordLoginFormValues>({
+    resolver: zodResolver(passwordLoginFormSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-    if (!currentUser) {
-      return mode === 'signup' ? authRoutes.signup() : authRoutes.login();
-    }
-
-    if (redirectTarget !== workspaceRoutes.entry()) {
-      return redirectTarget;
-    }
-
-    const lastActiveWorkspace = await getLastActiveWorkspace();
-
-    if (lastActiveWorkspace) {
-      return workspaceRoutes.detail(lastActiveWorkspace.slug);
-    }
-
-    const workspaces = await queryClient.fetchQuery(myWorkspaceListQueryOptions());
-
-    return workspaces[0]
-      ? workspaceRoutes.detail(workspaces[0].slug)
-      : workspaceRoutes.entry();
+  async function handleAuthSuccess() {
+    setIsVerifyRedirecting(true);
+    await redirectAfterAuth();
   }
 
   const startEmailAuthMutation = useMutation({
@@ -112,28 +120,29 @@ export function useLoginForm(mode: AuthFormMode = 'login') {
     },
     onError: (error) => {
       emailForm.setError('root', {
-        message: buildAuthErrorMessage(error, mode, 'start'),
+        message: buildEmailAuthErrorMessage(error, 'start'),
       });
     },
   });
 
   const verifyEmailAuthMutation = useMutation({
     mutationFn: verifyEmailAuth,
-    onSuccess: async () => {
-      setIsVerifyRedirecting(true);
-      await queryClient.invalidateQueries({
-        queryKey: authKeys.all,
-      });
-      await queryClient.invalidateQueries({
-        queryKey: workspaceKeys.all,
-      });
-
-      navigateAfterLogin(await resolvePostLoginPath());
-    },
+    onSuccess: handleAuthSuccess,
     onError: (error) => {
       setIsVerifyRedirecting(false);
       codeForm.setError('root', {
-        message: buildAuthErrorMessage(error, mode, 'verify'),
+        message: buildEmailAuthErrorMessage(error, 'verify'),
+      });
+    },
+  });
+
+  const passwordLoginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: handleAuthSuccess,
+    onError: (error) => {
+      setIsVerifyRedirecting(false);
+      passwordLoginForm.setError('root', {
+        message: buildPasswordLoginErrorMessage(error),
       });
     },
   });
@@ -143,7 +152,7 @@ export function useLoginForm(mode: AuthFormMode = 'login') {
     startEmailAuthMutation.mutate({
       email: values.email,
       displayName: values.displayName || undefined,
-      intent: mode,
+      intent: 'login',
     });
   }
 
@@ -153,8 +162,13 @@ export function useLoginForm(mode: AuthFormMode = 'login') {
       challengeId: values.challengeId,
       code: values.code,
       displayName: emailChallenge?.displayName,
-      intent: mode,
+      intent: 'login',
     });
+  }
+
+  function handlePasswordLogin(values: PasswordLoginFormValues) {
+    passwordLoginForm.clearErrors('root');
+    passwordLoginMutation.mutate(values);
   }
 
   function handleEditEmail() {
@@ -174,7 +188,7 @@ export function useLoginForm(mode: AuthFormMode = 'login') {
     startEmailAuthMutation.mutate({
       email: emailChallenge.email,
       displayName: emailChallenge.displayName,
-      intent: mode,
+      intent: 'login',
     });
   }
 
@@ -227,15 +241,7 @@ export function useLoginForm(mode: AuthFormMode = 'login') {
       }
 
       setIsOAuthRedirecting(true);
-
-      await queryClient.invalidateQueries({
-        queryKey: authKeys.all,
-      });
-      await queryClient.invalidateQueries({
-        queryKey: workspaceKeys.all,
-      });
-
-      navigateAfterLogin(await resolvePostLoginPath());
+      await redirectAfterAuth();
     }
 
     window.addEventListener('message', handleOAuthMessage);
@@ -243,7 +249,7 @@ export function useLoginForm(mode: AuthFormMode = 'login') {
     return () => {
       window.removeEventListener('message', handleOAuthMessage);
     };
-  }, [queryClient, redirectTarget]);
+  }, [redirectAfterAuth]);
 
   return {
     codeForm,
@@ -251,22 +257,22 @@ export function useLoginForm(mode: AuthFormMode = 'login') {
     emailForm,
     handleEditEmail,
     handleOAuthSignIn,
+    handlePasswordLogin,
     handleRequestCode,
     handleResendCode,
     handleVerifyCode,
     isVerifyRedirecting,
     isOAuthRedirecting,
+    passwordLoginForm,
+    passwordLoginMutation,
+    redirectTarget,
     resendCooldownSeconds,
     startEmailAuthMutation,
     verifyEmailAuthMutation,
   };
 }
 
-function buildAuthErrorMessage(
-  error: unknown,
-  mode: AuthFormMode,
-  step: 'start' | 'verify',
-) {
+function buildEmailAuthErrorMessage(error: unknown, step: 'start' | 'verify') {
   if (error instanceof HTTPError) {
     if (error.response.status === 429) {
       return step === 'start'
@@ -274,11 +280,7 @@ function buildAuthErrorMessage(
         : 'Too many attempts. Please wait a moment and try again.';
     }
 
-    if (mode === 'signup' && error.response.status === 409) {
-      return 'This email already has an account. Log in instead.';
-    }
-
-    if (mode === 'login' && error.response.status === 404) {
+    if (error.response.status === 404) {
       return 'No account found for this email. Sign up instead.';
     }
 
@@ -288,4 +290,18 @@ function buildAuthErrorMessage(
   }
 
   return step === 'start' ? 'Failed to send code.' : 'Code verification failed.';
+}
+
+function buildPasswordLoginErrorMessage(error: unknown) {
+  if (error instanceof HTTPError) {
+    if (error.response.status === 429) {
+      return 'Too many login attempts. Please wait a moment and try again.';
+    }
+
+    if (error.response.status === 401 || error.response.status === 404) {
+      return 'Invalid email or password.';
+    }
+  }
+
+  return 'Login failed.';
 }

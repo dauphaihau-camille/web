@@ -2,6 +2,8 @@ import { publicEnv } from '@shared/lib/public-env';
 
 const LOGIN_PATH = '/login';
 const SIGNUP_PATH = '/signup';
+const FORGOT_PASSWORD_PATH = '/forgot-password';
+const RESET_PASSWORD_PATH = '/reset';
 const OAUTH_POPUP_PATH = '/oauth/popup';
 const WAKE_PATH = '/wake';
 const LOGGED_OUT_SEARCH_PARAM = 'loggedOut';
@@ -50,14 +52,49 @@ export const authRoutes = {
 
     return `${SIGNUP_PATH}?${searchParams.toString()}`;
   },
+  forgotPassword(redirectTo?: string | null) {
+    if (!redirectTo) {
+      return FORGOT_PASSWORD_PATH;
+    }
+
+    const searchParams = new URLSearchParams({
+      redirectTo,
+    });
+
+    return `${FORGOT_PASSWORD_PATH}?${searchParams.toString()}`;
+  },
+  resetPassword(token?: string | null, redirectTo?: string | null) {
+    const searchParams = new URLSearchParams();
+
+    if (token) {
+      searchParams.set('t', token);
+    }
+
+    if (redirectTo) {
+      searchParams.set('redirectTo', redirectTo);
+    }
+
+    const query = searchParams.toString();
+
+    return query ? `${RESET_PASSWORD_PATH}?${query}` : RESET_PASSWORD_PATH;
+  },
   isLoginPath(pathname: string) {
     return pathname === LOGIN_PATH || pathname.startsWith(`${LOGIN_PATH}/`);
   },
   isSignupPath(pathname: string) {
     return pathname === SIGNUP_PATH || pathname.startsWith(`${SIGNUP_PATH}/`);
   },
+  isForgotPasswordPath(pathname: string) {
+    return pathname === FORGOT_PASSWORD_PATH || pathname.startsWith(`${FORGOT_PASSWORD_PATH}/`);
+  },
+  isResetPasswordPath(pathname: string) {
+    return pathname === RESET_PASSWORD_PATH || pathname.startsWith(`${RESET_PASSWORD_PATH}/`);
+  },
   isAuthPath(pathname: string) {
-    return this.isLoginPath(pathname) || this.isSignupPath(pathname);
+    return this.isLoginPath(pathname)
+      || this.isSignupPath(pathname)
+      || this.isForgotPasswordPath(pathname)
+      || this.isResetPasswordPath(pathname);
   },
   oauthStart(provider: OAuthProvider, redirectTo?: string | null) {
     const path = `${apiBaseUrl ?? ''}/auth/oauth/${provider}`;
