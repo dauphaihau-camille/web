@@ -76,6 +76,11 @@ if (!base || !head) {
   process.exit(1);
 }
 
+if (base === head) {
+  console.log('Base and head are identical; running build to avoid skipping stale or retried deploy.');
+  process.exit(1);
+}
+
 let changedFiles;
 
 try {
