@@ -41,5 +41,5 @@ export const publicEnv = {
   apiBaseUrl: buildApiBaseUrl(configuredApiUrl, apiVersion),
   apiOrigin,
   apiVersion,
-  marketingHost: normalizeUrl(process.env.NEXT_PUBLIC_MARKETING_HOST) || 'http://localhost:4001',
+  marketingHost: normalizeUrl(process.env.NEXT_PUBLIC_MARKETING_HOST) || 'http://localhost:5101',
 } as const;

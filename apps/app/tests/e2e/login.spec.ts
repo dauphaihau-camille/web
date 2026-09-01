@@ -30,7 +30,7 @@ test.describe('login flow', () => {
     await page.getByPlaceholder('123456').fill('123456');
     await page.getByRole('button', { name: 'Verify code' }).click();
 
-    await expect(page).toHaveURL('http://127.0.0.1:4000/');
+    await expect(page).toHaveURL('http://127.0.0.1:5102/');
     await expect(
       page.getByRole('link', { name: /get start for free/i }),
     ).toBeVisible();
@@ -55,6 +55,6 @@ test.describe('login flow', () => {
     await expect(
       page.getByText(/401|unauthorized|request failed/i),
     ).toBeVisible();
-    await expect(page).toHaveURL('http://127.0.0.1:4000/login');
+    await expect(page).toHaveURL('http://127.0.0.1:5102/login');
   });
 });

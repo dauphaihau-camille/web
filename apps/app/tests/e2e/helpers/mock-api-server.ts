@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-const port = 3000;
+const port = 5100;
 
 type Workspace = {
   id: string;
@@ -32,7 +32,7 @@ function sendJson(
   body: unknown,
 ) {
   response.writeHead(status, {
-    'access-control-allow-origin': 'http://127.0.0.1:4000',
+    'access-control-allow-origin': 'http://127.0.0.1:5102',
     'access-control-allow-credentials': 'true',
     'access-control-allow-headers': 'content-type',
     'access-control-allow-methods': 'GET,POST,OPTIONS',
@@ -55,7 +55,7 @@ const server = createServer((request, response) => {
 
   if (request.method === 'OPTIONS') {
     response.writeHead(204, {
-      'access-control-allow-origin': 'http://127.0.0.1:4000',
+      'access-control-allow-origin': 'http://127.0.0.1:5102',
       'access-control-allow-credentials': 'true',
       'access-control-allow-headers': 'content-type',
       'access-control-allow-methods': 'GET,POST,OPTIONS',

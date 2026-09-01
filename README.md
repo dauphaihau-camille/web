@@ -57,7 +57,7 @@ Frontend monorepo for `camille-v2`.
 ## Local setup
 
 1. Copy `.env.example` to `.env.local`.
-2. Set `NEXT_PUBLIC_API_BASE_URL=http://localhost:3000` and `NEXT_PUBLIC_API_VERSION=v1`.
+2. Set `NEXT_PUBLIC_API_BASE_URL=http://localhost:5100` and `NEXT_PUBLIC_API_VERSION=v1`.
 3. Start the API first so auth and workspace requests resolve.
 4. Run `npm run dev:app` for the product app.
 5. Run `npm run dev:marketing` for the marketing site.

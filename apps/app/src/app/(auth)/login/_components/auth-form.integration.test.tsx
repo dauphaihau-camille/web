@@ -388,7 +388,7 @@ describe('AuthForm login integration', () => {
     expect(errorAlert).toHaveTextContent(
       'Too many attempts. Please wait a moment before requesting another code.',
     );
-    expect(errorAlert).not.toHaveTextContent('localhost:3000');
+    expect(errorAlert).not.toHaveTextContent('localhost:5100');
     expect(errorAlert).not.toHaveTextContent('Request failed');
     expect(navigateAfterLoginMock).not.toHaveBeenCalled();
   });
@@ -427,7 +427,7 @@ describe('AuthForm login integration', () => {
     expect(errorAlert).toHaveTextContent(
       'That code is invalid or expired. Request a new code and try again.',
     );
-    expect(errorAlert).not.toHaveTextContent('localhost:3000');
+    expect(errorAlert).not.toHaveTextContent('localhost:5100');
     expect(errorAlert).not.toHaveTextContent('Request failed');
     expect(navigateAfterLoginMock).not.toHaveBeenCalled();
   });

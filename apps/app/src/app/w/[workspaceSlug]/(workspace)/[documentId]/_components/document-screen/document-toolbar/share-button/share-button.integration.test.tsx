@@ -11,7 +11,7 @@ import { mswServer } from '@shared/test/msw/server';
 
 import { ShareButton } from './share-button';
 
-const marketingHost = 'http://localhost:4001';
+const marketingHost = 'http://localhost:5101';
 
 type WorkspaceMemberFixture = {
   display_name?: string;

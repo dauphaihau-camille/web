@@ -13,9 +13,9 @@ jobs:
     timeout-minutes: 20
     env:
       CI: true
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:5100
       NEXT_PUBLIC_API_VERSION: v1
-      NEXT_PUBLIC_MARKETING_HOST: http://localhost:4001
+      NEXT_PUBLIC_MARKETING_HOST: http://localhost:5101
 
     steps:
       - name: Check out repository

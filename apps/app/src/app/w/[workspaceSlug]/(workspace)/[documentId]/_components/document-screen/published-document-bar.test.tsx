@@ -28,7 +28,7 @@ describe('PublishedDocumentBar', () => {
 
     expect(screen.getByRole('link', { name: 'View site' })).toHaveAttribute(
       'href',
-      'http://localhost:4001/share/published-doc',
+      'http://localhost:5101/share/published-doc',
     );
   });
 

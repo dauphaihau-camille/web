@@ -38,9 +38,9 @@
     "@tailwindcss/postcss": "^4"
   },
   "scripts": {
-    "dev": "next dev --port 4000",
+    "dev": "next dev --port 5102",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 5102",
     "typecheck": "tsc --noEmit",
     "test:e2e:api": "bun tests/e2e/helpers/mock-api-server.ts",
     "test:e2e": "playwright test"

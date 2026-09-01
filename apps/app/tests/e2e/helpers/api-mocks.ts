@@ -1,6 +1,6 @@
 import type { BrowserContext, Page, Route } from '@playwright/test';
 
-const apiBaseUrl = 'http://localhost:3000/v1';
+const apiBaseUrl = 'http://localhost:5100/v1';
 
 export type WorkspaceApiFixture = {
   id: string;
@@ -24,7 +24,7 @@ export type LoginApiScenario = {
 
 function corsHeaders() {
   return {
-    'access-control-allow-origin': 'http://127.0.0.1:4000',
+    'access-control-allow-origin': 'http://127.0.0.1:5102',
     'access-control-allow-credentials': 'true',
     'access-control-allow-headers': 'content-type',
     'access-control-allow-methods': 'GET,POST,OPTIONS',

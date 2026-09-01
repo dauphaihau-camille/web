@@ -150,7 +150,7 @@ export function CreateWorkspaceForm({
                 <FieldLabel htmlFor="workspace-domain">Domain</FieldLabel>
                 <InputGroup className="h-9">
                   <InputGroupAddon>
-                    <InputGroupText>localhost:4000/</InputGroupText>
+                    <InputGroupText>localhost:5102/</InputGroupText>
                   </InputGroupAddon>
                   <InputGroupInput
                     {...field}

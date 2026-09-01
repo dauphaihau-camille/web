@@ -60,7 +60,7 @@ describe('BillingPanel integration', () => {
       value: {
         ...originalLocation,
         assign: assignMock,
-        href: 'http://localhost:4000/w/acme-product/settings/billing',
+        href: 'http://localhost:5102/w/acme-product/settings/billing',
       },
     });
   });
@@ -145,7 +145,7 @@ describe('BillingPanel integration', () => {
     await user.click(screen.getByRole('button', { name: 'Upgrade now' }));
 
     expect(createCheckoutSessionMock).toHaveBeenCalledWith('workspace-1', {
-      return_url: 'http://localhost:4000/w/acme-product/settings/billing',
+      return_url: 'http://localhost:5102/w/acme-product/settings/billing',
     });
     expect(assignMock).toHaveBeenCalledWith('https://billing.example/checkout-1');
   });

@@ -193,7 +193,7 @@ export function WorkspaceSettings({
                   <div className="w-72 space-y-2">
                     <InputGroup className="h-9">
                       <InputGroupAddon>
-                        <InputGroupText>localhost:4000/</InputGroupText>
+                        <InputGroupText>localhost:5102/</InputGroupText>
                       </InputGroupAddon>
                       <InputGroupInput
                         {...field}

@@ -15,9 +15,9 @@
     "react-dom": "19.2.4"
   },
   "scripts": {
-    "dev": "next dev --port 4001",
+    "dev": "next dev --port 5101",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 5101",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
