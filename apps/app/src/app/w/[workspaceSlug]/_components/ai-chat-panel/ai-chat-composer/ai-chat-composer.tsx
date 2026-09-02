@@ -36,13 +36,13 @@ export function AiChatComposer({
 }: AiChatComposerProps) {
   return (
     <form
-      className="relative z-10 shrink-0 p-3 pt-0"
+      className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-transparent p-3"
       onSubmit={(event) => {
         event.preventDefault();
         onSubmit();
       }}
     >
-      <InputGroup className="min-h-24 items-stretch rounded-xl bg-ai-chat-composer shadow-sm has-disabled:bg-ai-chat-composer has-disabled:opacity-100 dark:!border-input/50 dark:!bg-ai-chat-composer dark:has-disabled:!bg-ai-chat-composer">
+      <InputGroup className="pointer-events-auto min-h-24 items-stretch rounded-xl bg-ai-chat-composer shadow-sm has-disabled:bg-ai-chat-composer has-disabled:opacity-100 dark:!border-input/50 dark:!bg-ai-chat-composer dark:has-disabled:!bg-ai-chat-composer">
         {documentBadges.length > 0
           ? (
             <div className="flex w-full flex-wrap gap-1.5 px-3 pt-3">

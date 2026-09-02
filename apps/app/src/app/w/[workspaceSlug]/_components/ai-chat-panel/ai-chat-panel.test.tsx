@@ -509,6 +509,7 @@ describe('AiChatPanel', () => {
 
   it('renders structured assistant response blocks while streaming', async () => {
     const user = userEvent.setup();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
     streamAiChatTurnMock.mockImplementation(async (_workspaceId, input, onEvent) => {
       onEvent({
@@ -530,6 +531,7 @@ describe('AiChatPanel', () => {
         content: [
           { type: 'text', text: 'Next action:', styles: { bold: true } },
           { type: 'text', text: ' name the owner' },
+          { type: 'text', text: ' name the owner' },
         ],
       });
       onEvent({ type: 'block_end', block_id: 'bullet-1' });
@@ -550,6 +552,7 @@ describe('AiChatPanel', () => {
               content: [
                 { type: 'text', text: 'Next action:', styles: { bold: true } },
                 { type: 'text', text: ' name the owner' },
+                { type: 'text', text: ' name the owner' },
               ],
             },
           ],
@@ -567,7 +570,9 @@ describe('AiChatPanel', () => {
 
     expect(await screen.findByRole('heading', { name: 'Objective', level: 2 })).toBeInTheDocument();
     expect(screen.getByText('Next action:')).toHaveClass('font-semibold');
-    expect(screen.getByText('name the owner')).toBeInTheDocument();
+    expect(screen.getAllByText('name the owner')).toHaveLength(2);
+    expect(consoleErrorSpy).not.toHaveBeenCalledWith(expect.stringContaining('Encountered two children with the same key'));
+    consoleErrorSpy.mockRestore();
   });
 
   it('keeps numbered response items in one ordered list with their follow-up paragraphs', async () => {

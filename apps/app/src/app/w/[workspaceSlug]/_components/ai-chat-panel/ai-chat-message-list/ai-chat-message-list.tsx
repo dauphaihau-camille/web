@@ -39,7 +39,7 @@ export function AiChatMessageList({
             }
           }}
         >
-          <MessageScrollerContent aria-busy={isBusy} className="px-4 py-5">
+          <MessageScrollerContent aria-busy={isBusy} className="px-4 pt-5 pb-40">
             {messages.map((message) => (
               <MessageScrollerItem
                 key={message.id}

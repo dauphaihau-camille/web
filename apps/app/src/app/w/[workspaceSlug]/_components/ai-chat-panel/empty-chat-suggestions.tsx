@@ -16,7 +16,7 @@ export function EmptyChatSuggestions({
   onSelect,
 }: EmptyChatSuggestionsProps) {
   return (
-    <section className="shrink-0 px-4 pb-4" aria-label="Suggested AI actions">
+    <section className="shrink-0 px-4 pb-36" aria-label="Suggested AI actions">
       <div className="space-y-2">
         <div className="space-y-1">
           <BotIcon className="size-10" />
