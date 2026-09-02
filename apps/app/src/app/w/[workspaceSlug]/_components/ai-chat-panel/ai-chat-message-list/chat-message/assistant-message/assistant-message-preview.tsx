@@ -122,10 +122,10 @@ function PreviewListItem({ item }: { item: PreviewListItemGroup }) {
 }
 
 function PreviewContent({ block }: { block: AiResponseBlock }) {
-  return block.content.map((inline) => (
+  return block.content.map((inline, index) => (
     <PreviewInline
       inline={inline}
-      key={`${block.id}-${inline.text}-${JSON.stringify(inline.styles ?? {})}`}
+      key={`${block.id}-inline-${index}`}
     />
   ));
 }
