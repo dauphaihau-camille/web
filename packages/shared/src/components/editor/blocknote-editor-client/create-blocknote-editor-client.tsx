@@ -1,7 +1,9 @@
 'use client';
 
+import type { ComponentProps } from 'react';
+import { createPortal } from 'react-dom';
 import { useCreateBlockNote, SuggestionMenuController } from '@blocknote/react';
-import { BlockNoteView } from '@blocknote/shadcn';
+import { BlockNoteView, ShadCNDefaultComponents } from '@blocknote/shadcn';
 import { useTheme } from 'next-themes';
 
 import type { BlockNoteEditorProps } from '../blocknote-editor.types';
@@ -16,6 +18,32 @@ import { useExternalSubdocCreated } from './_hooks/use-external-subdoc-created';
 import { useSessionUndoRedoHandler } from './_hooks/use-session-undo-redo-handler';
 import { useSlashMenuItems } from './_hooks/use-slash-menu-items';
 import { EditorSideMenuController } from './side-menu-controller';
+
+const bodyPortaledDropdownMenuComponents = {
+  ...ShadCNDefaultComponents.DropdownMenu,
+  DropdownMenuContent: BodyPortaledDropdownMenuContent,
+  DropdownMenuSubContent: BodyPortaledDropdownMenuSubContent,
+};
+
+function BodyPortaledDropdownMenuContent(
+  props: ComponentProps<typeof ShadCNDefaultComponents.DropdownMenu.DropdownMenuContent>,
+) {
+  const content = (
+    <ShadCNDefaultComponents.DropdownMenu.DropdownMenuContent {...props} />
+  );
+
+  return typeof document === 'undefined' ? content : createPortal(content, document.body);
+}
+
+function BodyPortaledDropdownMenuSubContent(
+  props: ComponentProps<typeof ShadCNDefaultComponents.DropdownMenu.DropdownMenuSubContent>,
+) {
+  const content = (
+    <ShadCNDefaultComponents.DropdownMenu.DropdownMenuSubContent {...props} />
+  );
+
+  return typeof document === 'undefined' ? content : createPortal(content, document.body);
+}
 
 export function createBlockNoteEditorClient({
   SlashMenuComponent,
@@ -130,6 +158,9 @@ export function createBlockNoteEditorClient({
           theme={resolvedTheme === 'dark' ? 'dark' : 'light'}
           slashMenu={false}
           className={blockNoteViewClassName}
+          shadCNComponents={{
+            DropdownMenu: bodyPortaledDropdownMenuComponents,
+          }}
           onSelectionChange={onSelectionChangeAction}
           onChange={handleEditorChange}
         >
@@ -152,6 +183,7 @@ export function createBlockNoteEditorClient({
                     isSelectingSlashMenuItemRef.current = true;
                     item.onItemClick();
                   }}
+                  portalElement={null}
                   floatingUIOptions={{
                     useFloatingOptions: {
                       onOpenChange: handleSlashMenuOpenChange,
