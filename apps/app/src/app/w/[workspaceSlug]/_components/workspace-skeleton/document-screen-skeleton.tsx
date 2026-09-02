@@ -12,7 +12,7 @@ export function DocumentScreenSkeleton({
 }: {
   animate?: boolean;
 }) {
-  const headerClassName = `fixed inset-x-0 z-10 bg-background px-2 backdrop-blur md:left-(--sidebar-width) ${animate ? motionStyles.cascadeEnter : ''}`;
+  const headerClassName = `fixed inset-x-0 z-10 bg-surface px-2 backdrop-blur md:left-(--sidebar-width) ${animate ? motionStyles.cascadeEnter : ''}`;
   const contentClassName = `mx-auto max-w-2xl ${animate ? motionStyles.cascadeEnter : ''}`;
 
   const headerStyle = {
