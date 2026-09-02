@@ -146,6 +146,11 @@ export const blockNoteEditorClientBaseStyles = `
     background: var(--color-popover);
     color: var(--color-popover-foreground);
     padding: 0.25rem;
+    box-shadow: none;
+  }
+
+  :root:not(.dark) .drag-handle-menu,
+  :root:not(.dark) .drag-handle-submenu {
     box-shadow: 0 12px 32px color-mix(in oklab, var(--color-foreground) 12%, transparent);
   }
 
