@@ -96,11 +96,12 @@ function DocumentScreenContent({
     document,
     isPublished: Boolean(documentToolbar.publishStatus?.published_document_id),
   });
-  useWorkspaceScrollFadeTopOffset(
-    fixedHeaderOffset > 0
-      ? `calc(2.75rem + ${fixedHeaderOffset}px)`
-      : '2.75rem',
-  );
+
+  const documentChromeOffset = fixedHeaderOffset > 0
+    ? `calc(2.75rem + ${fixedHeaderOffset}px)`
+    : '2.75rem';
+
+  useWorkspaceScrollFadeTopOffset('0px', documentChromeOffset);
 
   const { appendBlocksRequest } = useDocumentAiAppend({
     canEditDocument,
@@ -165,8 +166,7 @@ function DocumentScreenContent({
       </div>
 
       <div
-        className="mx-auto max-w-3xl"
-        style={{ paddingTop: `${110 + fixedHeaderOffset}px` }}
+        className="mx-auto max-w-3xl pt-32"
       >
         {documentCollaboration.isReady
           ? (

@@ -24,7 +24,7 @@ export function AiChatLimitCard() {
 
   return (
     <div
-      className="relative z-0 mx-3 mb-36 overflow-visible transition-[height] duration-200 ease-out data-[docked=false]:h-36 data-[docked=true]:h-8"
+      className="relative z-0 overflow-visible transition-[height] duration-200 ease-out data-[docked=false]:h-36 data-[docked=true]:h-8"
       data-docked={isDocked}
     >
       <section

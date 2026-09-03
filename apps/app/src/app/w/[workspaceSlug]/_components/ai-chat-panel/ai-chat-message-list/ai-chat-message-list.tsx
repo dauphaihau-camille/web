@@ -39,7 +39,7 @@ export function AiChatMessageList({
             }
           }}
         >
-          <MessageScrollerContent aria-busy={isBusy} className="px-4 pt-5 pb-40">
+          <MessageScrollerContent aria-busy={isBusy} className="pl-4 pr-2 pt-5 pb-[calc(var(--ai-chat-composer-dock-height,0px)+1rem)]">
             {messages.map((message) => (
               <MessageScrollerItem
                 key={message.id}
@@ -57,7 +57,7 @@ export function AiChatMessageList({
           </MessageScrollerContent>
         </MessageScrollerViewport>
 
-        <MessageScrollerButton className="rounded-full border-transparent bg-foreground text-background hover:bg-foreground/90 hover:text-background pt-0.5 size-8">
+        <MessageScrollerButton className="size-8 rounded-full border-transparent bg-foreground pt-0.5 text-background hover:bg-foreground/90 hover:text-background data-[direction=end]:bottom-[calc(var(--ai-chat-composer-dock-height,0px)-1rem)]">
           <ChevronDownIcon className="size-5" />
           <span className="sr-only">Scroll to end</span>
         </MessageScrollerButton>

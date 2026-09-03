@@ -12,6 +12,7 @@ import { renderWithProviders } from '@shared/test/render';
 
 import { DocumentScreen } from './document-screen';
 import { WorkspaceAiChatShell } from '../../../../_components/workspace-ai-chat-shell';
+import { WorkspaceScrollFade } from '../../../_components/workspace-scroll-fade';
 
 const collaborationMock = vi.hoisted(() => ({
   document: undefined as Yjs.Doc | undefined,
@@ -29,6 +30,13 @@ const aiChatMock = vi.hoisted(() => ({
   listAiConversationSessions: vi.fn(),
   listAiChatTurns: vi.fn(),
   streamAiChatTurn: vi.fn(),
+}));
+const toolbarMock = vi.hoisted(() => ({
+  publishStatus: {
+    document_id: 'doc-1',
+    published_document_id: undefined as string | undefined,
+    public_path: undefined as string | undefined,
+  },
 }));
 
 vi.mock('@/domains/workspace', () => ({
@@ -152,11 +160,7 @@ vi.mock('./document-toolbar/use-document-toolbar', () => ({
     isUnpublishing: false,
     permanentlyDeleteCurrentDocument: vi.fn(),
     publishCurrentDocument: vi.fn(),
-    publishStatus: {
-      document_id: 'doc-1',
-      published_document_id: undefined,
-      public_path: undefined,
-    },
+    publishStatus: toolbarMock.publishStatus,
     restoreCurrentDocument: vi.fn(),
     toggleFavorite: vi.fn(),
     unpublishCurrentDocument: vi.fn(),
@@ -262,6 +266,11 @@ describe('DocumentScreen AI append action', () => {
     aiChatMock.listAiConversationSessions.mockReset();
     aiChatMock.listAiChatTurns.mockReset();
     aiChatMock.streamAiChatTurn.mockReset();
+    toolbarMock.publishStatus = {
+      document_id: 'doc-1',
+      published_document_id: undefined,
+      public_path: undefined,
+    };
     aiChatMock.getWorkspace.mockResolvedValue({
       id: 'workspace-1',
       version: 1,
@@ -429,10 +438,40 @@ describe('DocumentScreen chrome visibility', () => {
     vi.useFakeTimers();
     collaborationMock.document = new Yjs.Doc();
     collaborationMock.onDocumentUpdatedAtChange = undefined;
+    toolbarMock.publishStatus = {
+      document_id: 'doc-1',
+      published_document_id: undefined,
+      public_path: undefined,
+    };
   });
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it('insets the workspace scroller below published chrome', () => {
+    toolbarMock.publishStatus = {
+      document_id: 'doc-1',
+      published_document_id: 'published-doc-1',
+      public_path: 'quarterly-plan',
+    };
+
+    const { container } = renderWithProviders(
+      <WorkspaceScrollFade>
+        <DocumentScreen document={documentFixture} workspaceSlug="acme" />
+      </WorkspaceScrollFade>,
+    );
+
+    const scroller = container.querySelector('[data-slot="scroll-fade"]');
+
+    expect(screen.getByText('This page is live on the web.')).toBeInTheDocument();
+    expect(scroller).toHaveClass(
+      'mt-[var(--workspace-scroll-top-inset)]',
+      'h-[calc(100%-var(--workspace-scroll-top-inset))]',
+    );
+    expect(scroller?.getAttribute('style')).toContain(
+      '--workspace-scroll-top-inset: calc(2.75rem + 48px)',
+    );
   });
 
   it('keeps chrome visible on content focus, hides it while typing, and reveals it on pointer movement', async () => {

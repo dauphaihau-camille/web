@@ -139,7 +139,7 @@ export const ScrollFade = React.forwardRef<HTMLDivElement, ScrollFadeProps>(func
       ref={setRefs}
       data-slot="scroll-fade"
       className={cn(isHorizontal && 'relative', className)}
-      style={fadeStyle}
+      style={{ ...style, ...fadeStyle }}
       onScroll={(event) => {
         callHandler(onScroll, event);
         syncFadeState();
