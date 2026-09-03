@@ -20,6 +20,13 @@ if (!globalThis.localStorage) {
   });
 }
 
+if (typeof document !== 'undefined' && !document.elementFromPoint) {
+  Object.defineProperty(document, 'elementFromPoint', {
+    configurable: true,
+    value: () => document.body,
+  });
+}
+
 beforeAll(() => {
   mswServer.listen({
     onUnhandledRequest: 'error',

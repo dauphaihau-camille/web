@@ -218,7 +218,7 @@ describe('AuthForm login integration', () => {
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.input(await screen.findByPlaceholderText('123456'), {
+    fireEvent.change(await screen.findByLabelText('Enter login code'), {
       target: { value: '123456' },
     });
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
@@ -267,7 +267,7 @@ describe('AuthForm login integration', () => {
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.input(await screen.findByPlaceholderText('123456'), {
+    fireEvent.change(await screen.findByLabelText('Enter login code'), {
       target: { value: '123456' },
     });
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
@@ -313,7 +313,7 @@ describe('AuthForm login integration', () => {
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.input(await screen.findByPlaceholderText('123456'), {
+    fireEvent.change(await screen.findByLabelText('Enter login code'), {
       target: { value: '123456' },
     });
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
@@ -353,7 +353,7 @@ describe('AuthForm login integration', () => {
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.input(await screen.findByPlaceholderText('123456'), {
+    fireEvent.change(await screen.findByLabelText('Enter login code'), {
       target: { value: '123456' },
     });
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
@@ -417,7 +417,7 @@ describe('AuthForm login integration', () => {
 
     await user.type(screen.getByLabelText('Email'), 'member@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.input(await screen.findByPlaceholderText('123456'), {
+    fireEvent.change(await screen.findByLabelText('Enter login code'), {
       target: { value: '123456' },
     });
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
@@ -430,6 +430,29 @@ describe('AuthForm login integration', () => {
     expect(errorAlert).not.toHaveTextContent('localhost:5100');
     expect(errorAlert).not.toHaveTextContent('Request failed');
     expect(navigateAfterLoginMock).not.toHaveBeenCalled();
+  });
+
+  it('keeps verification disabled until the code has 6 digits', async () => {
+    const user = userEvent.setup();
+
+    mswServer.use(
+      http.post(authEmailStartUrlPattern, () =>
+        HttpResponse.json({
+          challenge_id: 'challenge-1',
+          expires_in_seconds: 600,
+        })),
+    );
+
+    renderWithProviders(<AuthForm />);
+
+    await user.type(screen.getByLabelText('Email'), 'member@example.com');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    fireEvent.change(await screen.findByLabelText('Enter login code'), {
+      target: { value: '123' },
+    });
+
+    expect(screen.getByRole('button', { name: 'Verify code' })).toBeDisabled();
+    expect(screen.queryByText('Code must be 6 digits.')).not.toBeInTheDocument();
   });
 
   it('disables resend behind a countdown after sending the code', async () => {

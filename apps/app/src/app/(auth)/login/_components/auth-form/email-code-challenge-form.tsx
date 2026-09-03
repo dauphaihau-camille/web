@@ -6,50 +6,72 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field';
-import { Input } from '@shared/components/ui/input';
-import { authInputClassName } from '../../../_components/auth-form-styles';
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from '@shared/components/ui/input-otp';
 
 import type { UseLoginFormResult } from '../../_hooks/use-login-form';
 
 export function EmailCodeChallengeForm({ auth }: { auth: UseLoginFormResult }) {
   const codeValue = auth.codeForm.watch('code');
+
   const isVerifyingCode =
     auth.verifyEmailAuthMutation.isPending || auth.codeForm.formState.isSubmitting;
+
+  const isCodeComplete = codeValue?.length === 6;
+  const codeFieldState = auth.codeForm.getFieldState('code');
 
   return (
     <form key="email-code-challenge" onSubmit={auth.codeForm.handleSubmit(auth.handleVerifyCode)} noValidate>
       <FieldGroup className="gap-4">
         <Field>
-          <FieldLabel>Enter login code</FieldLabel>
+          <FieldLabel htmlFor="login-code">Enter login code</FieldLabel>
           <p className="text-sm text-muted-foreground">
             We sent a 6-digit code to {auth.emailChallenge?.email}.
           </p>
         </Field>
-        <Field data-invalid={auth.codeForm.getFieldState('code').invalid}>
-          <Input
+
+        <Field data-invalid={codeFieldState.invalid}>
+          <InputOTP
             id="login-code"
             inputMode="numeric"
             autoComplete="one-time-code"
             autoFocus
             disabled={isVerifyingCode}
-            readOnly={isVerifyingCode}
-            aria-invalid={auth.codeForm.getFieldState('code').invalid}
-            className={`h-12 px-4 text-center text-lg tracking-[0.45em] ${authInputClassName}`}
+            aria-invalid={codeFieldState.invalid}
             maxLength={6}
-            onChange={(event) => {
-              auth.codeForm.setValue(
-                'code',
-                event.target.value.replace(/\D/g, '').slice(0, 6),
-                { shouldDirty: true, shouldValidate: true },
-              );
-            }}
-            placeholder="123456"
+            pattern={'^\\d+$'}
             value={codeValue ?? ''}
-          />
-          {auth.codeForm.getFieldState('code').invalid
-            ? <FieldError errors={[auth.codeForm.getFieldState('code').error]} />
-            : null}
+            onChange={(value) => {
+              const code = value.replace(/\D/g, '').slice(0, 6);
+
+              if (code.length < 6) {
+                auth.codeForm.clearErrors('code');
+              }
+
+              auth.codeForm.setValue('code', code, {
+                shouldDirty: true,
+                shouldValidate: code.length === 6,
+              });
+            }}
+            containerClassName="justify-center"
+          >
+            <InputOTPGroup>
+              {Array.from({ length: 6 }, (_, index) => (
+                <InputOTPSlot
+                  key={index}
+                  index={index}
+                  aria-invalid={codeFieldState.invalid}
+                  className="h-12 w-10 bg-background text-lg"
+                />
+              ))}
+            </InputOTPGroup>
+          </InputOTP>
+          {codeFieldState.invalid ? <FieldError errors={[codeFieldState.error]} /> : null}
         </Field>
+
         {auth.codeForm.formState.errors.root?.message
           ? (
             <Field data-invalid>
@@ -58,7 +80,7 @@ export function EmailCodeChallengeForm({ auth }: { auth: UseLoginFormResult }) {
           )
           : null}
 
-        <Button type="submit" disabled={isVerifyingCode} className="h-11 w-full font-medium">
+        <Button type="submit" disabled={isVerifyingCode || !isCodeComplete} className="h-11 w-full font-medium">
           {auth.verifyEmailAuthMutation.isPending ? <LoadingIcon className="size-4" /> : 'Verify code'}
         </Button>
 

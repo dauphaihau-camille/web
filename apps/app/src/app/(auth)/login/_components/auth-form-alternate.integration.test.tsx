@@ -130,7 +130,7 @@ describe('AuthForm login alternate flows', () => {
 
     await user.type(screen.getByLabelText('Email'), 'new@example.com');
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    fireEvent.input(await screen.findByPlaceholderText('123456'), {
+    fireEvent.change(await screen.findByLabelText('Enter login code'), {
       target: { value: '123456' },
     });
     await user.click(screen.getByRole('button', { name: 'Verify code' }));
