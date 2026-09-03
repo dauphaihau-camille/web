@@ -101,7 +101,7 @@ export function SessionChatSelect({
                 <h3 className="px-2 py-0.5 text-xs font-semibold text-muted-foreground">
                   {group}
                 </h3>
-                <div className="">
+                <div className="space-y-1">
                   {groupSessions.map((session) => {
                     const isSelected = session.id === selectedSessionId;
 
