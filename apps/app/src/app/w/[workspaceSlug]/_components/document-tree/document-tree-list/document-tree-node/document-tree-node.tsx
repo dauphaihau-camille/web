@@ -11,20 +11,20 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from '@/components/ui/sidebar';
-import { ScrollFade } from '@/components/ui/scroll-fade';
+} from '@/shared/ui/sidebar';
+import { ScrollFade } from '@/shared/ui/scroll-fade';
 import {
   documentDetailQueryOptions,
   type DocumentNavigationNode,
   useWorkspaceDocumentChildrenQuery,
 } from '@/domains/document';
-import type { DocumentTreeScope } from '@/stores/document-tree-expansion-store';
+import type { DocumentTreeScope } from '@/domains/document/stores/document-tree-expansion-store';
 import {
   parseDocumentRouteSegment,
   workspaceRoutes,
 } from '@/domains/workspace';
-import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
-import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
+import { useDocumentTreeExpansionStore } from '@/domains/document/stores/document-tree-expansion-store';
+import { useDocumentTitleDraftStore } from '@/domains/document/stores/document-title-draft-store';
 import { cn } from '@shared/lib/utils';
 
 import { DocumentTreeNodeActions } from './document-tree-node-actions/document-tree-node-actions';

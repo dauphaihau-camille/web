@@ -1,7 +1,7 @@
 import {
   SidebarInset,
   SidebarProvider,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 
 import { WorkspaceSidebar } from '../_components/workspace-sidebar/workspace-sidebar';
 import { WorkspaceAiChatShell } from '../_components/workspace-ai-chat-shell';

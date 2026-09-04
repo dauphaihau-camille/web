@@ -9,7 +9,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 import type { useWorkspaceDocumentRootQuery } from '@/domains/document';
 import type { TeamspaceDocumentNavigationGroup } from '@/domains/document';
 import { cn } from '@shared/lib/utils';

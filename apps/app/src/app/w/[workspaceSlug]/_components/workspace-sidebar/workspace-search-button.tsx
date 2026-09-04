@@ -18,18 +18,18 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from '@/shared/ui/command';
 import {
   Empty,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from '@shared/components/ui/empty';
-import { Kbd } from '@/components/ui/kbd';
+import { Kbd } from '@/shared/ui/kbd';
 import {
   SidebarMenuBadge,
   SidebarMenuButton,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 import { Skeleton } from '@shared/components/ui/skeleton';
 import { useWorkspaceSearchDocumentsQuery } from '@/domains/search';
 import { workspaceRoutes } from '@/domains/workspace';

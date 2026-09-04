@@ -11,7 +11,7 @@ import {
   Field,
   FieldError,
   FieldLabel,
-} from '@/components/ui/field';
+} from '@/shared/ui/field';
 import {
   InputGroup,
   InputGroupAddon,

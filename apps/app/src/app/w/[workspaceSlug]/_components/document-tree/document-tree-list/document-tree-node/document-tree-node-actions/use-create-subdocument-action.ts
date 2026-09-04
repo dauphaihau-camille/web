@@ -28,7 +28,7 @@ import {
 import {
   type DocumentTreeScope,
   useDocumentTreeExpansionStore,
-} from '@/stores/document-tree-expansion-store';
+} from '@/domains/document/stores/document-tree-expansion-store';
 import { workspaceRoutes } from '@/domains/workspace';
 
 function createOptimisticSubdocument(

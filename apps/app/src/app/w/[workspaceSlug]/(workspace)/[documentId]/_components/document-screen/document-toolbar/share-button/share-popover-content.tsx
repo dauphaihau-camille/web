@@ -8,7 +8,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@/components/ui/tabs';
+} from '@/shared/ui/tabs';
 
 import { PublishTabContent } from './publish-tab-content';
 import { ShareTabContent } from './share-tab-content/share-tab-content';

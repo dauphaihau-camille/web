@@ -65,7 +65,7 @@ vi.mock('@/domains/workspace', async () => {
   };
 });
 
-vi.mock('@/components/ui/dropdown-menu', () => {
+vi.mock('@/shared/ui/dropdown-menu', () => {
   function PassThrough({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }

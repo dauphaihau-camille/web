@@ -1,7 +1,7 @@
 import {
   SidebarInset,
   SidebarProvider,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 
 import { SettingsSidebar } from './_components/settings-sidebar';
 

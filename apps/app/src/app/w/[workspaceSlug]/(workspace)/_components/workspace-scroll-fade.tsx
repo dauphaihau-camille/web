@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { ScrollFade } from '@/components/ui/scroll-fade';
+import { ScrollFade } from '@/shared/ui/scroll-fade';
 
 type WorkspaceScrollFadeContextValue = {
   setTopInset: (topInset: string) => void;

@@ -1,7 +1,7 @@
 import { Globe2Icon, LinkIcon } from 'lucide-react';
 
 import { Button } from '@shared/components/ui/button';
-import { Kbd } from '@/components/ui/kbd';
+import { Kbd } from '@/shared/ui/kbd';
 import {
   InputGroup,
   InputGroupButton,

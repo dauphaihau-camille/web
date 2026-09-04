@@ -6,7 +6,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuSkeleton,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 
 import motionStyles from '../_styles/cascade-enter.module.css';
 

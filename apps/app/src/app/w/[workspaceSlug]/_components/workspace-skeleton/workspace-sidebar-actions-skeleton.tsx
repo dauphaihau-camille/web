@@ -5,7 +5,7 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 import { Skeleton } from '@shared/components/ui/skeleton';
 
 export function WorkspaceSidebarActionsSkeleton() {

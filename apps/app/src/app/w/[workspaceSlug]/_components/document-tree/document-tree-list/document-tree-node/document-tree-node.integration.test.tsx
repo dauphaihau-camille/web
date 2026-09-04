@@ -77,10 +77,10 @@ const childDocuments: DocumentNavigationNode[] = [
 describe('DocumentTreeNode integration', () => {
   beforeEach(async () => {
     const { useDocumentTreeExpansionStore } = await import(
-      '@/stores/document-tree-expansion-store',
+      '@/domains/document/stores/document-tree-expansion-store',
     );
     const { useDocumentTitleDraftStore } = await import(
-      '@/stores/document-title-draft-store',
+      '@/domains/document/stores/document-title-draft-store',
     );
 
     localStorage.clear();
@@ -179,7 +179,7 @@ describe('DocumentTreeNode integration', () => {
   });
 
   it('uses the draft title for the active document', async () => {
-    const { useDocumentTitleDraftStore } = await import('@/stores/document-title-draft-store');
+    const { useDocumentTitleDraftStore } = await import('@/domains/document/stores/document-title-draft-store');
 
     useDocumentTitleDraftStore.getState().setDraftTitle('parent-1', 'Untitled draft');
 

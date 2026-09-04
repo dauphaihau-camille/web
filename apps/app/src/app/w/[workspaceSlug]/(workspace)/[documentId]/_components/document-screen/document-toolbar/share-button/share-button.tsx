@@ -11,7 +11,7 @@ import type { Document } from '@/domains/document';
 import {
   buttonVariants,
 } from '@shared/components/ui/button';
-import { Kbd } from '@/components/ui/kbd';
+import { Kbd } from '@/shared/ui/kbd';
 import {
   Popover,
   PopoverContent,

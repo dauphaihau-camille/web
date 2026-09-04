@@ -6,7 +6,7 @@ import {
   MessageScrollerItem,
   MessageScrollerProvider,
   MessageScrollerViewport,
-} from '@/components/ui/message-scroller';
+} from '@/shared/ui/message-scroller';
 
 import type { AiChatAppendResponse, ChatMessage as AiChatMessage } from '../ai-chat-panel.types';
 import { ChatMessage } from './chat-message/chat-message';

@@ -7,7 +7,7 @@ import { workspaceRoutes } from '@/domains/workspace';
 import {
   type DocumentTreeScope,
   useDocumentTreeExpansionStore,
-} from '@/stores/document-tree-expansion-store';
+} from '@/domains/document/stores/document-tree-expansion-store';
 import type { FavoriteDocument } from '@/domains/favorite';
 import { useDocumentActions } from '@/domains/document/hooks/use-document-actions';
 

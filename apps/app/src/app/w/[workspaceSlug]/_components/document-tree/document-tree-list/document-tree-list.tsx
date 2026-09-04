@@ -5,9 +5,9 @@ import { usePathname } from 'next/navigation';
 import {
   SidebarMenu,
   SidebarMenuItem,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 import type { DocumentNavigationNode } from '@/domains/document';
-import type { DocumentTreeScope } from '@/stores/document-tree-expansion-store';
+import type { DocumentTreeScope } from '@/domains/document/stores/document-tree-expansion-store';
 
 import { DocumentTreeSkeleton } from '../../workspace-skeleton/document-tree-skeleton';
 import { DocumentTreeMoreButton } from './document-tree-more-button/document-tree-more-button';

@@ -3,7 +3,7 @@ import {
   screen,
 } from '@testing-library/react';
 
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/shared/ui/sidebar';
 import type {
   useWorkspaceDocumentRootQuery,
   WorkspaceDocumentNavigation,
@@ -11,7 +11,7 @@ import type {
 
 import { SharedDocumentsGroup } from './shared-documents-group';
 
-vi.mock('@/hooks/use-mobile', () => ({
+vi.mock('@/shared/hooks/use-mobile', () => ({
   useIsMobile: () => false,
 }));
 

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/shared/ui/sidebar';
 import type * as DocumentDomain from '@/domains/document';
 import type * as FavoriteDomain from '@/domains/favorite';
 import type * as SubscriptionDomain from '@/domains/subscription';
@@ -64,7 +64,7 @@ vi.mock('@/domains/workspace', async () => {
   };
 });
 
-vi.mock('@/hooks/use-mobile', () => ({
+vi.mock('@/shared/hooks/use-mobile', () => ({
   useIsMobile: () => false,
 }));
 

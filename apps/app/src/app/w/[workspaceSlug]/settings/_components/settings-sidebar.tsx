@@ -24,7 +24,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 import { workspaceRoutes } from '@/domains/workspace';
 
 const workspaceSettingsItems = [

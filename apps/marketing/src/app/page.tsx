@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 
 import { Navigate } from '@/app/_components/navigate/navigate';
 import { buttonVariants } from '@shared/components/ui/button';
-import { getAppSignupUrl } from '@/lib/app-url';
+import { getAppSignupUrl } from '@/shared/lib/app-url';
 import { cn } from '@shared/lib/utils';
 
 export default function HomePage() {

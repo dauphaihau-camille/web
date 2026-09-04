@@ -12,7 +12,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@/components/ui/field';
+} from '@/shared/ui/field';
 import {
   InputGroup,
   InputGroupAddon,

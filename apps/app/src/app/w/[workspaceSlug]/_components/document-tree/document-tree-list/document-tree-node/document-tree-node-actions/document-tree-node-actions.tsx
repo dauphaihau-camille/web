@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/ui/dropdown-menu';
 import {
   Tooltip,
   TooltipContent,
@@ -26,7 +26,7 @@ import {
 import { LoadingIcon } from '@shared/components/loading-icon';
 import { buttonVariants } from '@shared/components/ui/button';
 import type { DocumentNavigationNode } from '@/domains/document';
-import type { DocumentTreeScope } from '@/stores/document-tree-expansion-store';
+import type { DocumentTreeScope } from '@/domains/document/stores/document-tree-expansion-store';
 import { cn } from '@shared/lib/utils';
 
 import { useDocumentTreeNodeActions } from './use-document-tree-node-actions';

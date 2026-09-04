@@ -8,7 +8,7 @@ import {
   FieldError,
   FieldGroup,
   FieldLabel,
-} from '@/components/ui/field';
+} from '@/shared/ui/field';
 import { Input } from '@shared/components/ui/input';
 import { authRoutes } from '@/domains/auth';
 import { authInputClassName } from '../../../_components/auth-form-styles';

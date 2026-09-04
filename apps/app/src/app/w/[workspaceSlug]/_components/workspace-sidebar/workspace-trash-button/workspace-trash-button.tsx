@@ -25,10 +25,10 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@shared/components/ui/popover';
-import { ScrollFade } from '@/components/ui/scroll-fade';
+import { ScrollFade } from '@/shared/ui/scroll-fade';
 import { Skeleton } from '@shared/components/ui/skeleton';
 import { cn } from '@shared/lib/utils';
-import { SidebarMenuButton } from '@/components/ui/sidebar';
+import { SidebarMenuButton } from '@/shared/ui/sidebar';
 import { workspaceRoutes } from '@/domains/workspace';
 
 import { useWorkspaceTrash } from './_hooks/use-workspace-trash';

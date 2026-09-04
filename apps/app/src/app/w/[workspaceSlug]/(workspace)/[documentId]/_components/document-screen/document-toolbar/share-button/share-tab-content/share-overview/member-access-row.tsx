@@ -7,7 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/ui/dropdown-menu';
 import { PersonRowContent } from '../person-row-content';
 import { PermissionMenuContent } from '../permission-menu-content';
 
