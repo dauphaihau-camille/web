@@ -50,3 +50,74 @@ jobs:
 
       - name: Build
         run: bun run build
+
+  contract:
+    name: Generated API types match the published contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_READ_TOKEN || secrets.GITHUB_TOKEN }}
+      REGISTRY_TOKEN_SOURCE: ${{ secrets.NPM_READ_TOKEN && 'NPM_READ_TOKEN' || 'GITHUB_TOKEN' }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Detect pinned contract package
+        id: contract
+        shell: bash
+        run: |
+          if grep -q '"@dauphaihau-camille/api-spec"' package.json; then
+            echo "pinned=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pinned=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::@dauphaihau-camille/api-spec is not pinned in package.json yet, so this job skips the registry check. Until the first publication, the superproject verifies the committed types against apps/api/api/openapi.json."
+          fi
+
+      - name: Verify registry access for @dauphaihau-camille
+        if: steps.contract.outputs.pinned == 'true'
+        run: |
+          echo "Resolving @dauphaihau-camille/api-spec with token from ${REGISTRY_TOKEN_SOURCE}."
+          status=$(curl \
+            --silent \
+            --output /dev/null \
+            --write-out '%{http_code}' \
+            --header "Authorization: Bearer ${NODE_AUTH_TOKEN}" \
+            --header 'Accept: application/vnd.npm.install-v1+json' \
+            'https://npm.pkg.github.com/@dauphaihau-camille%2Fapi-spec')
+
+          case "$status" in
+            200)
+              echo "Registry access confirmed."
+              ;;
+            401)
+              echo "::error::GitHub Packages rejected the credentials (401). NPM_READ_TOKEN is unset or expired, and GITHUB_TOKEN cannot authenticate to ${GITHUB_REPOSITORY} packages from this job."
+              exit 1
+              ;;
+            403)
+              echo "::error::The token is valid but lacks read access (403) for @dauphaihau-camille/api-spec. Add read:packages or set NPM_READ_TOKEN with access to the dauphaihau-camille packages."
+              exit 1
+              ;;
+            404)
+              echo "::error::GitHub Packages returned 404. The package is not missing: this token cannot see @dauphaihau-camille/api-spec. Grant dauphaihau-camille/web read access to the package repository, or set NPM_READ_TOKEN with read:packages for the dauphaihau-camille account."
+              exit 1
+              ;;
+            *)
+              echo "::error::Unexpected response from the GitHub Packages registry (HTTP ${status})."
+              exit 1
+              ;;
+          esac
+
+      - name: Install dependencies
+        if: steps.contract.outputs.pinned == 'true'
+        run: bun install --frozen-lockfile
+
+      - name: Check generated API types are current
+        if: steps.contract.outputs.pinned == 'true'
+        run: bun run generate:api-types -- --check
