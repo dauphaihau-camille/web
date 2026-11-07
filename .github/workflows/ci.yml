@@ -8,6 +8,13 @@ on:
 
 permissions:
   contents: read
+  # `bun install` resolves @dauphaihau-camille/api-spec from GitHub Packages,
+  # so every job that installs needs registry read access.
+  packages: read
+
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.NPM_READ_TOKEN || secrets.GITHUB_TOKEN }}
+  REGISTRY_TOKEN_SOURCE: ${{ secrets.NPM_READ_TOKEN && 'NPM_READ_TOKEN' || 'GITHUB_TOKEN' }}
 
 jobs:
   validate:
