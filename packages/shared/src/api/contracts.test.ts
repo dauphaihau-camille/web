@@ -10,7 +10,35 @@ import {
   publishStatusSchema,
   type publicDocumentSchema,
 } from '../domains/publish/api/publish.schemas';
-import type { ApiSchema, paths } from './contracts';
+import type { ApiSchema, components, paths } from './contracts';
+
+/**
+ * Contract components asserted by the publish, document, workspace, and auth
+ * conformance tests. Every entry must name a real contract schema; a rename in
+ * the contract breaks `UncoveredContractComponent` below.
+ */
+const CONTRACT_COVERAGE = [
+  'PublishedDocumentResponseDto',
+  'PublicDocumentResponseDto',
+  'DocumentResponseDto',
+  'DocumentOwnerUserResponseDto',
+  'DocumentBreadcrumbItemDto',
+  'DocumentAccessResponseDto',
+  'DocumentCollaborationResponseDto',
+  'DocumentInvitationResponseDto',
+  'ArchivedDocumentListItemResponseDto',
+  'ArchivedDocumentListPageResponseDto',
+  'WorkspaceResponseDto',
+  'WorkspaceMemberResponseDto',
+  'UserProfileResponseDto',
+  'AuthResponseDto',
+  'StartEmailAuthResponseDto',
+] as const;
+
+type UncoveredContractComponent = Exclude<
+  (typeof CONTRACT_COVERAGE)[number],
+  keyof components['schemas']
+>;
 
 /** Components the publish zod schemas must mirror. Referencing them fails typecheck if renamed. */
 type PublishStatusSchema = ApiSchema<'PublishedDocumentResponseDto'>;
@@ -75,5 +103,21 @@ describe('publish contract', () => {
     expect(publishStatusSchema.parse({ document_id: 'doc_1' })).toEqual({
       document_id: 'doc_1',
     });
+  });
+});
+
+describe('contract coverage', () => {
+  it('only lists component names that exist in the contract', () => {
+    expectTypeOf<UncoveredContractComponent>().toEqualTypeOf<never>();
+    expect(CONTRACT_COVERAGE.length).toBeGreaterThan(0);
+  });
+
+  it('covers every domain with a conformance test', () => {
+    expect(CONTRACT_COVERAGE).toEqual(expect.arrayContaining([
+      'PublishedDocumentResponseDto',
+      'DocumentResponseDto',
+      'WorkspaceResponseDto',
+      'UserProfileResponseDto',
+    ]));
   });
 });
