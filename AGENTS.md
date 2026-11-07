@@ -20,16 +20,14 @@ bun run generate:api-types -- --check
 
 - Regenerate after `@dauphaihau-camille/api-spec` changes; do not hand-fix
   types. The spec resolves from `--spec <path>`, then `API_SPEC_PATH`, then
-  `node_modules/@dauphaihau-camille/api-spec/openapi.json`. Before the package
-  is published, bootstrap with
-  `API_SPEC_PATH=../api/api/openapi.json bun run generate:api-types`.
+  `node_modules/@dauphaihau-camille/api-spec/openapi.json`. The offline
+  `API_SPEC_PATH=../api/api/openapi.json` form is only for bootstrapping a
+  checkout that has neither the package nor registry access.
 - Installing the package needs `NODE_AUTH_TOKEN` with `read:packages` for the
   `dauphaihau-camille` account (see `.npmrc`). A registry `404` means the token
   cannot see the package, not that the package is missing.
 - The `contract` CI job runs `bun run generate:api-types -- --check` against the
-  committed artifact once `@dauphaihau-camille/api-spec` is pinned in
-  `package.json`. Until the first publication it skips with a notice; the
-  superproject verifies the committed types against `apps/api/api/openapi.json`
-  in that window. Never commit the spec itself, only the generated types.
+  committed artifact with `@dauphaihau-camille/api-spec` pinned at `1.0.0`.
+  Never commit the spec itself, only the generated types.
 - `packages/shared/src/api/generated/README.md` documents the generator
   commands; keep it in sync when the workflow changes.
