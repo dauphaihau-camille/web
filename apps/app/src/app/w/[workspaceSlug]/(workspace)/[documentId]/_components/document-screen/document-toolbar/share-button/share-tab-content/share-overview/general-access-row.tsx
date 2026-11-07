@@ -10,7 +10,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/ui/dropdown-menu';
 import { getPermissionLabel } from '../share-permissions';
 import { PermissionMenuContent } from '../permission-menu-content';
 

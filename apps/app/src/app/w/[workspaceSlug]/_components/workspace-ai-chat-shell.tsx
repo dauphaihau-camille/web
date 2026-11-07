@@ -13,7 +13,7 @@ import {
 } from 'react';
 import { BotIcon, XIcon } from 'lucide-react';
 
-import { Kbd } from '@/components/ui/kbd';
+import { Kbd } from '@/shared/ui/kbd';
 
 import { Button } from '@shared/components/ui/button';
 import {

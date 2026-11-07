@@ -1,8 +1,8 @@
 import {
   SidebarInset,
   SidebarProvider,
-} from '@/components/ui/sidebar';
-import { ScrollFade } from '@/components/ui/scroll-fade';
+} from '@/shared/ui/sidebar';
+import { ScrollFade } from '@/shared/ui/scroll-fade';
 
 import { DocumentScreenSkeleton } from './document-screen-skeleton';
 import { WorkspaceSidebarSkeleton } from './workspace-sidebar-skeleton';

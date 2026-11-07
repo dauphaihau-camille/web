@@ -23,7 +23,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/ui/dropdown-menu';
 import LoadingFullPage from '@shared/components/loading-full-page';
 import {
   myWorkspaceListQueryOptions,

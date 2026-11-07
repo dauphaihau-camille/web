@@ -13,7 +13,7 @@ import {
 import { buttonVariants } from '@shared/components/ui/button';
 import { getPublicDocumentServer } from '@shared/domains/publish/api/publish.server.requests';
 import { BlockNoteEditorLoader } from './_components/editor/blocknote-editor-loader';
-import { getAppSignupUrl } from '@/lib/app-url';
+import { getAppSignupUrl } from '@/shared/lib/app-url';
 import { cn } from '@shared/lib/utils';
 
 export default async function SharedDocumentPage({

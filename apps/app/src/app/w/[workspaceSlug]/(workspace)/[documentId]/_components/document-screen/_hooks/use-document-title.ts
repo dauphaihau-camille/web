@@ -18,7 +18,7 @@ import {
   updateCachedReferencedSubdocTitles,
 } from '@/domains/document/cache/document-query-cache';
 import { workspaceRoutes } from '@/domains/workspace';
-import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
+import { useDocumentTitleDraftStore } from '@/domains/document/stores/document-title-draft-store';
 
 import { DOCUMENT_SYSTEM_SYNC_ORIGIN } from './use-document-session-undo-redo';
 

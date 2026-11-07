@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from '@shared/components/ui/dialog';
 import { Input } from '@shared/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/shared/ui/label';
 import {
   Table,
   TableBody,
@@ -27,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/shared/ui/table';
 import {
   addWorkspaceMember,
   removeWorkspaceMember,

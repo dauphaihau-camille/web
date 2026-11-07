@@ -13,7 +13,7 @@ import {
 import {
   type DocumentTreeScope,
   useDocumentTreeExpansionStore,
-} from '@/stores/document-tree-expansion-store';
+} from '@/domains/document/stores/document-tree-expansion-store';
 
 function normalizeDocumentIds(documentIds: string[]) {
   return [...new Set(

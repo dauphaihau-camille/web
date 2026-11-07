@@ -18,7 +18,7 @@ import {
 import * as Yjs from 'yjs';
 
 import type { Document } from '@/domains/document';
-import { useDocumentTitleDraftStore } from '@/stores/document-title-draft-store';
+import { useDocumentTitleDraftStore } from '@/domains/document/stores/document-title-draft-store';
 
 import { useDocumentTitle } from './use-document-title';
 

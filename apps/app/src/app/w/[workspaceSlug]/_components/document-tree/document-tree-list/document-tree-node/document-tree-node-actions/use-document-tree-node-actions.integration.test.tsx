@@ -29,7 +29,7 @@ import {
 } from '@/domains/document/document-subdoc-created-event';
 import type * as DocumentRequests from '@/domains/document/api/document.requests';
 import type * as SubscriptionDomain from '@/domains/subscription';
-import { useDocumentTreeExpansionStore } from '@/stores/document-tree-expansion-store';
+import { useDocumentTreeExpansionStore } from '@/domains/document/stores/document-tree-expansion-store';
 import type * as DocumentTreeNodeActionHelpers from './document-tree-node-action-helpers';
 
 import { useDocumentTreeNodeActions } from './use-document-tree-node-actions';

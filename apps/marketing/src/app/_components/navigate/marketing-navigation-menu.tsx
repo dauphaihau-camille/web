@@ -12,7 +12,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
-} from '@/components/ui/navigation-menu';
+} from '@/shared/ui/navigation-menu';
 import {
   Tooltip,
   TooltipContent,

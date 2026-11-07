@@ -4,7 +4,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 
 import { WorkspaceSidebarActionsSkeleton } from './workspace-sidebar-actions-skeleton';
 import { WorkspaceSidebarTreeSkeleton } from './workspace-sidebar-tree-skeleton';

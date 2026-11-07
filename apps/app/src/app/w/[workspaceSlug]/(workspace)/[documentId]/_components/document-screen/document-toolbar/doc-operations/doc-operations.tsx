@@ -20,7 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/shared/ui/dropdown-menu';
 import { cn } from '@shared/lib/utils';
 
 import { RelativeTimeText } from './relative-time-text';

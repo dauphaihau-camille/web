@@ -6,7 +6,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 import { DocumentTreeSkeleton } from './document-tree-skeleton';
 
 export function WorkspaceSidebarTreeSkeleton({

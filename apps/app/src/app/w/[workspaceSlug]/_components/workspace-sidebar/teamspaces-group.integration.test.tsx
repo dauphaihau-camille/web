@@ -7,7 +7,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@/shared/ui/sidebar';
 import type {
   Document,
   useWorkspaceDocumentRootQuery,
@@ -43,7 +43,7 @@ vi.mock('next/navigation', () => ({
   }),
 }));
 
-vi.mock('@/hooks/use-mobile', () => ({
+vi.mock('@/shared/hooks/use-mobile', () => ({
   useIsMobile: () => false,
 }));
 

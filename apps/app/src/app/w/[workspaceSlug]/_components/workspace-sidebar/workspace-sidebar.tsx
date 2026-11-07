@@ -8,8 +8,8 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-} from '@/components/ui/sidebar';
-import { ScrollFade } from '@/components/ui/scroll-fade';
+} from '@/shared/ui/sidebar';
+import { ScrollFade } from '@/shared/ui/scroll-fade';
 import { useWorkspaceDocumentRootQuery } from '@/domains/document';
 import { useWorkspaceFavoritesQuery } from '@/domains/favorite';
 import { useWorkspaceQuery } from '@/domains/workspace';

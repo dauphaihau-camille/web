@@ -25,7 +25,7 @@ import {
 } from '@shared/components/ui/dialog';
 import { Input } from '@shared/components/ui/input';
 import { Textarea } from '@shared/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/shared/ui/label';
 import { cn } from '@shared/lib/utils';
 
 import { documentKeys } from '@/domains/document';

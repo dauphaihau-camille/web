@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { Progress } from '@/components/ui/progress';
+import { Progress } from '@/shared/ui/progress';
 import { useSubscriptionSummaryQuery } from '@/domains/subscription';
 import { workspaceRoutes } from '@/domains/workspace';
 import type { Workspace } from '@/domains/workspace';

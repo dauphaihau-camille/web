@@ -7,7 +7,7 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-} from '@/components/ui/sidebar';
+} from '@/shared/ui/sidebar';
 import { cn } from '@shared/lib/utils';
 
 export function CollapsibleSidebarGroup({

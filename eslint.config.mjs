@@ -37,6 +37,12 @@ export default defineConfig([
     },
   },
   {
-    ignores: ['out/**', '**/next-env.d.ts'],
+    ignores: [
+      'out/**',
+      '**/next-env.d.ts',
+      // Generated from the OpenAPI contract; formatting it would make
+      // `generate:api-types -- --check` report false drift.
+      'packages/shared/src/api/generated/**',
+    ],
   },
 ]);

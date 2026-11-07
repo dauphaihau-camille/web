@@ -54,6 +54,22 @@ Frontend monorepo for `camille-v2`.
 - **Turborepo task graph** - Turbo coordinates monorepo build and typecheck tasks across the product app, marketing app, and shared package dependency graph
 - **Netlify deployment configuration** - each Next.js app carries its own `netlify.toml`, with workspace notes in [`NETLIFY.md`](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/NETLIFY.md)
 
+## API types
+
+API types are generated from the published `@dauphaihau-camille/api-spec`
+OpenAPI contract into the committed module
+`packages/shared/src/api/generated/openapi.d.ts`. Bootstrap or regenerate it
+from this directory:
+
+```bash
+API_SPEC_PATH=../api/api/openapi.json bun run generate:api-types
+bun run generate:api-types -- --check   # what CI enforces
+```
+
+See [`packages/shared/src/api/generated/README.md`](/Volumes/Local/dev/pj-personal/apps/camille/camille-v2/apps/web/packages/shared/src/api/generated/README.md)
+for spec resolution and registry access notes. Never hand-edit the generated
+file or commit the spec.
+
 ## Local setup
 
 1. Copy `.env.example` to `.env.local`.
