@@ -74,7 +74,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@dauphaihau-camille/api-spec": "1.0.0",
+    "@dauphaihau-camille/api-spec": "2.0.0",
     "@dauphaihau/eslint-config": "^0.3.4",
     "@next/eslint-plugin-next": "^16.2.9",
     "@playwright/test": "^1.61.1",
