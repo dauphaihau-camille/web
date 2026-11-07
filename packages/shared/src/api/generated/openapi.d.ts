@@ -1081,6 +1081,11 @@ export interface components {
              */
             error: string;
             /**
+             * @description Stable machine-readable error code in `UPPER_SNAKE_CASE`. Derived from the domain error code, the exception payload, or the HTTP status fallback; internal class names are never exposed.
+             * @example DOCUMENT_NOT_FOUND
+             */
+            code: string;
+            /**
              * @description Human-readable error message. Validation failures return one entry per invalid field instead of a single string.
              * @example [
              *       "title should not be empty"
@@ -1490,7 +1495,11 @@ export interface components {
             teamspace_id?: string;
             parent_document_id?: string;
             title: string;
-            content_format: string;
+            /**
+             * @example blocknote_v1
+             * @enum {string}
+             */
+            content_format: "blocknote_v1";
             content: unknown[];
             sort_key: number;
             archived_at?: string;
