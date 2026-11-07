@@ -27,6 +27,24 @@ if (typeof document !== 'undefined' && !document.elementFromPoint) {
   });
 }
 
+// jsdom does not implement ResizeObserver. Components that observe layout
+// (for example the AI chat composer dock) must not crash in tests, so provide
+// a no-op implementation; assertions still read layout from the DOM.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  class ResizeObserverStub implements ResizeObserver {
+    observe(): void {}
+
+    unobserve(): void {}
+
+    disconnect(): void {}
+  }
+
+  Object.defineProperty(globalThis, 'ResizeObserver', {
+    configurable: true,
+    value: ResizeObserverStub,
+  });
+}
+
 beforeAll(() => {
   mswServer.listen({
     onUnhandledRequest: 'error',

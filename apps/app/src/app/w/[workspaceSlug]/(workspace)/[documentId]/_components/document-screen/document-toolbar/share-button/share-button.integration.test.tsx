@@ -554,7 +554,11 @@ describe('ShareButton integration', () => {
       resolveRevokeResponse();
     });
 
-    expect(await screen.findByText('huongk1lk2clcla@yahoo.com')).toBeInTheDocument();
+    // The rollback happens after the DELETE settles and React Query re-renders;
+    // under a full-suite run that can take longer than the 1s default.
+    expect(
+      await screen.findByText('huongk1lk2clcla@yahoo.com', undefined, { timeout: 5000 }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Can comment' })).toBeInTheDocument();
   });
 
@@ -754,7 +758,9 @@ describe('ShareButton integration', () => {
 
   it('updates general access for everyone in the workspace', async () => {
     const updates: Array<string | null | undefined> = [];
+    let storedWorkspaceMemberPermission: string | undefined;
     let resolveUpdateResponse!: () => void;
+    // jsdom's Promise lacks `withResolvers`, so the executor form is required here.
     const updateResponse = new Promise<void>((resolve) => {
       resolveUpdateResponse = resolve;
     });
@@ -768,9 +774,11 @@ describe('ShareButton integration', () => {
 
         await updateResponse;
 
+        storedWorkspaceMemberPermission = body.workspace_member_permission ?? undefined;
+
         return HttpResponse.json({
           document_id: 'doc-1',
-          workspace_member_permission: body.workspace_member_permission ?? undefined,
+          workspace_member_permission: storedWorkspaceMemberPermission,
           updated_by_user_id: 'user-1',
           created_at: '2026-01-01T00:00:00.000Z',
           updated_at: '2026-01-01T00:00:00.000Z',
@@ -778,6 +786,20 @@ describe('ShareButton integration', () => {
       }),
     );
     renderShareButton();
+
+    mswServer.use(
+      // The mutation invalidates access settings after it settles, so the
+      // refetch must observe the persisted value instead of the initial empty
+      // fixture. Register after render so this handler wins over the helper's.
+      http.get(/\/documents\/doc-1\/access-settings\/?$/, () =>
+        HttpResponse.json({
+          document_id: 'doc-1',
+          workspace_member_permission: storedWorkspaceMemberPermission,
+          updated_by_user_id: 'user-1',
+          created_at: '1970-01-01T00:00:00.000Z',
+          updated_at: '1970-01-01T00:00:00.000Z',
+        })),
+    );
 
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: 'Share' }));
