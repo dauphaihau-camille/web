@@ -70,9 +70,9 @@ Every failing API route returns the `ApiErrorResponseDto` envelope:
 
 Validation failures always return `message: "Validation failed"` with the
 per-field reasons in `details.fields` as `{ field, messages: string[] }[]`.
-Use `isApiError` and `getApiErrorFields` from
-`packages/shared/src/lib/api-error.ts` rather than re-parsing the payload by
-hand.
+Use `getApiError(error)` from `packages/shared/src/lib/api-error.ts` to read
+the envelope from a ky `HTTPError` synchronously, then branch on `code`.
+`isApiError` remains available for already-parsed payloads.
 
 ### Netlify builds
 

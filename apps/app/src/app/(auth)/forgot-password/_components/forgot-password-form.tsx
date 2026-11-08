@@ -9,6 +9,7 @@ import { HTTPError } from 'ky';
 import { Controller, useForm } from 'react-hook-form';
 
 import { LoadingIcon } from '@shared/components/loading-icon';
+import { getApiError } from '@shared/lib/api-error';
 import { Button } from '@shared/components/ui/button';
 import {
   Field,
@@ -47,7 +48,7 @@ export function ForgotPasswordForm() {
     },
     onError: (error) => {
       form.setError('root', {
-        message: error instanceof HTTPError && error.response.status === 429
+        message: isRateLimited(error)
           ? 'Too many reset requests. Please wait a moment and try again.'
           : 'Failed to request password reset.',
       });
@@ -89,7 +90,7 @@ export function ForgotPasswordForm() {
         },
         onError: (error) => {
           setSuccessError(
-            error instanceof HTTPError && error.response.status === 429
+            isRateLimited(error)
               ? 'Too many reset requests. Please wait a moment and try again.'
               : 'Failed to resend password reset.',
           );
@@ -229,4 +230,9 @@ export function ForgotPasswordForm() {
       </form>
     </AuthFormShell>
   );
+}
+
+function isRateLimited(error: unknown) {
+  return getApiError(error)?.code === 'RATE_LIMIT_EXCEEDED'
+    || (error instanceof HTTPError && error.response.status === 429);
 }

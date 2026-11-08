@@ -80,8 +80,9 @@ type wins.
 Errors use the `ApiErrorResponseDto` envelope: `status_code`, `code`,
 `message`, optional `request_id`, and optional `details`. Branch on `code`.
 Validation failures return `message: "Validation failed"` with per-field
-reasons in `details.fields` (`{ field, messages }[]`); use `isApiError` and
-`getApiErrorFields` from `packages/shared/src/lib/api-error.ts` to read them.
+reasons in `details.fields` (`{ field, messages }[]`); use `getApiError` from
+`packages/shared/src/lib/api-error.ts` to read the envelope from a ky
+`HTTPError`, then branch on `code`.
 
 Netlify runs `bun install` for both sites, so it installs the private
 `@dauphaihau-camille/api-spec` package. `NODE_AUTH_TOKEN` (with

@@ -1,3 +1,5 @@
+import { HTTPError } from 'ky';
+
 import type { ApiSchema } from '../api/contracts';
 
 /**
@@ -6,31 +8,9 @@ import type { ApiSchema } from '../api/contracts';
  */
 export type ApiError = ApiSchema<'ApiErrorResponseDto'>;
 
-/** One validation failure entry from `details.fields`. */
-export type ApiErrorField = {
-  field: string;
-  messages: string[];
-};
-
-function isApiErrorField(value: unknown): value is ApiErrorField {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const candidate = value as { field?: unknown; messages?: unknown };
-
-  return typeof candidate.field === 'string'
-    && Array.isArray(candidate.messages)
-    && candidate.messages.every((message: unknown) => typeof message === 'string');
-}
-
-function isApiErrorFieldList(value: unknown): value is ApiErrorField[] {
-  return Array.isArray(value) && value.every(isApiErrorField);
-}
-
 /**
- * Structural guard for the API error envelope, for use on thrown `ky`
- * `HTTPError` payloads. `request_id` and `details` are optional.
+ * Structural guard for the API error envelope. `request_id` and `details` are
+ * optional; `details.fields` is not validated here.
  */
 export function isApiError(value: unknown): value is ApiError {
   if (typeof value !== 'object' || value === null) {
@@ -48,11 +28,16 @@ export function isApiError(value: unknown): value is ApiError {
 }
 
 /**
- * Validation field errors from `details.fields`, or `[]` when the error carries
- * no field errors or they are malformed.
+ * Returns the API error envelope carried by a thrown `ky` `HTTPError`.
+ *
+ * `HTTPError.data` holds the pre-parsed response body, so this is synchronous;
+ * use the error `code` for branching and fall back to the HTTP status only
+ * when the body is not an envelope (proxy errors, non-JSON responses).
  */
-export function getApiErrorFields(error: ApiError): ApiErrorField[] {
-  const fields: unknown = error.details?.fields;
+export function getApiError(error: unknown): ApiError | undefined {
+  if (error instanceof HTTPError && isApiError(error.data)) {
+    return error.data;
+  }
 
-  return isApiErrorFieldList(fields) ? fields : [];
+  return undefined;
 }

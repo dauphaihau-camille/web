@@ -6,6 +6,8 @@ import { HTTPError } from 'ky';
 import { useEffect, useState } from 'react';
 import { useForm, type UseFormReturn } from 'react-hook-form';
 
+import { getApiError } from '@shared/lib/api-error';
+
 import {
   authRoutes,
   login,
@@ -273,6 +275,26 @@ export function useLoginForm(): UseLoginFormResult {
 }
 
 function buildEmailAuthErrorMessage(error: unknown, step: 'start' | 'verify') {
+  const apiError = getApiError(error);
+
+  if (apiError?.code === 'RATE_LIMIT_EXCEEDED') {
+    return step === 'start'
+      ? 'Too many attempts. Please wait a moment before requesting another code.'
+      : 'Too many attempts. Please wait a moment and try again.';
+  }
+
+  if (apiError?.code === 'EMAIL_AUTH_ACCOUNT_NOT_FOUND') {
+    return 'No account found for this email. Sign up instead.';
+  }
+
+  if (
+    step === 'verify'
+    && (apiError?.code === 'INVALID_EMAIL_LOGIN_CODE'
+      || apiError?.code === 'EMAIL_LOGIN_CODE_EXPIRED')
+  ) {
+    return 'That code is invalid or expired. Request a new code and try again.';
+  }
+
   if (error instanceof HTTPError) {
     if (error.response.status === 429) {
       return step === 'start'
@@ -293,6 +315,19 @@ function buildEmailAuthErrorMessage(error: unknown, step: 'start' | 'verify') {
 }
 
 function buildPasswordLoginErrorMessage(error: unknown) {
+  const apiError = getApiError(error);
+
+  if (apiError?.code === 'RATE_LIMIT_EXCEEDED') {
+    return 'Too many login attempts. Please wait a moment and try again.';
+  }
+
+  if (
+    apiError?.code === 'INVALID_CREDENTIALS'
+    || apiError?.code === 'EMAIL_AUTH_ACCOUNT_NOT_FOUND'
+  ) {
+    return 'Invalid email or password.';
+  }
+
   if (error instanceof HTTPError) {
     if (error.response.status === 429) {
       return 'Too many login attempts. Please wait a moment and try again.';
