@@ -2,6 +2,7 @@ import {
   apiGet,
   apiPost,
 } from '@shared/lib/api-client';
+import type { ApiRequestBody, ApiSuccess } from '@shared/api/contracts';
 import {
   checkoutSessionSchema,
   subscriptionSummarySchema,
@@ -14,7 +15,9 @@ import type {
 export async function getSubscriptionSummary(
   workspaceId: string,
 ): Promise<SubscriptionSummary> {
-  const response = await apiGet<unknown>(`workspaces/${workspaceId}/subscription`);
+  const response = await apiGet<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/subscription', 'get'>
+  >(`workspaces/${workspaceId}/subscription`);
 
   return subscriptionSummarySchema.parse(response);
 }
@@ -25,7 +28,10 @@ export async function createCheckoutSession(
     return_url?: string;
   },
 ): Promise<CheckoutSession> {
-  const response = await apiPost<unknown, typeof input>(
+  const response = await apiPost<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/subscription/checkout', 'post', 201>,
+    ApiRequestBody<'/v1/workspaces/{workspaceId}/subscription/checkout', 'post'>
+  >(
     `workspaces/${workspaceId}/subscription/checkout`,
     input,
   );
@@ -36,7 +42,9 @@ export async function createCheckoutSession(
 export async function cancelSubscription(
   workspaceId: string,
 ): Promise<SubscriptionSummary> {
-  const response = await apiPost<unknown>(`workspaces/${workspaceId}/subscription/cancel`);
+  const response = await apiPost<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/subscription/cancel', 'post'>
+  >(`workspaces/${workspaceId}/subscription/cancel`);
 
   return subscriptionSummarySchema.parse(response);
 }

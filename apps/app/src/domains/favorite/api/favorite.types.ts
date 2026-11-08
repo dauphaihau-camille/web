@@ -1,8 +1,4 @@
-import type { z } from 'zod';
-import type {
-  favoriteDocumentSchema,
-  favoriteStatusSchema,
-} from './favorite.schemas';
+import type { ApiSchema } from '@shared/api/contracts';
 
-export type FavoriteStatus = z.infer<typeof favoriteStatusSchema>;
-export type FavoriteDocument = z.infer<typeof favoriteDocumentSchema>;
+export type FavoriteStatus = ApiSchema<'FavoriteStatusResponseDto'>;
+export type FavoriteDocument = ApiSchema<'FavoriteDocumentResponseDto'>;

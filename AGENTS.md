@@ -40,3 +40,45 @@ bun run generate:api-types -- --check
   `package.json`. Never commit the spec itself, only the generated types.
 - `packages/shared/src/api/generated/README.md` documents the generator
   commands; keep it in sync when the workflow changes.
+
+### Consuming contract types
+
+Import contract types from `packages/shared/src/api/contracts` and pass them
+as the generics of the `apiGet` / `apiPost` / `apiPut` / `apiPatch` /
+`apiDelete` helpers instead of hand-written response shapes:
+
+```ts
+import type { ApiSchema, operations } from './api/contracts';
+```
+
+Domain Zod schemas remain the source of truth for runtime parsing. When a
+contract type and the Zod input genuinely differ (nullable or optional
+transforms, for example), keep the Zod-inferred type and note the mismatch
+instead of forcing the contract type.
+
+### Errors
+
+Every failing API route returns the `ApiErrorResponseDto` envelope:
+
+- `status_code` - HTTP status code; always matches the response status line.
+- `code` - stable `UPPER_SNAKE_CASE` machine-readable code. Branch on this,
+  not on `message`, and never on internal class names.
+- `message` - human-readable summary.
+- `request_id` - optional correlation id, also echoed in the `X-Request-Id`
+  response header.
+- `details` - optional structured context.
+
+Validation failures always return `message: "Validation failed"` with the
+per-field reasons in `details.fields` as `{ field, messages: string[] }[]`.
+Use `isApiError` and `getApiErrorFields` from
+`packages/shared/src/lib/api-error.ts` rather than re-parsing the payload by
+hand.
+
+### Netlify builds
+
+Netlify runs `bun install` for both sites, which installs the private
+`@dauphaihau-camille/api-spec` package. `NODE_AUTH_TOKEN` (a token with
+`read:packages` for the `dauphaihau-camille` account) must be set in the
+Netlify environment for **both** the app and marketing sites, exactly as CI
+provides it. Without it the build fails during install with a registry
+`401`/`404`.

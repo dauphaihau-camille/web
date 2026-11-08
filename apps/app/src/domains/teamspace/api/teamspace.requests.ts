@@ -1,4 +1,5 @@
 import { apiGet, apiPatch, apiPost } from '@shared/lib/api-client';
+import type { ApiRequestBody, ApiSuccess } from '@shared/api/contracts';
 
 import {
   teamspaceListSchema,
@@ -11,7 +12,9 @@ import type {
 } from './teamspace.types';
 
 export async function listWorkspaceTeamspaces(workspaceId: string): Promise<Teamspace[]> {
-  const response = await apiGet<unknown>(`workspaces/${workspaceId}/teamspaces`);
+  const response = await apiGet<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/teamspaces', 'get'>
+  >(`workspaces/${workspaceId}/teamspaces`);
 
   return teamspaceListSchema.parse(response);
 }
@@ -20,7 +23,10 @@ export async function createTeamspace(
   workspaceId: string,
   input: CreateTeamspaceInput,
 ): Promise<Teamspace> {
-  const response = await apiPost<unknown, CreateTeamspaceInput>(
+  const response = await apiPost<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/teamspaces', 'post', 201>,
+    CreateTeamspaceInput
+  >(
     `workspaces/${workspaceId}/teamspaces`,
     input,
   );
@@ -32,7 +38,10 @@ export async function updateTeamspace(
   teamspaceId: string,
   input: UpdateTeamspaceInput,
 ): Promise<Teamspace> {
-  const response = await apiPatch<unknown, UpdateTeamspaceInput>(
+  const response = await apiPatch<
+    ApiSuccess<'/v1/teamspaces/{teamspaceId}', 'patch'>,
+    ApiRequestBody<'/v1/teamspaces/{teamspaceId}', 'patch'>
+  >(
     `teamspaces/${teamspaceId}`,
     input,
   );

@@ -1,14 +1,12 @@
 import type { z } from 'zod';
 
+import type { ApiSchema } from '@shared/api/contracts';
 import type {
-  archivedDocumentListItemSchema,
-  archivedDocumentListPageSchema,
   archiveSubdocCommandResultSchema,
   archiveSubdocCommandSchema,
   createRootDocumentSchema,
   createSubdocumentCommandResultSchema,
   createSubdocumentCommandSchema,
-  documentBreadcrumbItemSchema,
   documentAccessGrantPermissionSchema,
   documentAccessPermissionSchema,
   documentAccessSettingsSchema,
@@ -18,7 +16,6 @@ import type {
   documentCollaboratorSchema,
   documentCollaboratorUserSchema,
   documentInvitationListSchema,
-  documentInvitationSchema,
   documentCollaborationSchema,
   documentContentFormatSchema,
   documentIdSchema,
@@ -41,24 +38,24 @@ import type {
 export type DocumentId = z.infer<typeof documentIdSchema>;
 export type WorkspaceId = string;
 export type DocumentContentFormat = z.infer<typeof documentContentFormatSchema>;
-export type DocumentBreadcrumbItem = z.infer<typeof documentBreadcrumbItemSchema>;
+export type DocumentBreadcrumbItem = ApiSchema<'DocumentBreadcrumbItemDto'>;
 export type DocumentAccessScope = z.infer<typeof documentAccessScopeSchema>;
 export type DocumentAccessPermission = z.infer<typeof documentAccessPermissionSchema>;
 export type DocumentAccessGrantPermission = z.infer<typeof documentAccessGrantPermissionSchema>;
-export type DocumentAccess = z.infer<typeof documentAccessSchema>;
-export type DocumentCollaboration = z.infer<typeof documentCollaborationSchema>;
+export type DocumentAccess = z.infer<typeof documentAccessSchema>; // narrower than the contract's string scope/permission
+export type DocumentCollaboration = z.infer<typeof documentCollaborationSchema>; // narrower than the contract's string mode
 export type DocumentAccessSettings = z.infer<typeof documentAccessSettingsSchema>;
-export type Document = z.infer<typeof documentSchema>;
-export type DocumentOwnerUser = z.infer<typeof documentOwnerUserSchema>;
+export type Document = z.infer<typeof documentSchema>; // narrower enums, optional avatar the contract omits
+export type DocumentOwnerUser = z.infer<typeof documentOwnerUserSchema>; // wider: optional avatar, absent from the contract
 export type DocumentCollaboratorUser = z.infer<typeof documentCollaboratorUserSchema>;
 export type DocumentCollaborator = z.infer<typeof documentCollaboratorSchema>;
 export type DocumentCollaboratorList = z.infer<typeof documentCollaboratorListSchema>;
-export type DocumentInvitation = z.infer<typeof documentInvitationSchema>;
+export type DocumentInvitation = ApiSchema<'DocumentInvitationResponseDto'>;
 export type DocumentInvitationList = z.infer<typeof documentInvitationListSchema>;
 export type DocumentNavigationNode = z.infer<typeof documentNavigationNodeSchema>;
 export type DocumentNavigationPage = z.infer<typeof documentNavigationPageSchema>;
-export type ArchivedDocumentListItem = z.infer<typeof archivedDocumentListItemSchema>;
-export type ArchivedDocumentListPage = z.infer<typeof archivedDocumentListPageSchema>;
+export type ArchivedDocumentListItem = ApiSchema<'ArchivedDocumentListItemResponseDto'>;
+export type ArchivedDocumentListPage = ApiSchema<'ArchivedDocumentListPageResponseDto'>;
 export type TeamspaceDocumentNavigationGroup = z.infer<typeof teamspaceDocumentNavigationSchema>;
 export type WorkspaceDocumentNavigation = z.infer<typeof workspaceDocumentNavigationSchema>;
 export type CreateRootDocumentInput = z.infer<typeof createRootDocumentSchema>;
