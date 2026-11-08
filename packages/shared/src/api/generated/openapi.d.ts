@@ -1528,9 +1528,9 @@ export interface components {
             /** @example 1 */
             version: number;
             /** @example 95d9f7cb-7057-4c7a-bfde-c25ae7975f15 */
-            teamspace_id?: Record<string, never> | null;
+            teamspace_id?: string | null;
             /** @example 66cf61ad-e395-4f91-8af9-15d309c347f2 */
-            parent_document_id?: Record<string, never> | null;
+            parent_document_id?: string | null;
             /** @example 0 */
             index?: number;
         };
