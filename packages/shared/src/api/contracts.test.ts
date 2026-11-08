@@ -33,6 +33,17 @@ const CONTRACT_COVERAGE = [
   'UserProfileResponseDto',
   'AuthResponseDto',
   'StartEmailAuthResponseDto',
+  'FavoriteDocumentResponseDto',
+  'FavoriteDocumentAccessResponseDto',
+  'FavoriteStatusResponseDto',
+  'SubscriptionSummaryResponseDto',
+  'SubscriptionEntitlementsResponseDto',
+  'CheckoutSessionResponseDto',
+  'SearchDocumentResponseDto',
+  'TeamspaceResponseDto',
+  'WorkspacePreferenceResponseDto',
+  'WorkspaceNavigationPreferenceResponseDto',
+  'WorkspaceActivityPreferenceResponseDto',
 ] as const;
 
 type UncoveredContractComponent = Exclude<
@@ -118,6 +129,11 @@ describe('contract coverage', () => {
       'DocumentResponseDto',
       'WorkspaceResponseDto',
       'UserProfileResponseDto',
+      'FavoriteDocumentResponseDto',
+      'SubscriptionSummaryResponseDto',
+      'SearchDocumentResponseDto',
+      'TeamspaceResponseDto',
+      'WorkspacePreferenceResponseDto',
     ]));
   });
 });
