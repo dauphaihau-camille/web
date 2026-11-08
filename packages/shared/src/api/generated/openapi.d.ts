@@ -9,7 +9,7 @@ export interface paths {
             cookie?: never;
         };
         /** Stream */
-        get: operations["stream"];
+        get: operations["Sse_stream"];
         put?: never;
         post?: never;
         delete?: never;
@@ -26,7 +26,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get AI response entitlement status */
-        get: operations["getEntitlement"];
+        get: operations["AiAssistance_getEntitlement"];
         put?: never;
         post?: never;
         delete?: never;
@@ -43,10 +43,10 @@ export interface paths {
             cookie?: never;
         };
         /** List AI conversation sessions */
-        get: operations["listSessions"];
+        get: operations["AiAssistance_listSessions"];
         put?: never;
         /** Create AI conversation session */
-        post: operations["createSession"];
+        post: operations["AiAssistance_createSession"];
         delete?: never;
         options?: never;
         head?: never;
@@ -61,10 +61,10 @@ export interface paths {
             cookie?: never;
         };
         /** List AI chat turns */
-        get: operations["listTurns"];
+        get: operations["AiAssistance_listTurns"];
         put?: never;
         /** Create AI chat turn */
-        post: operations["createTurn"];
+        post: operations["AiAssistance_createTurn"];
         delete?: never;
         options?: never;
         head?: never;
@@ -81,7 +81,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Stream AI chat turn */
-        post: operations["streamTurn"];
+        post: operations["AiAssistance_streamTurn"];
         delete?: never;
         options?: never;
         head?: never;
@@ -98,7 +98,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Register */
-        post: operations["register"];
+        post: operations["Auth_register"];
         delete?: never;
         options?: never;
         head?: never;
@@ -113,7 +113,7 @@ export interface paths {
             cookie?: never;
         };
         /** Start Google OAuth */
-        get: operations["googleOAuth"];
+        get: operations["Auth_googleOAuth"];
         put?: never;
         post?: never;
         delete?: never;
@@ -130,7 +130,7 @@ export interface paths {
             cookie?: never;
         };
         /** Handle Google callback */
-        get: operations["googleOAuthCallback"];
+        get: operations["Auth_googleOAuthCallback"];
         put?: never;
         post?: never;
         delete?: never;
@@ -147,7 +147,7 @@ export interface paths {
             cookie?: never;
         };
         /** Start GitHub OAuth */
-        get: operations["githubOAuth"];
+        get: operations["Auth_githubOAuth"];
         put?: never;
         post?: never;
         delete?: never;
@@ -164,7 +164,7 @@ export interface paths {
             cookie?: never;
         };
         /** Handle GitHub callback */
-        get: operations["githubOAuthCallback"];
+        get: operations["Auth_githubOAuthCallback"];
         put?: never;
         post?: never;
         delete?: never;
@@ -183,7 +183,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Login */
-        post: operations["login"];
+        post: operations["Auth_login"];
         delete?: never;
         options?: never;
         head?: never;
@@ -200,7 +200,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Send login code */
-        post: operations["startEmailAuth"];
+        post: operations["Auth_startEmailAuth"];
         delete?: never;
         options?: never;
         head?: never;
@@ -217,7 +217,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Verify login code */
-        post: operations["verifyEmailAuth"];
+        post: operations["Auth_verifyEmailAuth"];
         delete?: never;
         options?: never;
         head?: never;
@@ -234,7 +234,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Refresh session */
-        post: operations["refresh"];
+        post: operations["Auth_refresh"];
         delete?: never;
         options?: never;
         head?: never;
@@ -251,7 +251,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Forgot password */
-        post: operations["forgotPassword"];
+        post: operations["Auth_forgotPassword"];
         delete?: never;
         options?: never;
         head?: never;
@@ -266,7 +266,7 @@ export interface paths {
             cookie?: never;
         };
         /** Verify token */
-        get: operations["verifyToken"];
+        get: operations["Auth_verifyToken"];
         put?: never;
         post?: never;
         delete?: never;
@@ -285,7 +285,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Reset password */
-        post: operations["resetPassword"];
+        post: operations["Auth_resetPassword"];
         delete?: never;
         options?: never;
         head?: never;
@@ -302,7 +302,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Logout */
-        post: operations["logout"];
+        post: operations["Auth_logout"];
         delete?: never;
         options?: never;
         head?: never;
@@ -317,7 +317,7 @@ export interface paths {
             cookie?: never;
         };
         /** Current user */
-        get: operations["me"];
+        get: operations["Auth_me"];
         put?: never;
         post?: never;
         delete?: never;
@@ -334,10 +334,10 @@ export interface paths {
             cookie?: never;
         };
         /** List */
-        get: operations["users"];
+        get: operations["User_users"];
         put?: never;
         /** Create */
-        post: operations["createUser"];
+        post: operations["User_createUser"];
         delete?: never;
         options?: never;
         head?: never;
@@ -352,14 +352,14 @@ export interface paths {
             cookie?: never;
         };
         /** Get by id */
-        get: operations["user"];
+        get: operations["User_user"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         /** Update */
-        patch: operations["updateUser"];
+        patch: operations["User_updateUser"];
         trace?: never;
     };
     "/v1/me/workspaces": {
@@ -370,7 +370,7 @@ export interface paths {
             cookie?: never;
         };
         /** List user workspaces */
-        get: operations["listMyWorkspaces"];
+        get: operations["Workspace_listMyWorkspaces"];
         put?: never;
         post?: never;
         delete?: never;
@@ -389,7 +389,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Create workspace */
-        post: operations["createWorkspace"];
+        post: operations["Workspace_createWorkspace"];
         delete?: never;
         options?: never;
         head?: never;
@@ -404,15 +404,15 @@ export interface paths {
             cookie?: never;
         };
         /** Get workspace detail */
-        get: operations["getWorkspace"];
+        get: operations["Workspace_getWorkspace"];
         put?: never;
         post?: never;
         /** Delete workspace */
-        delete: operations["deleteWorkspace"];
+        delete: operations["Workspace_deleteWorkspace"];
         options?: never;
         head?: never;
         /** Update workspace */
-        patch: operations["updateWorkspace"];
+        patch: operations["Workspace_updateWorkspace"];
         trace?: never;
     };
     "/v1/me/workspaces/last-active": {
@@ -423,7 +423,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get last active workspace */
-        get: operations["getLastActiveWorkspace"];
+        get: operations["WorkspacePreference_getLastActiveWorkspace"];
         put?: never;
         post?: never;
         delete?: never;
@@ -440,14 +440,14 @@ export interface paths {
             cookie?: never;
         };
         /** Get workspace user preferences */
-        get: operations["getWorkspacePreferences"];
+        get: operations["WorkspacePreference_getWorkspacePreferences"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         /** Update workspace user preferences */
-        patch: operations["updateWorkspacePreferences"];
+        patch: operations["WorkspacePreference_updateWorkspacePreferences"];
         trace?: never;
     };
     "/v1/workspaces/{workspaceId}/preferences/last-active": {
@@ -464,7 +464,7 @@ export interface paths {
         options?: never;
         head?: never;
         /** Mark workspace as last active */
-        patch: operations["markWorkspaceAsLastActive"];
+        patch: operations["WorkspacePreference_markWorkspaceAsLastActive"];
         trace?: never;
     };
     "/v1/workspaces/{workspaceId}/members": {
@@ -475,10 +475,10 @@ export interface paths {
             cookie?: never;
         };
         /** List workspace members */
-        get: operations["listWorkspaceMembers"];
+        get: operations["Membership_listWorkspaceMembers"];
         put?: never;
         /** Add workspace member */
-        post: operations["addWorkspaceMember"];
+        post: operations["Membership_addWorkspaceMember"];
         delete?: never;
         options?: never;
         head?: never;
@@ -493,7 +493,7 @@ export interface paths {
             cookie?: never;
         };
         /** Search workspace members */
-        get: operations["searchWorkspaceMembers"];
+        get: operations["Membership_searchWorkspaceMembers"];
         put?: never;
         post?: never;
         delete?: never;
@@ -513,11 +513,11 @@ export interface paths {
         put?: never;
         post?: never;
         /** Remove workspace member */
-        delete: operations["removeWorkspaceMember"];
+        delete: operations["Membership_removeWorkspaceMember"];
         options?: never;
         head?: never;
         /** Update member role */
-        patch: operations["updateWorkspaceMember"];
+        patch: operations["Membership_updateWorkspaceMember"];
         trace?: never;
     };
     "/v1/workspaces/{workspaceId}/subscription": {
@@ -528,7 +528,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get workspace subscription summary */
-        get: operations["getSummary"];
+        get: operations["Subscription_getSummary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -547,7 +547,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Create Plus checkout session */
-        post: operations["createCheckout"];
+        post: operations["Subscription_createCheckout"];
         delete?: never;
         options?: never;
         head?: never;
@@ -564,7 +564,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Cancel Plus at period end */
-        post: operations["cancel"];
+        post: operations["Subscription_cancel"];
         delete?: never;
         options?: never;
         head?: never;
@@ -581,7 +581,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Handle Stripe billing webhook */
-        post: operations["handleStripeWebhook"];
+        post: operations["BillingWebhook_handleStripeWebhook"];
         delete?: never;
         options?: never;
         head?: never;
@@ -596,10 +596,10 @@ export interface paths {
             cookie?: never;
         };
         /** List workspace teamspaces */
-        get: operations["listWorkspaceTeamspaces"];
+        get: operations["Teamspace_listWorkspaceTeamspaces"];
         put?: never;
         /** Create workspace teamspace */
-        post: operations["createTeamspace"];
+        post: operations["Teamspace_createTeamspace"];
         delete?: never;
         options?: never;
         head?: never;
@@ -620,7 +620,7 @@ export interface paths {
         options?: never;
         head?: never;
         /** Update teamspace */
-        patch: operations["updateTeamspace"];
+        patch: operations["Teamspace_updateTeamspace"];
         trace?: never;
     };
     "/v1/workspaces/{workspaceId}/documents/default": {
@@ -631,7 +631,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get default document */
-        get: operations["getWorkspaceDefaultDocument"];
+        get: operations["WorkspaceDocument_getWorkspaceDefaultDocument"];
         put?: never;
         post?: never;
         delete?: never;
@@ -648,7 +648,7 @@ export interface paths {
             cookie?: never;
         };
         /** List archived workspace documents */
-        get: operations["listArchivedWorkspaceDocuments"];
+        get: operations["WorkspaceDocument_listArchivedWorkspaceDocuments"];
         put?: never;
         post?: never;
         delete?: never;
@@ -665,7 +665,7 @@ export interface paths {
             cookie?: never;
         };
         /** List workspace documents */
-        get: operations["listWorkspaceDocuments"];
+        get: operations["WorkspaceDocument_listWorkspaceDocuments"];
         put?: never;
         post?: never;
         delete?: never;
@@ -684,7 +684,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Create document */
-        post: operations["createDocument"];
+        post: operations["Document_createDocument"];
         delete?: never;
         options?: never;
         head?: never;
@@ -701,7 +701,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Duplicate document subtree */
-        post: operations["duplicateDocument"];
+        post: operations["Document_duplicateDocument"];
         delete?: never;
         options?: never;
         head?: never;
@@ -716,15 +716,15 @@ export interface paths {
             cookie?: never;
         };
         /** Get document detail */
-        get: operations["getDocument"];
+        get: operations["Document_getDocument"];
         put?: never;
         post?: never;
         /** Permanently delete document */
-        delete: operations["permanentlyDeleteDocument"];
+        delete: operations["DocumentLifecycle_permanentlyDeleteDocument"];
         options?: never;
         head?: never;
         /** Update document */
-        patch: operations["updateDocument"];
+        patch: operations["Document_updateDocument"];
         trace?: never;
     };
     "/v1/documents/{documentId}/children": {
@@ -735,7 +735,7 @@ export interface paths {
             cookie?: never;
         };
         /** List document children */
-        get: operations["listDocumentChildren"];
+        get: operations["Document_listDocumentChildren"];
         put?: never;
         post?: never;
         delete?: never;
@@ -754,7 +754,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Move document */
-        post: operations["moveDocument"];
+        post: operations["Document_moveDocument"];
         delete?: never;
         options?: never;
         head?: never;
@@ -771,7 +771,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Create subdocument command */
-        post: operations["createSubdoc"];
+        post: operations["DocumentCommand_createSubdoc"];
         delete?: never;
         options?: never;
         head?: never;
@@ -788,7 +788,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Archive subdocument command */
-        post: operations["archiveSubdoc"];
+        post: operations["DocumentCommand_archiveSubdoc"];
         delete?: never;
         options?: never;
         head?: never;
@@ -805,7 +805,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Archive document */
-        post: operations["archiveDocument"];
+        post: operations["DocumentLifecycle_archiveDocument"];
         delete?: never;
         options?: never;
         head?: never;
@@ -822,7 +822,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Restore document */
-        post: operations["restoreDocument"];
+        post: operations["DocumentLifecycle_restoreDocument"];
         delete?: never;
         options?: never;
         head?: never;
@@ -837,7 +837,7 @@ export interface paths {
             cookie?: never;
         };
         /** List document collaborators */
-        get: operations["listCollaborators"];
+        get: operations["DocumentAccess_listCollaborators"];
         put?: never;
         post?: never;
         delete?: never;
@@ -854,7 +854,7 @@ export interface paths {
             cookie?: never;
         };
         /** List pending document invitations */
-        get: operations["listInvitations"];
+        get: operations["DocumentAccess_listInvitations"];
         put?: never;
         post?: never;
         delete?: never;
@@ -873,7 +873,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Share document */
-        post: operations["shareDocument"];
+        post: operations["DocumentAccess_shareDocument"];
         delete?: never;
         options?: never;
         head?: never;
@@ -890,7 +890,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Share document with multiple users */
-        post: operations["shareDocuments"];
+        post: operations["DocumentAccess_shareDocuments"];
         delete?: never;
         options?: never;
         head?: never;
@@ -905,14 +905,14 @@ export interface paths {
             cookie?: never;
         };
         /** Get document access settings */
-        get: operations["getAccessSettings"];
+        get: operations["DocumentAccess_getAccessSettings"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         /** Update document access settings */
-        patch: operations["updateAccessSettings"];
+        patch: operations["DocumentAccess_updateAccessSettings"];
         trace?: never;
     };
     "/v1/documents/{documentId}/collaborators/{userId}": {
@@ -926,7 +926,7 @@ export interface paths {
         put?: never;
         post?: never;
         /** Revoke document access */
-        delete: operations["revokeDocumentAccess"];
+        delete: operations["DocumentAccess_revokeDocumentAccess"];
         options?: never;
         head?: never;
         patch?: never;
@@ -943,11 +943,11 @@ export interface paths {
         put?: never;
         post?: never;
         /** Revoke pending document invitation */
-        delete: operations["revokeInvitation"];
+        delete: operations["DocumentAccess_revokeInvitation"];
         options?: never;
         head?: never;
         /** Update pending document invitation */
-        patch: operations["updateInvitation"];
+        patch: operations["DocumentAccess_updateInvitation"];
         trace?: never;
     };
     "/v1/workspaces/{workspaceId}/favorites": {
@@ -958,7 +958,7 @@ export interface paths {
             cookie?: never;
         };
         /** List favorite documents */
-        get: operations["listWorkspaceFavorites"];
+        get: operations["Favorite_listWorkspaceFavorites"];
         put?: never;
         post?: never;
         delete?: never;
@@ -975,12 +975,12 @@ export interface paths {
             cookie?: never;
         };
         /** Get favorite status */
-        get: operations["getFavoriteStatus"];
+        get: operations["Favorite_getFavoriteStatus"];
         put?: never;
         /** Favorite a document */
-        post: operations["favoriteDocument"];
+        post: operations["Favorite_favoriteDocument"];
         /** Remove document favorite */
-        delete: operations["unfavoriteDocument"];
+        delete: operations["Favorite_unfavoriteDocument"];
         options?: never;
         head?: never;
         patch?: never;
@@ -994,7 +994,7 @@ export interface paths {
             cookie?: never;
         };
         /** Get published document */
-        get: operations["getPublicDocument"];
+        get: operations["Publish_getPublicDocument"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1011,12 +1011,12 @@ export interface paths {
             cookie?: never;
         };
         /** Get publish status */
-        get: operations["getPublishStatus"];
+        get: operations["Publish_getPublishStatus"];
         put?: never;
         /** Publish a document */
-        post: operations["publishDocument"];
+        post: operations["Publish_publishDocument"];
         /** Unpublish a document */
-        delete: operations["unpublishDocument"];
+        delete: operations["Publish_unpublishDocument"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1030,7 +1030,7 @@ export interface paths {
             cookie?: never;
         };
         /** Search workspace documents */
-        get: operations["searchDocuments"];
+        get: operations["Search_searchDocuments"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1063,35 +1063,26 @@ export interface components {
              * @description HTTP status code. Always matches the response status line.
              * @example 400
              */
-            statusCode: number;
+            status_code: number;
             /**
-             * Format: date-time
-             * @description ISO-8601 timestamp of when the error response was rendered.
-             * @example 2026-01-01T00:00:00.000Z
-             */
-            timestamp: string;
-            /**
-             * @description Request path, including the global `v1` prefix.
-             * @example /v1/documents
-             */
-            path: string;
-            /**
-             * @description HTTP error name. Also used as the stable key of the documented example.
-             * @example Bad Request
-             */
-            error: string;
-            /**
-             * @description Stable machine-readable error code in `UPPER_SNAKE_CASE`. Derived from the domain error code, the exception payload, or the HTTP status fallback; internal class names are never exposed.
+             * @description Stable machine-readable error code in `UPPER_SNAKE_CASE`. Derived from the domain error code, the exception payload, or the HTTP status fallback; internal class names are never exposed. Also used as the stable key of the documented example.
              * @example DOCUMENT_NOT_FOUND
              */
             code: string;
             /**
-             * @description Human-readable error message. Validation failures return one entry per invalid field instead of a single string.
-             * @example [
-             *       "title should not be empty"
-             *     ]
+             * @description Human-readable error summary. Validation failures always return `Validation failed` and expose the per-field reasons in `details.fields`.
+             * @example Document document_123 was not found.
              */
-            message: string | string[];
+            message: string;
+            /**
+             * @description Request correlation id. Also returned in the X-Request-Id response header and logged.
+             * @example 3f6c1b1e-2b0f-4d5a-9d0e-7a1f2c3b4d5e
+             */
+            request_id?: string;
+            /** @description Structured, error-specific context. Validation failures expose `fields`. */
+            details?: {
+                [key: string]: unknown;
+            };
         };
         AiResponseEntitlementResponseDto: {
             workspace_id: string;
@@ -1709,7 +1700,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    stream: {
+    Sse_stream: {
         parameters: {
             query?: never;
             header?: never;
@@ -1747,7 +1738,7 @@ export interface operations {
             };
         };
     };
-    getEntitlement: {
+    AiAssistance_getEntitlement: {
         parameters: {
             query?: never;
             header?: never;
@@ -1813,7 +1804,7 @@ export interface operations {
             };
         };
     };
-    listSessions: {
+    AiAssistance_listSessions: {
         parameters: {
             query?: {
                 page?: number;
@@ -1837,7 +1828,7 @@ export interface operations {
                     "application/json": components["schemas"]["PaginatedAiConversationSessionResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -1893,7 +1884,7 @@ export interface operations {
             };
         };
     };
-    createSession: {
+    AiAssistance_createSession: {
         parameters: {
             query?: never;
             header?: never;
@@ -1959,7 +1950,7 @@ export interface operations {
             };
         };
     };
-    listTurns: {
+    AiAssistance_listTurns: {
         parameters: {
             query?: {
                 limit?: number;
@@ -1983,7 +1974,7 @@ export interface operations {
                     "application/json": components["schemas"]["CursorPaginatedAiChatTurnResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2039,7 +2030,7 @@ export interface operations {
             };
         };
     };
-    createTurn: {
+    AiAssistance_createTurn: {
         parameters: {
             query?: never;
             header?: never;
@@ -2063,7 +2054,7 @@ export interface operations {
                     "application/json": components["schemas"]["AiChatTurnResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2119,7 +2110,7 @@ export interface operations {
             };
         };
     };
-    streamTurn: {
+    AiAssistance_streamTurn: {
         parameters: {
             query?: never;
             header?: never;
@@ -2144,7 +2135,7 @@ export interface operations {
                     "application/x-ndjson": string;
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2200,7 +2191,7 @@ export interface operations {
             };
         };
     };
-    register: {
+    Auth_register: {
         parameters: {
             query?: never;
             header?: never;
@@ -2221,7 +2212,7 @@ export interface operations {
                     "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2259,7 +2250,7 @@ export interface operations {
             };
         };
     };
-    googleOAuth: {
+    Auth_googleOAuth: {
         parameters: {
             query?: never;
             header?: never;
@@ -2275,6 +2266,15 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Google OAuth is not enabled. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
             /** @description Too many requests. */
             429: {
                 headers: {
@@ -2295,7 +2295,7 @@ export interface operations {
             };
         };
     };
-    googleOAuthCallback: {
+    Auth_googleOAuthCallback: {
         parameters: {
             query?: never;
             header?: never;
@@ -2349,7 +2349,7 @@ export interface operations {
             };
         };
     };
-    githubOAuth: {
+    Auth_githubOAuth: {
         parameters: {
             query?: never;
             header?: never;
@@ -2365,6 +2365,15 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description GitHub OAuth is not enabled. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
             /** @description Too many requests. */
             429: {
                 headers: {
@@ -2385,7 +2394,7 @@ export interface operations {
             };
         };
     };
-    githubOAuthCallback: {
+    Auth_githubOAuthCallback: {
         parameters: {
             query?: never;
             header?: never;
@@ -2439,7 +2448,7 @@ export interface operations {
             };
         };
     };
-    login: {
+    Auth_login: {
         parameters: {
             query?: never;
             header?: never;
@@ -2460,7 +2469,7 @@ export interface operations {
                     "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2507,7 +2516,7 @@ export interface operations {
             };
         };
     };
-    startEmailAuth: {
+    Auth_startEmailAuth: {
         parameters: {
             query?: never;
             header?: never;
@@ -2528,7 +2537,7 @@ export interface operations {
                     "application/json": components["schemas"]["StartEmailAuthResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2557,7 +2566,7 @@ export interface operations {
             };
         };
     };
-    verifyEmailAuth: {
+    Auth_verifyEmailAuth: {
         parameters: {
             query?: never;
             header?: never;
@@ -2578,7 +2587,7 @@ export interface operations {
                     "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2643,7 +2652,7 @@ export interface operations {
             };
         };
     };
-    refresh: {
+    Auth_refresh: {
         parameters: {
             query?: never;
             header?: never;
@@ -2664,7 +2673,7 @@ export interface operations {
                     "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2711,7 +2720,7 @@ export interface operations {
             };
         };
     };
-    forgotPassword: {
+    Auth_forgotPassword: {
         parameters: {
             query?: never;
             header?: never;
@@ -2731,7 +2740,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2760,7 +2769,7 @@ export interface operations {
             };
         };
     };
-    verifyToken: {
+    Auth_verifyToken: {
         parameters: {
             query: {
                 token: string;
@@ -2779,7 +2788,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2817,7 +2826,7 @@ export interface operations {
             };
         };
     };
-    resetPassword: {
+    Auth_resetPassword: {
         parameters: {
             query: {
                 token: string;
@@ -2840,7 +2849,7 @@ export interface operations {
                     "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2878,7 +2887,7 @@ export interface operations {
             };
         };
     };
-    logout: {
+    Auth_logout: {
         parameters: {
             query?: never;
             header?: never;
@@ -2923,7 +2932,7 @@ export interface operations {
             };
         };
     };
-    me: {
+    Auth_me: {
         parameters: {
             query?: never;
             header?: never;
@@ -2969,7 +2978,7 @@ export interface operations {
             };
         };
     };
-    users: {
+    User_users: {
         parameters: {
             query?: {
                 page?: number;
@@ -2991,7 +3000,7 @@ export interface operations {
                     "application/json": components["schemas"]["PaginatedUserSummaryResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3029,7 +3038,7 @@ export interface operations {
             };
         };
     };
-    createUser: {
+    User_createUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -3050,7 +3059,7 @@ export interface operations {
                     "application/json": components["schemas"]["UserSummaryResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3106,7 +3115,7 @@ export interface operations {
             };
         };
     };
-    user: {
+    User_user: {
         parameters: {
             query?: never;
             header?: never;
@@ -3163,7 +3172,7 @@ export interface operations {
             };
         };
     };
-    updateUser: {
+    User_updateUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -3186,7 +3195,7 @@ export interface operations {
                     "application/json": components["schemas"]["UserSummaryResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3251,7 +3260,7 @@ export interface operations {
             };
         };
     };
-    listMyWorkspaces: {
+    Workspace_listMyWorkspaces: {
         parameters: {
             query?: never;
             header?: never;
@@ -3306,7 +3315,7 @@ export interface operations {
             };
         };
     };
-    createWorkspace: {
+    Workspace_createWorkspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -3327,7 +3336,7 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3383,7 +3392,7 @@ export interface operations {
             };
         };
     };
-    getWorkspace: {
+    Workspace_getWorkspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -3449,7 +3458,7 @@ export interface operations {
             };
         };
     };
-    deleteWorkspace: {
+    Workspace_deleteWorkspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -3513,7 +3522,7 @@ export interface operations {
             };
         };
     };
-    updateWorkspace: {
+    Workspace_updateWorkspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -3536,7 +3545,7 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3601,7 +3610,7 @@ export interface operations {
             };
         };
     };
-    getLastActiveWorkspace: {
+    WorkspacePreference_getLastActiveWorkspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -3656,7 +3665,7 @@ export interface operations {
             };
         };
     };
-    getWorkspacePreferences: {
+    WorkspacePreference_getWorkspacePreferences: {
         parameters: {
             query?: never;
             header?: never;
@@ -3722,7 +3731,7 @@ export interface operations {
             };
         };
     };
-    updateWorkspacePreferences: {
+    WorkspacePreference_updateWorkspacePreferences: {
         parameters: {
             query?: never;
             header?: never;
@@ -3745,7 +3754,7 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspacePreferenceResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3801,7 +3810,7 @@ export interface operations {
             };
         };
     };
-    markWorkspaceAsLastActive: {
+    WorkspacePreference_markWorkspaceAsLastActive: {
         parameters: {
             query?: never;
             header?: never;
@@ -3866,7 +3875,7 @@ export interface operations {
             };
         };
     };
-    listWorkspaceMembers: {
+    Membership_listWorkspaceMembers: {
         parameters: {
             query?: never;
             header?: never;
@@ -3932,7 +3941,7 @@ export interface operations {
             };
         };
     };
-    addWorkspaceMember: {
+    Membership_addWorkspaceMember: {
         parameters: {
             query?: never;
             header?: never;
@@ -3955,7 +3964,7 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceMemberResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4020,7 +4029,7 @@ export interface operations {
             };
         };
     };
-    searchWorkspaceMembers: {
+    Membership_searchWorkspaceMembers: {
         parameters: {
             query?: {
                 q?: string;
@@ -4089,7 +4098,7 @@ export interface operations {
             };
         };
     };
-    removeWorkspaceMember: {
+    Membership_removeWorkspaceMember: {
         parameters: {
             query?: never;
             header?: never;
@@ -4165,7 +4174,7 @@ export interface operations {
             };
         };
     };
-    updateWorkspaceMember: {
+    Membership_updateWorkspaceMember: {
         parameters: {
             query?: never;
             header?: never;
@@ -4189,7 +4198,7 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceMemberResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4254,7 +4263,7 @@ export interface operations {
             };
         };
     };
-    getSummary: {
+    Subscription_getSummary: {
         parameters: {
             query?: never;
             header?: never;
@@ -4320,7 +4329,7 @@ export interface operations {
             };
         };
     };
-    createCheckout: {
+    Subscription_createCheckout: {
         parameters: {
             query?: never;
             header?: never;
@@ -4343,7 +4352,7 @@ export interface operations {
                     "application/json": components["schemas"]["CheckoutSessionResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4399,7 +4408,7 @@ export interface operations {
             };
         };
     };
-    cancel: {
+    Subscription_cancel: {
         parameters: {
             query?: never;
             header?: never;
@@ -4465,7 +4474,7 @@ export interface operations {
             };
         };
     };
-    handleStripeWebhook: {
+    BillingWebhook_handleStripeWebhook: {
         parameters: {
             query?: never;
             header?: never;
@@ -4511,7 +4520,7 @@ export interface operations {
             };
         };
     };
-    listWorkspaceTeamspaces: {
+    Teamspace_listWorkspaceTeamspaces: {
         parameters: {
             query?: never;
             header?: never;
@@ -4577,7 +4586,7 @@ export interface operations {
             };
         };
     };
-    createTeamspace: {
+    Teamspace_createTeamspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -4600,7 +4609,7 @@ export interface operations {
                     "application/json": components["schemas"]["TeamspaceResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4656,7 +4665,7 @@ export interface operations {
             };
         };
     };
-    updateTeamspace: {
+    Teamspace_updateTeamspace: {
         parameters: {
             query?: never;
             header?: never;
@@ -4679,7 +4688,7 @@ export interface operations {
                     "application/json": components["schemas"]["TeamspaceResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4744,7 +4753,7 @@ export interface operations {
             };
         };
     };
-    getWorkspaceDefaultDocument: {
+    WorkspaceDocument_getWorkspaceDefaultDocument: {
         parameters: {
             query?: {
                 recent_document_id?: string;
@@ -4812,7 +4821,7 @@ export interface operations {
             };
         };
     };
-    listArchivedWorkspaceDocuments: {
+    WorkspaceDocument_listArchivedWorkspaceDocuments: {
         parameters: {
             query?: {
                 q?: string;
@@ -4892,7 +4901,7 @@ export interface operations {
             };
         };
     };
-    listWorkspaceDocuments: {
+    WorkspaceDocument_listWorkspaceDocuments: {
         parameters: {
             query?: {
                 q?: string;
@@ -4973,7 +4982,7 @@ export interface operations {
             };
         };
     };
-    createDocument: {
+    Document_createDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -4994,7 +5003,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5050,7 +5059,7 @@ export interface operations {
             };
         };
     };
-    duplicateDocument: {
+    Document_duplicateDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -5125,7 +5134,7 @@ export interface operations {
             };
         };
     };
-    getDocument: {
+    Document_getDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -5191,7 +5200,7 @@ export interface operations {
             };
         };
     };
-    permanentlyDeleteDocument: {
+    DocumentLifecycle_permanentlyDeleteDocument: {
         parameters: {
             query: {
                 version: number;
@@ -5211,7 +5220,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5276,7 +5285,7 @@ export interface operations {
             };
         };
     };
-    updateDocument: {
+    Document_updateDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -5364,7 +5373,7 @@ export interface operations {
             };
         };
     };
-    listDocumentChildren: {
+    Document_listDocumentChildren: {
         parameters: {
             query?: never;
             header?: never;
@@ -5439,7 +5448,7 @@ export interface operations {
             };
         };
     };
-    moveDocument: {
+    Document_moveDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -5527,7 +5536,7 @@ export interface operations {
             };
         };
     };
-    createSubdoc: {
+    DocumentCommand_createSubdoc: {
         parameters: {
             query?: never;
             header?: never;
@@ -5550,7 +5559,7 @@ export interface operations {
                     "application/json": components["schemas"]["CreateSubdocCommandResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5615,7 +5624,7 @@ export interface operations {
             };
         };
     };
-    archiveSubdoc: {
+    DocumentCommand_archiveSubdoc: {
         parameters: {
             query?: never;
             header?: never;
@@ -5638,7 +5647,7 @@ export interface operations {
                     "application/json": components["schemas"]["ArchiveSubdocCommandResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5703,7 +5712,7 @@ export interface operations {
             };
         };
     };
-    archiveDocument: {
+    DocumentLifecycle_archiveDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -5726,7 +5735,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5791,7 +5800,7 @@ export interface operations {
             };
         };
     };
-    restoreDocument: {
+    DocumentLifecycle_restoreDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -5814,7 +5823,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5879,7 +5888,7 @@ export interface operations {
             };
         };
     };
-    listCollaborators: {
+    DocumentAccess_listCollaborators: {
         parameters: {
             query?: never;
             header?: never;
@@ -5945,7 +5954,7 @@ export interface operations {
             };
         };
     };
-    listInvitations: {
+    DocumentAccess_listInvitations: {
         parameters: {
             query?: never;
             header?: never;
@@ -6011,7 +6020,7 @@ export interface operations {
             };
         };
     };
-    shareDocument: {
+    DocumentAccess_shareDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -6034,7 +6043,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentCollaboratorResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6090,7 +6099,7 @@ export interface operations {
             };
         };
     };
-    shareDocuments: {
+    DocumentAccess_shareDocuments: {
         parameters: {
             query?: never;
             header?: never;
@@ -6113,7 +6122,7 @@ export interface operations {
                     "application/json": components["schemas"]["ShareDocumentsResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6169,7 +6178,7 @@ export interface operations {
             };
         };
     };
-    getAccessSettings: {
+    DocumentAccess_getAccessSettings: {
         parameters: {
             query?: never;
             header?: never;
@@ -6235,7 +6244,7 @@ export interface operations {
             };
         };
     };
-    updateAccessSettings: {
+    DocumentAccess_updateAccessSettings: {
         parameters: {
             query?: never;
             header?: never;
@@ -6258,7 +6267,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentAccessSettingsResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6314,7 +6323,7 @@ export interface operations {
             };
         };
     };
-    revokeDocumentAccess: {
+    DocumentAccess_revokeDocumentAccess: {
         parameters: {
             query?: never;
             header?: never;
@@ -6380,7 +6389,7 @@ export interface operations {
             };
         };
     };
-    revokeInvitation: {
+    DocumentAccess_revokeInvitation: {
         parameters: {
             query?: never;
             header?: never;
@@ -6446,7 +6455,7 @@ export interface operations {
             };
         };
     };
-    updateInvitation: {
+    DocumentAccess_updateInvitation: {
         parameters: {
             query?: never;
             header?: never;
@@ -6470,7 +6479,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentInvitationResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Validation failed */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6526,7 +6535,7 @@ export interface operations {
             };
         };
     };
-    listWorkspaceFavorites: {
+    Favorite_listWorkspaceFavorites: {
         parameters: {
             query?: never;
             header?: never;
@@ -6592,7 +6601,7 @@ export interface operations {
             };
         };
     };
-    getFavoriteStatus: {
+    Favorite_getFavoriteStatus: {
         parameters: {
             query?: never;
             header?: never;
@@ -6658,7 +6667,7 @@ export interface operations {
             };
         };
     };
-    favoriteDocument: {
+    Favorite_favoriteDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -6724,7 +6733,7 @@ export interface operations {
             };
         };
     };
-    unfavoriteDocument: {
+    Favorite_unfavoriteDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -6790,7 +6799,7 @@ export interface operations {
             };
         };
     };
-    getPublicDocument: {
+    Publish_getPublicDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -6847,7 +6856,7 @@ export interface operations {
             };
         };
     };
-    getPublishStatus: {
+    Publish_getPublishStatus: {
         parameters: {
             query?: never;
             header?: never;
@@ -6913,7 +6922,7 @@ export interface operations {
             };
         };
     };
-    publishDocument: {
+    Publish_publishDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -6979,7 +6988,7 @@ export interface operations {
             };
         };
     };
-    unpublishDocument: {
+    Publish_unpublishDocument: {
         parameters: {
             query?: never;
             header?: never;
@@ -7045,7 +7054,7 @@ export interface operations {
             };
         };
     };
-    searchDocuments: {
+    Search_searchDocuments: {
         parameters: {
             query?: {
                 q?: string;
