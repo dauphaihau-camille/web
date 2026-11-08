@@ -10,11 +10,24 @@ import type {
   emailAuthStartResponseApiSchema,
   loginResponseApiSchema,
 } from '../../../../../../apps/app/src/domains/auth/api/auth.schemas';
-import type { ApiSchema } from '../../../api/contracts';
+import type { ApiSchema, paths } from '../../../api/contracts';
 
 type CurrentUserWireInput = z.input<typeof currentUserApiSchema>;
 type LoginResponseWireInput = z.input<typeof loginResponseApiSchema>;
 type EmailAuthStartResponseWireInput = z.input<typeof emailAuthStartResponseApiSchema>;
+
+type LoginResponse =
+  paths['/v1/auth/login']['post']['responses'][200]['content']['application/json'];
+type RefreshSessionResponse =
+  paths['/v1/auth/refresh']['post']['responses'][200]['content']['application/json'];
+type EmailAuthStartResponse =
+  paths['/v1/auth/email/start']['post']['responses'][200]['content']['application/json'];
+type EmailAuthVerifyResponse =
+  paths['/v1/auth/email/verify']['post']['responses'][200]['content']['application/json'];
+type ResetPasswordResponse =
+  paths['/v1/auth/reset-password']['post']['responses'][200]['content']['application/json'];
+type LogoutNoContent =
+  paths['/v1/auth/logout']['post']['responses'][204];
 
 describe('auth contract', () => {
   it('UserProfileResponseDto fits the currentUser wire input', () => {
@@ -32,5 +45,23 @@ describe('auth contract', () => {
   it('StartEmailAuthResponseDto fits the email auth start wire input', () => {
     expectTypeOf<ApiSchema<'StartEmailAuthResponseDto'>>()
       .toExtend<EmailAuthStartResponseWireInput>();
+  });
+
+  it('session operations resolve to the auth DTOs', () => {
+    expectTypeOf<LoginResponse>().toEqualTypeOf<ApiSchema<'AuthResponseDto'>>();
+    expectTypeOf<RefreshSessionResponse>().toEqualTypeOf<ApiSchema<'AuthResponseDto'>>();
+    expectTypeOf<EmailAuthVerifyResponse>().toEqualTypeOf<ApiSchema<'AuthResponseDto'>>();
+    expectTypeOf<ResetPasswordResponse>().toEqualTypeOf<ApiSchema<'AuthResponseDto'>>();
+  });
+
+  it('email auth start resolves to StartEmailAuthResponseDto', () => {
+    expectTypeOf<EmailAuthStartResponse>()
+      .toEqualTypeOf<ApiSchema<'StartEmailAuthResponseDto'>>();
+  });
+
+  it('logout resolves to a 204 without a JSON body', () => {
+    expectTypeOf<LogoutNoContent>().not.toEqualTypeOf<never>();
+    expectTypeOf<LogoutNoContent['headers']>()
+      .toEqualTypeOf<{ [name: string]: unknown }>();
   });
 });
