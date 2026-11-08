@@ -13,9 +13,9 @@ import {
 import type { ApiSchema, components, paths } from './contracts';
 
 /**
- * Contract components asserted by the publish, document, workspace, and auth
- * conformance tests. Every entry must name a real contract schema; a rename in
- * the contract breaks `UncoveredContractComponent` below.
+ * Contract components asserted by the publish, document, workspace, auth, and
+ * ai conformance tests. Every entry must name a real contract schema; a
+ * rename in the contract breaks `UncoveredContractComponent` below.
  */
 const CONTRACT_COVERAGE = [
   'PublishedDocumentResponseDto',
@@ -28,6 +28,7 @@ const CONTRACT_COVERAGE = [
   'DocumentInvitationResponseDto',
   'ArchivedDocumentListItemResponseDto',
   'ArchivedDocumentListPageResponseDto',
+  'DocumentTreeChildResponseDto',
   'WorkspaceResponseDto',
   'WorkspaceMemberResponseDto',
   'UserProfileResponseDto',
@@ -44,6 +45,20 @@ const CONTRACT_COVERAGE = [
   'WorkspacePreferenceResponseDto',
   'WorkspaceNavigationPreferenceResponseDto',
   'WorkspaceActivityPreferenceResponseDto',
+  'CreateSubdocCommandResponseDto',
+  'ArchiveSubdocCommandResponseDto',
+  'DocumentCollaboratorResponseDto',
+  'DocumentCollaboratorUserResponseDto',
+  'ShareDocumentsResponseDto',
+  'ShareDocumentFailureResponseDto',
+  'PaginatedAiConversationSessionResponseDto',
+  'AiConversationSessionResponseDto',
+  'AiPaginationMetaResponseDto',
+  'CursorPaginatedAiChatTurnResponseDto',
+  'AiChatTurnResponseDto',
+  'AiDocumentAttachmentResponseDto',
+  'AiCursorPaginationMetaResponseDto',
+  'AiResponseEntitlementResponseDto',
 ] as const;
 
 type UncoveredContractComponent = Exclude<
@@ -134,6 +149,10 @@ describe('contract coverage', () => {
       'SearchDocumentResponseDto',
       'TeamspaceResponseDto',
       'WorkspacePreferenceResponseDto',
+      'DocumentCollaboratorResponseDto',
+      'CreateSubdocCommandResponseDto',
+      'AiChatTurnResponseDto',
+      'AiResponseEntitlementResponseDto',
     ]));
   });
 });
