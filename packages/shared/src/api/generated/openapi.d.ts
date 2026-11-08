@@ -1727,6 +1727,24 @@ export interface operations {
                     "text/event-stream": string;
                 };
             };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
         };
     };
     getEntitlement: {
@@ -1748,15 +1766,6 @@ export interface operations {
                     "application/json": components["schemas"]["AiResponseEntitlementResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -1775,8 +1784,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1846,8 +1864,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1885,15 +1912,6 @@ export interface operations {
                     "application/json": components["schemas"]["AiConversationSessionResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -1912,8 +1930,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1983,8 +2010,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2045,7 +2081,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description Workspace AI trial responses are exhausted */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2054,8 +2090,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2090,11 +2135,14 @@ export interface operations {
             };
         };
         responses: {
+            /** @description NDJSON stream of AI chat turn events. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/x-ndjson": string;
+                };
             };
             /** @description email must be an email */
             400: {
@@ -2114,7 +2162,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description Workspace AI trial responses are exhausted */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2123,8 +2171,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2173,35 +2230,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
+            /** @description Email is already registered */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2236,44 +2275,8 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2308,15 +2311,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -2326,7 +2320,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description User account is not active */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2335,17 +2329,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2380,44 +2365,8 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2452,15 +2401,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -2470,7 +2410,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description User account is not active */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2479,17 +2419,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2538,7 +2469,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Unauthorized */
+            /** @description Invalid email or password */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2547,7 +2478,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description User account is not active */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2556,17 +2487,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2615,35 +2537,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2692,7 +2587,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Unauthorized */
+            /** @description Invalid login code */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2701,7 +2596,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description User account is not active */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2710,7 +2605,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description No account found for this email */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2719,8 +2614,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Email is already registered */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2769,7 +2673,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Unauthorized */
+            /** @description Invalid refresh token */
             401: {
                 headers: {
                     [name: string]: unknown;
@@ -2778,7 +2682,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description User account is not active */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -2787,17 +2691,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2845,35 +2740,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Unauthorized */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2929,26 +2797,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3008,26 +2858,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3062,15 +2894,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -3080,26 +2903,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3135,15 +2940,6 @@ export interface operations {
                     "application/json": components["schemas"]["UserProfileResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -3153,26 +2949,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3231,26 +3009,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3308,7 +3068,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description Only admins can create users */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3317,8 +3077,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
-            404: {
+            /** @description Email is already registered */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3326,8 +3086,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3365,15 +3125,6 @@ export interface operations {
                     "application/json": components["schemas"]["UserSummaryResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -3383,8 +3134,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
-            403: {
+            /** @description User was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3392,15 +3143,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description User was not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3460,7 +3204,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description Only admins can update users */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3469,7 +3213,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description User was not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3478,8 +3222,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description User was updated by another request. Refresh and retry with the latest version. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3515,15 +3268,6 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceResponseDto"][];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -3533,7 +3277,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3542,17 +3286,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3610,7 +3345,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3619,8 +3354,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
-            404: {
+            /** @description Workspace domain is already in use. */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3628,8 +3363,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3667,15 +3402,6 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -3685,7 +3411,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3694,7 +3420,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3703,8 +3429,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3740,15 +3466,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -3758,7 +3475,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description Only workspace owners can delete this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3767,7 +3484,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3776,8 +3493,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3837,7 +3554,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -3846,7 +3563,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3855,8 +3572,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Workspace domain is already in use. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3892,15 +3618,6 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -3919,8 +3636,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
-            404: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -3958,15 +3675,6 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspacePreferenceResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -3985,8 +3693,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4055,8 +3772,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4086,20 +3812,12 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Workspace marked as last active. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
             };
             /** @description Unauthorized */
             401: {
@@ -4119,8 +3837,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4158,15 +3885,6 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceMemberResponseDto"][];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -4185,7 +3903,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4194,8 +3912,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4264,7 +3982,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4273,8 +3991,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description That user is already a workspace member. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4315,15 +4042,6 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceMemberResponseDto"][];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -4342,7 +4060,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4351,8 +4069,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4391,15 +4109,6 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceMemberResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -4418,7 +4127,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace member was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4427,8 +4136,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Workspace must keep at least one owner. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4498,7 +4216,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace member was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4507,8 +4225,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Workspace member version conflict. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4546,15 +4273,6 @@ export interface operations {
                     "application/json": components["schemas"]["SubscriptionSummaryResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -4573,8 +4291,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4643,8 +4370,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4682,15 +4418,6 @@ export interface operations {
                     "application/json": components["schemas"]["SubscriptionSummaryResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -4709,8 +4436,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4746,6 +4482,24 @@ export interface operations {
                     "application/json": components["schemas"]["BillingWebhookResponseDto"];
                 };
             };
+            /** @description Billing webhook could not be verified. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
             /** @description Internal server error */
             500: {
                 headers: {
@@ -4776,15 +4530,6 @@ export interface operations {
                     "application/json": components["schemas"]["TeamspaceResponseDto"][];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -4794,7 +4539,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4803,7 +4548,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4812,8 +4557,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4873,7 +4618,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4882,7 +4627,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4891,8 +4636,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -4952,7 +4697,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -4961,7 +4706,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Teamspace teamspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4970,8 +4715,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Teamspace version conflict. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5011,15 +4765,6 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceDefaultDocumentResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -5029,7 +4774,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5038,7 +4783,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5047,8 +4792,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5091,7 +4836,7 @@ export interface operations {
                     "application/json": components["schemas"]["ArchivedDocumentListPageResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Invalid document cursor. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5109,7 +4854,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5118,7 +4863,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5127,8 +4872,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5172,7 +4917,7 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceDocumentNavigationResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Invalid document cursor. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5190,7 +4935,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5199,7 +4944,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5208,8 +4953,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5267,7 +5012,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description Workspace block limit reached. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5276,7 +5021,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5285,8 +5030,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5324,7 +5069,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Archived document cannot be duplicated. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5342,7 +5087,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5351,7 +5096,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5360,8 +5105,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5399,15 +5144,6 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -5417,7 +5153,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5426,7 +5162,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5435,8 +5171,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5468,6 +5204,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Document permanently deleted. */
             204: {
                 headers: {
                     [name: string]: unknown;
@@ -5492,7 +5229,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5501,7 +5238,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5510,8 +5247,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Document version conflict. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5553,7 +5299,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Document content must be updated through the collaboration channel. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5571,7 +5317,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5580,7 +5326,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5589,8 +5335,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Document version conflict. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5628,7 +5383,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentTreeChildResponseDto"][];
                 };
             };
-            /** @description email must be an email */
+            /** @description Invalid document cursor. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5646,7 +5401,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5655,7 +5410,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5664,8 +5419,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5707,7 +5462,7 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentResponseDto"];
                 };
             };
-            /** @description email must be an email */
+            /** @description Parent document does not belong to the selected workspace. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5725,7 +5480,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5734,7 +5489,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5743,8 +5498,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Document version conflict. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5804,7 +5568,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description Workspace block limit reached. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5813,7 +5577,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5822,8 +5586,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Document version conflict. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5883,7 +5656,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5892,7 +5665,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5901,8 +5674,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Document version conflict. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5962,7 +5744,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -5971,7 +5753,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5980,8 +5762,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Document version conflict. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6041,7 +5832,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6050,7 +5841,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6059,8 +5850,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
+            /** @description Document version conflict. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6098,15 +5898,6 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentCollaboratorResponseDto"][];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -6116,7 +5907,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6125,7 +5916,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6134,8 +5925,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6173,15 +5964,6 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentInvitationResponseDto"][];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -6191,7 +5973,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6200,7 +5982,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6209,8 +5991,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6270,7 +6052,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6279,7 +6061,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6288,8 +6070,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6349,7 +6131,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6358,7 +6140,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6367,8 +6149,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6406,15 +6188,6 @@ export interface operations {
                     "application/json": components["schemas"]["DocumentAccessSettingsResponseDto"];
                 };
             };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
-            };
             /** @description Unauthorized */
             401: {
                 headers: {
@@ -6424,7 +6197,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6433,7 +6206,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6442,8 +6215,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6503,7 +6276,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6512,7 +6285,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6521,8 +6294,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6553,20 +6326,12 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Document access revoked. */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
             };
             /** @description Unauthorized */
             401: {
@@ -6577,7 +6342,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6586,7 +6351,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6595,8 +6360,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6627,20 +6392,12 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Document invitation revoked. */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description email must be an email */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApiErrorResponseDto"];
-                };
             };
             /** @description Unauthorized */
             401: {
@@ -6651,7 +6408,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6660,7 +6417,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6669,8 +6426,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6731,7 +6488,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to update this workspace. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -6740,7 +6497,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6749,8 +6506,8 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource already exists */
-            409: {
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6806,8 +6563,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6863,8 +6629,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6920,8 +6695,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -6977,8 +6761,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7016,8 +6809,26 @@ export interface operations {
                     "application/json": components["schemas"]["PublicDocumentResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Missing required permissions */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Published document published_document_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7064,7 +6875,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to publish this document. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7073,8 +6884,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7121,7 +6941,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to publish this document. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7130,8 +6950,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7178,7 +7007,7 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Missing required permissions */
+            /** @description You do not have permission to publish this document. */
             403: {
                 headers: {
                     [name: string]: unknown;
@@ -7187,8 +7016,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Document document_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -7247,8 +7085,17 @@ export interface operations {
                     "application/json": components["schemas"]["ApiErrorResponseDto"];
                 };
             };
-            /** @description Resource not found */
+            /** @description Workspace workspace_123 was not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiErrorResponseDto"];
+                };
+            };
+            /** @description Too many requests. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

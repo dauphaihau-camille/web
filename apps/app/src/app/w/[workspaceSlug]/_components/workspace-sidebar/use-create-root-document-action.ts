@@ -33,6 +33,7 @@ function createOptimisticRootDocument(
     version: 0,
     workspace_id: workspaceSlug,
     owner_user_id: 'optimistic-owner',
+    owner_user: { id: 'optimistic-owner', email: 'optimistic-owner@example.com' },
     teamspace_id: teamspaceId,
     parent_document_id: undefined,
     title: 'Untitled',

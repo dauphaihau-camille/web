@@ -51,6 +51,7 @@ const createdDocumentFixture: Document = {
   version: 1,
   workspace_id: 'acme',
   owner_user_id: 'user-1',
+  owner_user: { id: 'user-1', email: 'user-1@example.com' },
   teamspace_id: undefined,
   parent_document_id: undefined,
   title: 'Untitled',
