@@ -1,4 +1,5 @@
 import { apiGet, apiPatch, apiRequest } from '@shared/lib/api-client';
+import type { ApiRequestBody, ApiSuccess } from '@shared/api/contracts';
 import { workspaceSchema } from '@/domains/workspace/api/workspace.schemas';
 import {
   updateWorkspacePreferenceSchema,
@@ -11,7 +12,9 @@ import type { Workspace } from '@/domains/workspace/api/workspace.types';
 export async function getWorkspacePreference(
   workspaceId: string,
 ): Promise<WorkspacePreference> {
-  const response = await apiGet<unknown>(`workspaces/${workspaceId}/preferences`);
+  const response = await apiGet<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/preferences', 'get'>
+  >(`workspaces/${workspaceId}/preferences`);
 
   return workspacePreferenceSchema.parse(response);
 }
@@ -26,7 +29,10 @@ export async function updateWorkspacePreference(
 ): Promise<WorkspacePreference> {
   const payload = updateWorkspacePreferenceSchema.parse(input);
 
-  const response = await apiPatch<unknown, typeof payload>(
+  const response = await apiPatch<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/preferences', 'patch'>,
+    ApiRequestBody<'/v1/workspaces/{workspaceId}/preferences', 'patch'>
+  >(
     `workspaces/${workspaceId}/preferences`,
     payload,
   );

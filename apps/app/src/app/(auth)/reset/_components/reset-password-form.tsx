@@ -9,6 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 
 import LoadingFullPage from '@shared/components/loading-full-page';
 import { LoadingIcon } from '@shared/components/loading-icon';
+import { getApiError } from '@shared/lib/api-error';
 import { Button } from '@shared/components/ui/button';
 import {
   Field,
@@ -152,6 +153,19 @@ function InvalidResetTokenMessage({ message }: { message: string }) {
 }
 
 function buildResetPasswordErrorMessage(error: unknown) {
+  const apiError = getApiError(error);
+
+  if (apiError?.code === 'RATE_LIMIT_EXCEEDED') {
+    return 'Too many reset attempts. Please wait a moment and try again.';
+  }
+
+  if (
+    apiError?.code === 'INVALID_PASSWORD_RESET_TOKEN'
+    || apiError?.code === 'PASSWORD_RESET_TOKEN_EXPIRED'
+  ) {
+    return 'This password reset link is invalid or expired.';
+  }
+
   if (error instanceof HTTPError) {
     if (error.response.status === 429) {
       return 'Too many reset attempts. Please wait a moment and try again.';

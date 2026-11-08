@@ -70,6 +70,26 @@ See [`packages/shared/src/api/generated/README.md`](/Volumes/Local/dev/pj-person
 for spec resolution and registry access notes. Never hand-edit the generated
 file or commit the spec.
 
+API calls consume the contract types from
+`packages/shared/src/api/contracts` (`ApiSchema<...>`, `operations`, `paths`)
+as the generics of the `apiGet` / `apiPost` / `apiPut` / `apiPatch` /
+`apiDelete` helpers. Zod schemas still own runtime parsing; if a contract type
+and the Zod input differ (nullable or optional transforms), the Zod-inferred
+type wins.
+
+Errors use the `ApiErrorResponseDto` envelope: `status_code`, `code`,
+`message`, optional `request_id`, and optional `details`. Branch on `code`.
+Validation failures return `message: "Validation failed"` with per-field
+reasons in `details.fields` (`{ field, messages }[]`); use `getApiError` from
+`packages/shared/src/lib/api-error.ts` to read the envelope from a ky
+`HTTPError`, then branch on `code`.
+
+Netlify runs `bun install` for both sites, so it installs the private
+`@dauphaihau-camille/api-spec` package. `NODE_AUTH_TOKEN` (with
+`read:packages` access to `dauphaihau-camille`) must be set in the Netlify
+environment for both the app and marketing sites, the same way CI sets it.
+Without it the build fails during install with a registry `401`/`404`.
+
 ## Local setup
 
 1. Copy `.env.example` to `.env.local`.

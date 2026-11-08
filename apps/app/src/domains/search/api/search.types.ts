@@ -1,4 +1,3 @@
-import type { z } from 'zod';
-import type { searchDocumentSchema } from './search.schemas';
+import type { ApiSchema } from '@shared/api/contracts';
 
-export type SearchDocument = z.infer<typeof searchDocumentSchema>;
+export type SearchDocument = ApiSchema<'SearchDocumentResponseDto'>;

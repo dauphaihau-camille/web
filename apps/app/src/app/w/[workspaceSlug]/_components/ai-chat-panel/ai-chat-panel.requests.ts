@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { HTTPError } from 'ky';
 
 import { apiGet, apiPost, apiRequest } from '@shared/lib/api-client';
+import type { ApiRequestBody, ApiSuccess } from '@shared/api/contracts';
 
 const aiConversationSessionSchema = z.object({
   id: z.string().min(1),
@@ -132,7 +133,9 @@ export type AiResponseLimitReached = z.infer<typeof aiResponseLimitReachedSchema
 export async function getAiResponseEntitlement(
   workspaceId: string,
 ): Promise<AiResponseEntitlement> {
-  const response = await apiGet<unknown>(`workspaces/${workspaceId}/ai/entitlement`);
+  const response = await apiGet<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/ai/entitlement', 'get'>
+  >(`workspaces/${workspaceId}/ai/entitlement`);
 
   return aiResponseEntitlementSchema.parse(response);
 }
@@ -146,7 +149,9 @@ export async function listAiConversationSessions(
     searchParams.set('q', options.q);
   }
 
-  const response = await apiGet<unknown>(`workspaces/${workspaceId}/ai/conversations`, {
+  const response = await apiGet<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/ai/conversations', 'get'>
+  >(`workspaces/${workspaceId}/ai/conversations`, {
     searchParams,
   });
 
@@ -156,7 +161,9 @@ export async function listAiConversationSessions(
 export async function createAiConversationSession(
   workspaceId: string,
 ): Promise<AiConversationSession> {
-  const response = await apiPost<unknown>(`workspaces/${workspaceId}/ai/conversations`);
+  const response = await apiPost<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/ai/conversations', 'post', 201>
+  >(`workspaces/${workspaceId}/ai/conversations`);
 
   return aiConversationSessionSchema.parse(response);
 }
@@ -177,7 +184,9 @@ export async function listAiChatTurns(
   }
 
   const queryString = searchParams.toString();
-  const response = await apiGet<unknown>(
+  const response = await apiGet<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/ai/conversations/{sessionId}/turns', 'get'>
+  >(
     `workspaces/${workspaceId}/ai/conversations/${sessionId}/turns${queryString ? `?${queryString}` : ''}`,
   );
 
@@ -192,10 +201,10 @@ export async function createAiChatTurn(
     documentIds: string[];
   },
 ): Promise<AiChatTurn> {
-  const response = await apiPost<unknown, {
-    message: string;
-    document_ids: string[];
-  }>(`workspaces/${workspaceId}/ai/conversations/${input.sessionId}/turns`, {
+  const response = await apiPost<
+    ApiSuccess<'/v1/workspaces/{workspaceId}/ai/conversations/{sessionId}/turns', 'post'>,
+    ApiRequestBody<'/v1/workspaces/{workspaceId}/ai/conversations/{sessionId}/turns', 'post'>
+  >(`workspaces/${workspaceId}/ai/conversations/${input.sessionId}/turns`, {
     message: input.message,
     document_ids: input.documentIds,
   });

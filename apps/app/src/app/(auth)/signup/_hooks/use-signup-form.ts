@@ -6,6 +6,8 @@ import { HTTPError } from 'ky';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { getApiError } from '@shared/lib/api-error';
+
 import { register } from '@/domains/auth';
 import { usePostAuthRedirect } from '../../_hooks/use-post-auth-redirect';
 import {
@@ -54,6 +56,16 @@ export function useSignupForm() {
 }
 
 function buildSignupErrorMessage(error: unknown) {
+  const apiError = getApiError(error);
+
+  if (apiError?.code === 'RATE_LIMIT_EXCEEDED') {
+    return 'Too many signup attempts. Please wait a moment and try again.';
+  }
+
+  if (apiError?.code === 'EMAIL_ALREADY_REGISTERED') {
+    return 'This email already has an account. Log in instead.';
+  }
+
   if (error instanceof HTTPError) {
     if (error.response.status === 429) {
       return 'Too many signup attempts. Please wait a moment and try again.';

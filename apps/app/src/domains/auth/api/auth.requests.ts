@@ -1,4 +1,5 @@
 import { apiPost, apiRequest } from '@shared/lib/api-client';
+import type { ApiRequestBody, ApiSuccess } from '@shared/api/contracts';
 
 import {
   currentUserApiSchema,
@@ -45,7 +46,10 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
 
 export async function login(body: LoginInput): Promise<LoginResponse> {
   const payload = loginInputSchema.parse(body);
-  const response = await apiPost<unknown, LoginInput>('auth/login', payload);
+  const response = await apiPost<
+    ApiSuccess<'/v1/auth/login', 'post'>,
+    ApiRequestBody<'/v1/auth/login', 'post'>
+  >('auth/login', payload);
 
   return loginResponseApiSchema.parse(response);
 }
@@ -53,12 +57,8 @@ export async function login(body: LoginInput): Promise<LoginResponse> {
 export async function register(body: RegisterInput): Promise<LoginResponse> {
   const payload = registerInputSchema.parse(body);
   const response = await apiPost<
-    unknown,
-    {
-      email: string;
-      password: string;
-      display_name: string;
-    }
+    ApiSuccess<'/v1/auth/register', 'post', 201>,
+    ApiRequestBody<'/v1/auth/register', 'post'>
   >('auth/register', {
     email: payload.email,
     password: payload.password,
@@ -98,10 +98,8 @@ export async function resetPassword(body: ResetPasswordInput): Promise<LoginResp
     token: payload.token,
   });
   const response = await apiPost<
-    unknown,
-    {
-      password: string;
-    }
+    ApiSuccess<'/v1/auth/reset-password', 'post'>,
+    ApiRequestBody<'/v1/auth/reset-password', 'post'>
   >(`auth/reset-password?${searchParams.toString()}`, {
     password: payload.password,
   });
@@ -114,12 +112,8 @@ export async function startEmailAuth(
 ): Promise<EmailAuthStartResponse> {
   const payload = emailAuthStartInputSchema.parse(body);
   const response = await apiPost<
-    unknown,
-    {
-      email: string;
-      intent?: 'login' | 'signup';
-      display_name?: string;
-    }
+    ApiSuccess<'/v1/auth/email/start', 'post'>,
+    ApiRequestBody<'/v1/auth/email/start', 'post'>
   >('auth/email/start', {
     email: payload.email,
     intent: payload.intent,
@@ -134,13 +128,8 @@ export async function verifyEmailAuth(
 ): Promise<LoginResponse> {
   const payload = emailAuthVerifyInputSchema.parse(body);
   const response = await apiPost<
-    unknown,
-    {
-      challenge_id: string;
-      code: string;
-      intent?: 'login' | 'signup';
-      display_name?: string;
-    }
+    ApiSuccess<'/v1/auth/email/verify', 'post'>,
+    ApiRequestBody<'/v1/auth/email/verify', 'post'>
   >('auth/email/verify', {
     challenge_id: payload.challengeId,
     code: payload.code,
