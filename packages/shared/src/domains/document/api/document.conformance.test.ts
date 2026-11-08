@@ -84,9 +84,14 @@ describe('document contract', () => {
       .toEqualTypeOf<'blocknote_v1'>();
   });
 
-  // `documentSchema` is intentionally more permissive than the contract in
-  // three places: `owner_user` stays optional, and `access`/`collaboration`
-  // widen enums to `string` so older payloads still parse. A bidirectional
-  // assignability assertion would encode the opposite, so only the narrowed
-  // fields are asserted here.
+  it('documentSchema requires every contract field, including owner_user', () => {
+    // The API always serialises `owner_user` through `DocumentResponseDto`,
+    // including POST /v1/documents, so the runtime schema requires it too.
+    // The runtime schema is still narrower than the contract for `access` and
+    // `collaboration` (enums instead of plain strings), and it tolerates the
+    // optional avatar the contract omits, so one direction remains the
+    // strongest true statement.
+    expectTypeOf<z.infer<typeof documentSchema>>()
+      .toExtend<ApiSchema<'DocumentResponseDto'>>();
+  });
 });

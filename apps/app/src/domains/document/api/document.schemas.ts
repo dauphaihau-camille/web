@@ -40,7 +40,7 @@ export const documentSchema = z.object({
   version: z.number().int().positive(),
   workspace_id: z.string().min(1),
   owner_user_id: z.string().min(1),
-  owner_user: documentOwnerUserSchema.optional(),
+  owner_user: documentOwnerUserSchema,
   teamspace_id: z.string().nullable().optional().transform((value) => value ?? undefined),
   parent_document_id: z.string().nullable().optional().transform((value) => value ?? undefined),
   title: z.string(),
