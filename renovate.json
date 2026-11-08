@@ -1,0 +1,20 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "automerge": false,
+  "schedule": ["before 6am on monday"],
+  "packageRules": [
+    {
+      "groupName": "contract tooling",
+      "matchPackageNames": ["@dauphaihau-camille/api-spec", "openapi-typescript"],
+      "rangeStrategy": "pin",
+      "labels": ["deps"],
+      "automerge": false
+    },
+    {
+      "groupName": "test tooling",
+      "matchPackageNames": ["@playwright/test", "vitest", "@testing-library/*"],
+      "labels": ["deps"]
+    }
+  ]
+}
