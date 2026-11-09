@@ -34,7 +34,7 @@
         "zustand": "^5.0.14",
       },
       "devDependencies": {
-        "@dauphaihau-camille/api-spec": "4.0.0",
+        "@dauphaihau-camille/api-spec": "4.1.0",
         "@dauphaihau/eslint-config": "^0.3.4",
         "@next/eslint-plugin-next": "^16.2.9",
         "@playwright/test": "^1.61.1",
@@ -256,7 +256,7 @@
 
     "@csstools/css-tokenizer": ["@csstools/css-tokenizer@4.0.0", "", {}, "sha512-QxULHAm7cNu72w97JUNCBFODFaXpbDg+dP8b/oWFAZ2MTRppA3U00Y2L1HqaS4J6yBqxwa/Y3nMBaxVKbB/NsA=="],
 
-    "@dauphaihau-camille/api-spec": ["@dauphaihau-camille/api-spec@4.0.0", "https://npm.pkg.github.com/download/@dauphaihau-camille/api-spec/4.0.0/62b1f18c5561a458957f437617b1604d149aa67a", {}, "sha512-fHO/1M3wBUVksMReBOacKoFul/nWfbN4wYU6n8Qtt4FyIezEGFJdHH1bUp5/28JSx4/8BPjV6zRtlIMbaEx7lQ=="],
+    "@dauphaihau-camille/api-spec": ["@dauphaihau-camille/api-spec@4.1.0", "https://npm.pkg.github.com/download/@dauphaihau-camille/api-spec/4.1.0/5940b03b4312fa54cbc261a1a2d137defbc12186", {}, "sha512-GJ9joLbENi4qLGd+PGPVvD2VVfNmIf+8Z2akoyP+p2v6MqHzNuufbdJ64uwcOahZzEljVFcP79qGWpSBvloQbg=="],
 
     "@dauphaihau/eslint-config": ["@dauphaihau/eslint-config@0.3.4", "", { "dependencies": { "@eslint/js": "^10.0.0", "@stylistic/eslint-plugin": "^5.9.0", "eslint-plugin-check-file": "^3.3.1", "globals": "^16.5.0", "typescript-eslint": "^8.56.1" }, "peerDependencies": { "eslint": "^9.0.0 || ^10.0.0", "eslint-plugin-tailwindcss": ">=3.0.0" }, "optionalPeers": ["eslint-plugin-tailwindcss"] }, "sha512-0D9FTch5IsSQCAn8otNNrfWNIsk4a8YhFd9RB/hnzht7/x38e5FcMpTkOxCTNEg0ma3yvXQd2bQgijpK6+FLuw=="],
 
