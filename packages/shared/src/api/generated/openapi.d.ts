@@ -1097,8 +1097,9 @@ export interface components {
         AiConversationSessionResponseDto: {
             id: string;
             workspace_id: string;
-            title?: string;
-            group: string;
+            title?: string | null;
+            /** @enum {string} */
+            group: "Past week" | "Older";
             created_at: string;
             updated_at: string;
         };
@@ -1114,6 +1115,24 @@ export interface components {
             items: components["schemas"]["AiConversationSessionResponseDto"][];
             meta: components["schemas"]["AiPaginationMetaResponseDto"];
         };
+        AiResponseInlineContentDto: {
+            /** @enum {string} */
+            type: "text";
+            text: string;
+            styles?: {
+                bold?: boolean;
+                italic?: boolean;
+            };
+        };
+        AiResponseBlockDto: {
+            id: string;
+            /** @enum {string} */
+            type: "paragraph" | "bulletListItem" | "numberedListItem" | "heading";
+            content: components["schemas"]["AiResponseInlineContentDto"][];
+            props?: {
+                level?: number;
+            };
+        };
         AiDocumentAttachmentResponseDto: {
             document_id: string;
             title: string;
@@ -1123,8 +1142,9 @@ export interface components {
             session_id: string;
             user_message: string;
             assistant_response: string;
-            response_block_payload: string[];
-            status: string;
+            response_block_payload: components["schemas"]["AiResponseBlockDto"][];
+            /** @enum {string} */
+            status: "completed" | "failed" | "canceled";
             attachments: components["schemas"]["AiDocumentAttachmentResponseDto"][];
             created_at: string;
             updated_at: string;
