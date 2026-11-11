@@ -126,7 +126,7 @@ const REQUEST_OPERATIONS = [
 type Body<
   P extends keyof paths,
   M extends keyof paths[P],
-> = paths[P][M] extends { requestBody: { content: { 'application/json': infer B } } }
+> = paths[P][M] extends { requestBody?: { content: { 'application/json': infer B } } }
   ? B
   : never;
 
@@ -471,10 +471,9 @@ describe('auth request contract', () => {
 
   it('refresh request accepts the body-less call the client makes', () => {
     // `api-client.ts` refreshes through the cookie and sends no body at all.
-    // The contract marks the request body required but its only field,
-    // `refresh_token`, is optional and documented as cookie-supplied, so an
-    // empty body type is accepted. That required=true flag is a spec wart, not
-    // a client error: the server must keep accepting a missing body.
+    // The contract now marks the whole request body optional, and its only
+    // field, `refresh_token`, is optional too.
+    expectTypeOf<undefined>().toExtend<paths['/v1/auth/refresh']['post']['requestBody']>();
     expectTypeOf<Record<string, never>>().toExtend<RefreshTokenRequest>();
     expectTypeOf<RefreshTokenRequest>()
       .toEqualTypeOf<components['schemas']['RefreshTokenDto']>();
