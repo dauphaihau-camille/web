@@ -336,14 +336,14 @@ describe('workspace request contract', () => {
     expectTypeOf<UpdateWorkspaceRequest>().toEqualTypeOf<UpdateWorkspaceInput>();
   });
 
-  it('addWorkspaceMemberSchema output matches AddWorkspaceMemberDto exactly', () => {
-    // The schema defaults `role` to `'member'`, so its *output* (the type the
-    // request file accepts and forwards) requires both fields, like the
-    // contract. Only the schema input leaves `role` optional.
-    expectTypeOf<z.output<typeof addWorkspaceMemberSchema>>()
+  it('addWorkspaceMemberSchema input matches AddWorkspaceMemberDto exactly', () => {
+    // The schema defaults `role` to `'member'`; the wire body is the input
+    // shape, where `role` is optional. The contract documents the default
+    // rather than forcing the field, so the input and the DTO agree.
+    expectTypeOf<z.input<typeof addWorkspaceMemberSchema>>()
       .toEqualTypeOf<AddWorkspaceMemberRequest>();
     expectTypeOf<AddWorkspaceMemberRequest>()
-      .toEqualTypeOf<z.output<typeof addWorkspaceMemberSchema>>();
+      .toEqualTypeOf<z.input<typeof addWorkspaceMemberSchema>>();
     expectTypeOf<AddWorkspaceMemberRequest>()
       .toEqualTypeOf<components['schemas']['AddWorkspaceMemberDto']>();
   });
