@@ -51,23 +51,17 @@ describe('ai contract', () => {
       .toEqualTypeOf<ApiSchema<'AiDocumentAttachmentResponseDto'>>();
   });
 
-  it('ai chat turn still declares response_block_payload as string[]', () => {
-    // The runtime schema parses the structured BlockNote-style block array the
-    // API actually emits, not a list of strings, and the runtime schema module
-    // is out of reach for this package (it imports through the app's `@shared`
-    // alias). Rather than forcing an assignability assertion that only one
-    // side supports, this pins the contract's declared shape so the mismatch
-    // surfaces the moment the contract changes.
+  it('ai chat turn types response_block_payload as block DTOs', () => {
     expectTypeOf<ApiSchema<'AiChatTurnResponseDto'>['response_block_payload']>()
-      .toEqualTypeOf<string[]>();
+      .toEqualTypeOf<ApiSchema<'AiResponseBlockDto'>[]>();
+    expectTypeOf<ApiSchema<'AiResponseBlockDto'>['content'][number]>()
+      .toEqualTypeOf<ApiSchema<'AiResponseInlineContentDto'>>();
   });
 
-  it('ai conversation session declares group as a plain string', () => {
-    // The runtime schema narrows `group` to 'Past week' | 'Older' and allows a
-    // null `title`, so the contract is the wider declaration of the two.
+  it('ai conversation session narrows group and allows a null title', () => {
     expectTypeOf<ApiSchema<'AiConversationSessionResponseDto'>['group']>()
-      .toEqualTypeOf<string>();
+      .toEqualTypeOf<'Past week' | 'Older'>();
     expectTypeOf<ApiSchema<'AiConversationSessionResponseDto'>['title']>()
-      .toEqualTypeOf<string | undefined>();
+      .toEqualTypeOf<string | null | undefined>();
   });
 });
