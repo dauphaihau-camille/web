@@ -11,17 +11,19 @@ import type {
   archivedDocumentListPageSchema,
   createSubdocumentCommandResultSchema,
   documentAccessSchema,
+  documentAccessSettingsSchema,
   documentBreadcrumbItemSchema,
   documentCollaborationSchema,
   documentCollaboratorSchema,
   documentInvitationSchema,
+  documentNavigationNodeSchema,
   documentNavigationPageSchema,
   documentOwnerUserSchema,
   documentSchema,
   shareDocumentFailureSchema,
   shareDocumentsResponseSchema,
 } from '../../../../../../apps/app/src/domains/document/api/document.schemas';
-import type { ApiSchema, paths } from '../../../api/contracts';
+import type { ApiSchema, ApiSuccess, paths } from '../../../api/contracts';
 
 type DocumentAccessInferred = z.infer<typeof documentAccessSchema>;
 type DocumentCollaborationInferred = z.infer<typeof documentCollaborationSchema>;
@@ -36,6 +38,28 @@ type CreateSubdocumentCommandResultInferred =
 type ArchiveSubdocCommandResultInferred = z.infer<typeof archiveSubdocCommandResultSchema>;
 type ShareDocumentFailureInferred = z.infer<typeof shareDocumentFailureSchema>;
 type ShareDocumentsResponseInferred = z.infer<typeof shareDocumentsResponseSchema>;
+type DocumentAccessSettingsInferred = z.infer<typeof documentAccessSettingsSchema>;
+
+type DocumentDetailResponse =
+  paths['/v1/documents/{documentId}']['get']['responses'][200]['content']['application/json'];
+type UpdateDocumentResponse =
+  paths['/v1/documents/{documentId}']['patch']['responses'][200]['content']['application/json'];
+type CreateRootDocumentResponse =
+  paths['/v1/documents']['post']['responses'][201]['content']['application/json'];
+type ArchiveDocumentResponse =
+  paths['/v1/documents/{documentId}/archive']['post']['responses'][200]['content']['application/json'];
+type RestoreDocumentResponse =
+  paths['/v1/documents/{documentId}/restore']['post']['responses'][200]['content']['application/json'];
+type DocumentCollaboratorsResponse =
+  paths['/v1/documents/{documentId}/collaborators']['get']['responses'][200]['content']['application/json'];
+type UpdateDocumentInvitationResponse =
+  paths['/v1/documents/{documentId}/invitations/{invitationId}']['patch']['responses'][200]['content']['application/json'];
+type DocumentAccessSettingsResponse =
+  paths['/v1/documents/{documentId}/access-settings']['get']['responses'][200]['content']['application/json'];
+type UpdateDocumentAccessSettingsResponse =
+  paths['/v1/documents/{documentId}/access-settings']['patch']['responses'][200]['content']['application/json'];
+type WorkspaceRootDocumentsResponse =
+  paths['/v1/workspaces/{workspaceId}/documents']['get']['responses'][200]['content']['application/json'];
 
 type DuplicateDocumentResponse =
   paths['/v1/documents/{documentId}/duplicate']['post']['responses'][201]['content']['application/json'];
@@ -189,5 +213,82 @@ describe('document contract', () => {
   it('archived workspace documents resolve to ArchivedDocumentListPageResponseDto', () => {
     expectTypeOf<ArchivedWorkspaceDocumentsResponse>()
       .toEqualTypeOf<ApiSchema<'ArchivedDocumentListPageResponseDto'>>();
+  });
+
+  it('document detail, create, update, archive, and restore resolve to DocumentResponseDto', () => {
+    expectTypeOf<DocumentDetailResponse>()
+      .toEqualTypeOf<ApiSchema<'DocumentResponseDto'>>();
+    expectTypeOf<CreateRootDocumentResponse>()
+      .toEqualTypeOf<ApiSchema<'DocumentResponseDto'>>();
+    expectTypeOf<UpdateDocumentResponse>()
+      .toEqualTypeOf<ApiSchema<'DocumentResponseDto'>>();
+    expectTypeOf<ArchiveDocumentResponse>()
+      .toEqualTypeOf<ApiSchema<'DocumentResponseDto'>>();
+    expectTypeOf<RestoreDocumentResponse>()
+      .toEqualTypeOf<ApiSchema<'DocumentResponseDto'>>();
+  });
+
+  it('document collaborators resolve to DocumentCollaboratorResponseDto[]', () => {
+    expectTypeOf<DocumentCollaboratorsResponse>()
+      .toEqualTypeOf<ApiSchema<'DocumentCollaboratorResponseDto'>[]>();
+  });
+
+  it('document invitation update resolves to DocumentInvitationResponseDto', () => {
+    expectTypeOf<UpdateDocumentInvitationResponse>()
+      .toEqualTypeOf<ApiSchema<'DocumentInvitationResponseDto'>>();
+  });
+
+  it('document access settings operations resolve to DocumentAccessSettingsResponseDto', () => {
+    expectTypeOf<DocumentAccessSettingsResponse>()
+      .toEqualTypeOf<ApiSchema<'DocumentAccessSettingsResponseDto'>>();
+    expectTypeOf<UpdateDocumentAccessSettingsResponse>()
+      .toEqualTypeOf<ApiSchema<'DocumentAccessSettingsResponseDto'>>();
+    // The contract declares `workspace_member_permission` as a plain optional
+    // string; the runtime schema narrows it to the grant enum and normalises
+    // null away, so only the schema -> contract direction holds.
+    expectTypeOf<DocumentAccessSettingsInferred>()
+      .toExtend<ApiSchema<'DocumentAccessSettingsResponseDto'>>();
+  });
+
+  it('workspace root documents resolve to WorkspaceDocumentNavigationResponseDto', () => {
+    expectTypeOf<WorkspaceRootDocumentsResponse>()
+      .toEqualTypeOf<ApiSchema<'WorkspaceDocumentNavigationResponseDto'>>();
+    expectTypeOf<WorkspaceRootDocumentsResponse['private_documents']>()
+      .toEqualTypeOf<ApiSchema<'DocumentNavigationPageResponseDto'>>();
+    expectTypeOf<ApiSchema<'DocumentNavigationPageResponseDto'>['items'][number]>()
+      .toEqualTypeOf<ApiSchema<'DocumentNavigationNodeResponseDto'>>();
+    expectTypeOf<WorkspaceRootDocumentsResponse['teamspaces'][number]>()
+      .toEqualTypeOf<ApiSchema<'TeamspaceDocumentNavigationGroupResponseDto'>>();
+    // The runtime navigation node leaves `is_owned_by_current_user` optional
+    // and narrows `access_scope` to the enum, so it cannot extend the contract
+    // node unchanged; every other field still has to line up.
+    expectTypeOf<z.infer<typeof documentNavigationNodeSchema>>()
+      .toExtend<Omit<
+      ApiSchema<'DocumentNavigationNodeResponseDto'>,
+      'is_owned_by_current_user'
+    >>();
+  });
+
+  it('document mutations without a body resolve to a 204 with no JSON content', () => {
+    type DeleteDocumentResponse =
+      paths['/v1/documents/{documentId}']['delete']['responses'][204];
+    type RevokeDocumentAccessResponse =
+      paths['/v1/documents/{documentId}/collaborators/{userId}']['delete']['responses'][204];
+    type RevokeDocumentInvitationResponse =
+      paths['/v1/documents/{documentId}/invitations/{invitationId}']['delete']['responses'][204];
+
+    expectTypeOf<DeleteDocumentResponse['content']>().toEqualTypeOf<undefined>();
+    expectTypeOf<RevokeDocumentAccessResponse['content']>().toEqualTypeOf<undefined>();
+    expectTypeOf<RevokeDocumentInvitationResponse['content']>().toEqualTypeOf<undefined>();
+
+    expectTypeOf<
+      ApiSuccess<'/v1/documents/{documentId}', 'delete', 204>
+    >().toEqualTypeOf<never>();
+    expectTypeOf<
+      ApiSuccess<'/v1/documents/{documentId}/collaborators/{userId}', 'delete', 204>
+    >().toEqualTypeOf<never>();
+    expectTypeOf<
+      ApiSuccess<'/v1/documents/{documentId}/invitations/{invitationId}', 'delete', 204>
+    >().toEqualTypeOf<never>();
   });
 });
