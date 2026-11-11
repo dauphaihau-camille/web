@@ -1343,7 +1343,7 @@ export interface components {
              * @default member
              * @enum {string}
              */
-            role: "owner" | "admin" | "member";
+            role?: "owner" | "admin" | "member";
         };
         UpdateWorkspaceMemberDto: {
             /** @example 1 */
@@ -1406,7 +1406,7 @@ export interface components {
              * @default open
              * @enum {string}
              */
-            access_mode: "open" | "restricted";
+            access_mode?: "open" | "restricted";
         };
         UpdateTeamspaceDto: {
             /** @example 1 */

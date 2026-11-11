@@ -136,7 +136,7 @@ function countLineChanges(committed, generated) {
 
 async function render(specPath) {
   const schema = JSON.parse(readFileSync(specPath, 'utf8'));
-  const ast = await openapiTS(schema, { silent: true });
+  const ast = await openapiTS(schema, { silent: true, defaultNonNullable: false });
   const generated = `${HEADER}\n\n${astToString(ast)}`;
   return `${normaliseNewlines(generated).replace(/\n*$/, '')}\n`;
 }
