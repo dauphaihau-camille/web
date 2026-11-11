@@ -26,6 +26,8 @@ type EmailAuthVerifyResponse =
   paths['/v1/auth/email/verify']['post']['responses'][200]['content']['application/json'];
 type ResetPasswordResponse =
   paths['/v1/auth/reset-password']['post']['responses'][200]['content']['application/json'];
+type RegisterResponse =
+  paths['/v1/auth/register']['post']['responses'][201]['content']['application/json'];
 type LogoutNoContent =
   paths['/v1/auth/logout']['post']['responses'][204];
 
@@ -52,6 +54,10 @@ describe('auth contract', () => {
     expectTypeOf<RefreshSessionResponse>().toEqualTypeOf<ApiSchema<'AuthResponseDto'>>();
     expectTypeOf<EmailAuthVerifyResponse>().toEqualTypeOf<ApiSchema<'AuthResponseDto'>>();
     expectTypeOf<ResetPasswordResponse>().toEqualTypeOf<ApiSchema<'AuthResponseDto'>>();
+  });
+
+  it('register resolves to AuthResponseDto', () => {
+    expectTypeOf<RegisterResponse>().toEqualTypeOf<ApiSchema<'AuthResponseDto'>>();
   });
 
   it('email auth start resolves to StartEmailAuthResponseDto', () => {
