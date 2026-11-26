@@ -12,6 +12,8 @@
 # testing
 /coverage
 /test-results
+/apps/app/test-results
+/apps/app/playwright-report
 .turbo/
 
 # next.js
