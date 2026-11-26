@@ -1,0 +1,61 @@
+name: Visual regression
+
+on:
+  workflow_dispatch:
+    inputs:
+      update:
+        description: Regenerate baselines for this runner platform and upload them
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  gallery:
+    name: Design system gallery
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: true
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:5100
+      NEXT_PUBLIC_API_VERSION: v1
+      NEXT_PUBLIC_MARKETING_HOST: http://localhost:5101
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browser
+        run: bunx playwright install --with-deps chromium
+
+      - name: Compare against baselines
+        if: ${{ !inputs.update }}
+        run: bun run --cwd apps/app test:visual
+
+      - name: Regenerate baselines
+        if: ${{ inputs.update }}
+        run: bun run --cwd apps/app test:visual:update
+
+      - name: Upload regenerated baselines
+        if: ${{ inputs.update }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-baselines-linux
+          path: apps/app/tests/visual/design-gallery.spec.ts-snapshots
+          if-no-files-found: error
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-artifacts
+          if-no-files-found: ignore
+          path: |
+            apps/app/test-results
