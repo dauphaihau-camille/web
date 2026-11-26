@@ -43,6 +43,8 @@
     "start": "next start --port 5102",
     "typecheck": "tsc --noEmit",
     "test:e2e:api": "bun tests/e2e/helpers/mock-api-server.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:visual": "playwright test --config playwright.visual.config.ts",
+    "test:visual:update": "playwright test --config playwright.visual.config.ts --update-snapshots"
   }
 }

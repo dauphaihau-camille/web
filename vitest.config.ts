@@ -20,6 +20,7 @@ export default defineConfig({
       '**/dist/**',
       '**/.next/**',
       '**/tests/e2e/**',
+      '**/tests/visual/**',
     ],
     globals: true,
     setupFiles: ['./packages/shared/src/test/setup.ts'],
